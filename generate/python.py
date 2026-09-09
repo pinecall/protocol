@@ -35,6 +35,8 @@ def emit(bundle: Bundle, out_dir: Path) -> list[Path]:
     written.append(_write(out_dir / "_base.py", BASE_SOURCE))
     written.append(_write(out_dir / "codec.py", CODEC_SOURCE))
     written.append(_write(out_dir / "__init__.py", INIT_SOURCE))
+    # PEP 561: the models are typed, and a consumer's checker may read them as such.
+    written.append(_write(out_dir / "py.typed", ""))
     return written
 
 
