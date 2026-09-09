@@ -10,11 +10,15 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./fixtures/call-log-golden.json": "./dist/fixtures/call-log-golden.json",
+    "./fixtures/call-log-golden.state.json": "./dist/fixtures/call-log-golden.state.json"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && mkdir -p dist/fixtures && cp ../python/pinecall_protocol/fixtures/*.json dist/fixtures/",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },

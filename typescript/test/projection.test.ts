@@ -5,6 +5,9 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { decodeEntries, reduce, type State } from "../src/index.js";
 
+// The goldens live in the Python package's own directory — hatchling cannot pack a file
+// from outside the project it builds — and `pnpm build` copies them into this one's dist,
+// so both languages ship the same bytes. A test reads the source, not the copy.
 const fixtures = fileURLToPath(new URL("../../python/pinecall_protocol/fixtures/", import.meta.url));
 const golden = reduce(decodeEntries(readFileSync(`${fixtures}call-log-golden.json`, "utf8")));
 const MASK = "***";

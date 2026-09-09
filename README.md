@@ -6,7 +6,7 @@ languages and committed: a consumer installs a package and never runs a generato
 
 ```
 schema/         the source. defs · envelope · events/ · commands/ · verbs · metrics · state · rest · room
-python/pinecall_protocol/fixtures/  the golden call log and the state it reduces to, shipped with the package
+python/pinecall_protocol/fixtures/  the golden call log and the state it reduces to, shipped with BOTH packages
 generate/       the emitters: schema in, python + typescript + docs out
 python/         pinecall-protocol: pydantic v2 models, the registries, the codec
 typescript/     @pinecall/protocol: zod schemas, the types, the reducer
