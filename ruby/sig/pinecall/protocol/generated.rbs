@@ -1,0 +1,338 @@
+# Generated from schema/: the wire as RBS record types. `rbs validate` reads this file.
+#
+# A payload is a Hash with symbol keys, so its type is a record: what Steep checks and what
+# `case data in {...}` matches on. Nothing here is loaded at runtime.
+module Pinecall
+  module Protocol
+    module Types
+      # The door the public came through: a phone call over SIP, the browser widget over WebRTC, or WhatsApp text.
+      type channel = "phone" | "web" | "whatsapp"
+      # Inbound: the public reached the agent.
+      type direction = "inbound" | "outbound"
+      # Why the call is over.
+      type end_reason = "caller_hung_up" | "agent_hung_up" | "supervisor_ended" | "transferred" | "no_answer" | "busy" | "dial_failed" | "timeout" | "drained" | "app_detached" | "error"
+      # Whose action ended the call.
+      type ended_by = "caller" | "agent" | "supervisor" | "platform"
+      # What one judge answered about a finished call.
+      type score_verdict = "held" | "broken" | "deferred" | "skipped"
+      # Cold: the caller is sent on and the agent leaves.
+      type transfer_mode = "cold" | "warm"
+      # Which region of the prompt: the cached static prefix (instructions), or the dynamic view rendered from state at the end.
+      type prompt_region = "static" | "view"
+      # What the platform believes the person on the line is doing right now.
+      type user_state = "listening" | "speaking" | "away"
+      # What the agent is doing right now, in the session's own words: warming up, waiting, hearing the caller, generating, or playing audio.
+      type agent_state = "initializing" | "idle" | "listening" | "thinking" | "speaking"
+      # Who a participant is to the call: the person the agent serves (over SIP or the widget), the agent itself, a supervisor who took a seat in the room, a listener who only hears, or a second SIP leg that room.invite brought in.
+      type participant_kind = "caller" | "agent" | "supervisor" | "listener" | "sip"
+      # What a track carries: a microphone's audio, a camera's video, or a screen share.
+      type track_kind = "audio" | "video" | "screen"
+      # Where a track comes from, as livekit's TrackSource names it, in lower case.
+      type track_source = "microphone" | "camera" | "screen_share" | "screen_share_audio" | "unknown"
+      # Where an outside fact came from: the tenant's backend over the app socket (app), or a participant's browser over the DataChannel (participant).
+      type event_source = "app" | "participant"
+      # Who may see a field of the app's state: everyone in the call (public), the tenant's own readers (tenant, the default for a field never declared), or nobody without masking (pii).
+      type visibility = "public" | "tenant" | "pii"
+      # Which projection a sink applies before a state or an entry leaves the platform: public for a participant reading its own call, tenant for the tenant's readers.
+      type projection = "public" | "tenant"
+      # Who is on the line, as far as the platform knows.
+      type contact = { ?id: String, ?phone: String, ?name: String, ?email: String, ?external_id: String }
+      # One door to an agent: a channel and, for phone and WhatsApp, the number that answers.
+      type route = { channel: channel, number: String?, ?label: String }
+      # The human who sent a supervise verb, as the token that let them in names them.
+      type supervisor = { id: String, ?name: String }
+      # What the app declares about one tool: the contract the model sees and the rules the platform enforces before running it.
+      type tool_spec = { name: String, description: String, parameters: Hash[Symbol, untyped], ?side_effect: "read" | "write" | "irreversible", ?confirm: String, ?pii: Array[String], ?timeout_s: Float }
+      # What came back from running a tool in the app's process.
+      type tool_result = { call_id: String, name: String, ?output: untyped, ?error: String, ?summary: String, ?duration_s: Float }
+      # One thing remembered about a contact: a sentence, where it came from, and how well it matched when recalled.
+      type memory_fact = { ?id: String, text: String, ?score: Float, ?source: String }
+      # One operation against the contact's memory: a recall during the turn, a remember at hangup, or a forget on request.
+      type memory_op = { op: "recall" | "remember" | "forget", ?contact: String, ?query: String, facts: Array[memory_fact], took_ms: Float }
+      # One chunk of the knowledge base that retrieval put in front of the model for this turn.
+      type doc_source = { id: String, path: String, ?heading: String, score: Float, ?excerpt: String }
+      # The exchange rate the cost was computed with, stated so the number can be reproduced.
+      type cost_rate = { currency: "EUR", usd_to_eur: Float, as_of: String }
+      # One priced line: a model, what was counted, how much, and what it came to.
+      type cost_row = { provider: String, model: String, unit: "input_tokens" | "cached_input_tokens" | "cache_creation_tokens" | "output_tokens" | "characters" | "audio_seconds" | "requests" | "session_seconds", quantity: Float, unit_price_usd: Float, eur: Float }
+      # A usage row the price table does not know.
+      type unpriced_row = { provider: String, model: String }
+      # What the call cost in provider fees, informational, in euros.
+      type cost = { eur: Float, rate: cost_rate, rows: Array[cost_row], unpriced: Array[unpriced_row] }
+      # Which voice speaks for the agent: the name it was asked for, or the id the provider knows it by.
+      type voice_config = { ?name: String, ?provider: String, ?model: String, ?voice_id: String }
+      # Which model does a job (the LLM, or the STT), and the one or two knobs worth turning.
+      type model_config = { provider: String, model: String, ?temperature: Float }
+      # How the session decides that the caller has finished, and when the caller may interrupt.
+      type turn_config = { ?min_interruption_words: Integer, ?endpointing_ms: Integer }
+      # How the voice says one word it would otherwise get wrong: a proper name, a brand, a street.
+      type pronunciation = { word: String, spoken: String }
+      # What the app declares about one field of its state: who may see it.
+      type state_field_spec = { name: String, visibility: visibility }
+      # One outside event the agent accepts, and from whom.
+      type event_spec = { name: String, from: Array[event_source] }
+      # What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what.
+      type agent_config = { ?instructions: String, ?language: String, ?greeting: String, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?tools: Array[tool_spec], ?state_fields: Array[state_field_spec], ?events: Array[event_spec] }
+      # One line of a call's log, or of an agent's log when call is null.
+      type entry = { seq: Integer, ts: Float, call: String?, agent: String, type: String, ephemeral: bool, data: Hash[Symbol, untyped] }
+      # One instruction from an app to the gateway over its WebSocket.
+      type command = { type: String, agent: String, call: String?, ?id: String, data: Hash[Symbol, untyped] }
+      # Which model and provider produced a block.
+      type metadata = { ?model_name: String?, ?model_provider: String? }
+      # One LLM request, measured by the session's llm node.
+      type llm_metrics = { type: "llm_metrics", label: String, request_id: String, timestamp: Float, duration: Float, ttft: Float, cancelled: bool, completion_tokens: Integer, prompt_tokens: Integer, prompt_cached_tokens: Integer, ?cache_creation_tokens: Integer, ?reasoning_tokens: Integer, total_tokens: Integer, tokens_per_second: Float, ?speech_id: String?, ?metadata: metadata? }
+      # One speech-to-text request, measured by the session's stt node.
+      type stt_metrics = { type: "stt_metrics", label: String, request_id: String, timestamp: Float, duration: Float, audio_duration: Float, ?input_tokens: Integer, ?output_tokens: Integer, streamed: bool, ?acquire_time: Float, ?connection_reused: bool, ?metadata: metadata? }
+      # One text-to-speech request, measured by the session's tts node.
+      type tts_metrics = { type: "tts_metrics", label: String, request_id: String, timestamp: Float, ttfb: Float, duration: Float, audio_duration: Float, cancelled: bool, characters_count: Integer, ?input_tokens: Integer, ?output_tokens: Integer, streamed: bool, ?acquire_time: Float, ?connection_reused: bool, ?segment_id: String?, ?speech_id: String?, ?metadata: metadata? }
+      # The voice activity detector's health, reported about once a second while it runs.
+      type vad_metrics = { type: "vad_metrics", label: String, timestamp: Float, idle_time: Float, inference_duration_total: Float, inference_count: Integer, ?metadata: metadata? }
+      # How long the session took to decide that the caller had finished.
+      type eou_metrics = { type: "eou_metrics", timestamp: Float, end_of_utterance_delay: Float, transcription_delay: Float, on_user_turn_completed_delay: Float, ?speech_id: String?, ?metadata: metadata? }
+      # One prediction by the end-of-turn model.
+      type eot_inference_metrics = { type: "eot_inference_metrics", timestamp: Float, total_duration: Float, detection_delay: Float, prediction_duration: Float, ?num_requests: Integer, ?metadata: metadata? }
+      # The interruption detector's latest inference and its running counts.
+      type interruption_metrics = { type: "interruption_metrics", timestamp: Float, total_duration: Float, prediction_duration: Float, detection_delay: Float, num_interruptions: Integer, num_backchannels: Integer, num_requests: Integer, ?metadata: metadata? }
+      # Of a realtime model's cached input, how much was audio, text or image.
+      type realtime_cached_token_details = { ?audio_tokens: Integer, ?text_tokens: Integer, ?image_tokens: Integer }
+      # What a realtime model read, by kind, with the cached part broken out.
+      type realtime_input_token_details = { ?audio_tokens: Integer, ?text_tokens: Integer, ?image_tokens: Integer, ?cached_tokens: Integer, ?cached_tokens_details: realtime_cached_token_details? }
+      # What a realtime model produced, by kind.
+      type realtime_output_token_details = { ?text_tokens: Integer, ?audio_tokens: Integer, ?image_tokens: Integer }
+      # One response from a speech-to-speech model, which replaces STT, LLM and TTS at once.
+      type realtime_model_metrics = { type: "realtime_model_metrics", ?label: String, request_id: String, timestamp: Float, ?duration: Float, ?session_duration: Float, ?ttft: Float, ?cancelled: bool, ?input_tokens: Integer, ?output_tokens: Integer, ?total_tokens: Integer, ?tokens_per_second: Float, input_token_details: realtime_input_token_details, output_token_details: realtime_output_token_details, ?acquire_time: Float, ?connection_reused: bool, ?metadata: metadata? }
+      # Timing of a video avatar worker, when one is in the chain.
+      type avatar_metrics = { type: "avatar_metrics", timestamp: Float, ?playback_latency: Float, ?session_started_time: Float?, ?avatar_joined_time: Float?, ?metadata: metadata? }
+      # Which model handled one leg of a turn.
+      type turn_metadata = { ?model_name: String, ?model_provider: String }
+      # What the session measured about the caller's turn.
+      type user_turn_metrics = { ?started_speaking_at: Float, ?stopped_speaking_at: Float, ?transcription_delay: Float, ?end_of_turn_delay: Float, ?on_user_turn_completed_delay: Float, ?stt_metadata: turn_metadata }
+      # What the session measured about the agent's reply.
+      type agent_turn_metrics = { ?started_speaking_at: Float, ?stopped_speaking_at: Float, ?llm_node_ttft: Float, ?llm_node_tps: Float, ?llm_node_ttfs: Float, ?tts_node_ttfb: Float, ?playback_latency: Float, ?e2e_latency: Float, ?provider_request_ids: Array[String], ?llm_metadata: turn_metadata, ?tts_metadata: turn_metadata }
+      # Everything one LLM consumed over the call.
+      type llm_model_usage = { type: "llm_usage", provider: String, model: String, ?input_tokens: Integer, ?input_cached_tokens: Integer, ?input_cache_creation_tokens: Integer, ?input_audio_tokens: Integer, ?input_cached_audio_tokens: Integer, ?input_text_tokens: Integer, ?input_cached_text_tokens: Integer, ?input_image_tokens: Integer, ?input_cached_image_tokens: Integer, ?output_tokens: Integer, ?output_audio_tokens: Integer, ?output_text_tokens: Integer, ?output_reasoning_tokens: Integer, ?session_duration: Float }
+      # Everything one TTS consumed over the call.
+      type tts_model_usage = { type: "tts_usage", provider: String, model: String, ?input_tokens: Integer, ?output_tokens: Integer, ?characters_count: Integer, ?audio_duration: Float }
+      # Everything one STT consumed over the call.
+      type stt_model_usage = { type: "stt_usage", provider: String, model: String, ?input_tokens: Integer, ?output_tokens: Integer, ?audio_duration: Float }
+      # How often the interruption detector was asked over the call.
+      type interruption_model_usage = { type: "interruption_usage", provider: String, model: String, ?total_requests: Integer }
+      # How often the end-of-turn model was asked over the call.
+      type eot_model_usage = { type: "eot_usage", provider: String, model: String, ?total_requests: Integer }
+      # One usage row, told apart by its type tag.
+      type model_usage = llm_model_usage | tts_model_usage | stt_model_usage | interruption_model_usage | eot_model_usage
+      # GET /v1/calls/{call}/state: the whole log folded, and the seq a stream resumes from.
+      type call_state = { state: state, last_seq: Integer, live: bool }
+      # One page of a log: what this reader may see, whether the log is open, and where to resume.
+      type log_page = { entries: Array[entry], live: bool, next: Integer? }
+      # One call as a list draws it: which call, how far the log got, and the state's own fields.
+      type session_line = { call: String, live: bool, last_seq: Integer, status: call_status, channel: channel?, direction: direction?, from: String?, to: String?, caller: contact?, started_at: Float?, ended_at: Float?, end_reason: end_reason?, outcome: String?, cost: cost? }
+      # GET /v1/agents/{slug}/sessions: which calls that agent handled, newest first.
+      type session_list = { calls: Array[session_line] }
+      # One agent, as somebody choosing which to open needs to see it: its name and its channels.
+      type held_agent = { slug: String, channels: Array[channel] }
+      # GET /v1/agents: every agent this fleet is holding right now, as the front page lists them.
+      type agent_list = { agents: Array[held_agent] }
+      # The LiveKit room exists and the call lives in it.
+      type room_opened = { name: String, sid: String, channel: channel }
+      # Somebody joined the room: the caller over SIP or the widget, the agent, a supervisor, a listener, or a second SIP leg.
+      type participant_joined = { identity: String, kind: participant_kind, ?name: String, attributes: Hash[Symbol, untyped] }
+      # Somebody left the room.
+      type participant_left = { identity: String, reason: String }
+      # The room's own voice activity for one participant flipped.
+      type participant_speaking = { identity: String, speaking: bool }
+      # A participant put a track on the room: their microphone, their camera, a screen.
+      type track_published = { identity: String, kind: track_kind, source: track_source }
+      # A participant's track left the room: they stopped sharing, or a participant.mute took their audio away.
+      type track_unpublished = { identity: String, kind: track_kind, source: track_source }
+      # A fact arrived from outside the conversation: the tenant's backend sent call.event, or a participant's browser sent pinecall.event.
+      type event_received = { name: String, data: Hash[Symbol, untyped], source: event_source, ?identity: String }
+      # The agent pushed a payload to a browser in the room, on the tenant's room.send.
+      type room_sent = { topic: String, ?to: String, bytes: Integer }
+      # Where the call is in its life.
+      type call_status = "idle" | "ringing" | "dialing" | "active" | "ended"
+      # One finished turn of the caller, with what the session measured about it.
+      type user_turn = { role: "user", speech_id: String, ?item_id: String, text: String, ?language: String, ?transcript_confidence: Float, metrics: user_turn_metrics }
+      # One finished reply of the agent, with what the session measured about it.
+      type agent_turn = { role: "agent", speech_id: String, ?item_id: String, text: String, interrupted: bool, metrics: agent_turn_metrics }
+      # One turn of either side, told apart by role.
+      type turn = user_turn | agent_turn
+      # Every raw metric block of the call, by kind, in the order it arrived.
+      type collected_metrics = { llm: Array[llm_metrics], stt: Array[stt_metrics], tts: Array[tts_metrics], vad: Array[vad_metrics], eou: Array[eou_metrics], eot: Array[eot_inference_metrics], interruption: Array[interruption_metrics], realtime: Array[realtime_model_metrics], avatar: Array[avatar_metrics] }
+      # One tool call and, once the app answered, its result.
+      type tool_run = { call_id: String, name: String, arguments: Hash[Symbol, untyped], ?speech_id: String, status: "running" | "done" | "failed", ?output: untyped, ?error: String, ?summary: String, ?duration_s: Float, seq: Integer }
+      # What is known about one region of the prompt without storing its text.
+      type prompt_region_state = { hash: String, chars: Integer, seq: Integer }
+      # The two regions the app writes.
+      type prompt_state = { static: prompt_region_state?, view: prompt_region_state? }
+      # One confirmation the platform asked for, and how it went.
+      type confirm = { tool: String, call_id: String, audience: String, phrase: String, status: "pending" | "granted" | "declined", ?said: String, ?reason: String }
+      # Whether a supervisor holds the line right now.
+      type handoff = { active: bool, by: supervisor? }
+      # The transfer in flight or the one that happened.
+      type transfer_state = { to: String, mode: transfer_mode, status: "requested" | "done" | "failed", by: "agent" | "supervisor" }
+      # The words on screen right now: interim transcripts that a finished turn clears.
+      type live_transcript = { user: String?, agent: String? }
+      # A stretch of seqs this reader never saw.
+      type gap = { from_seq: Integer, to_seq: Integer }
+      # An error entry, kept so the console can show what went wrong and when.
+      type logged_error = { seq: Integer, code: String, message: String }
+      # One participant in the room right now, as the room reported them when they joined.
+      type participant = { identity: String, kind: participant_kind, ?name: String, joined_at: Float, speaking: bool, attributes: Hash[Symbol, untyped] }
+      # The LiveKit room the call lives in, and who is in it right now.
+      type room = { name: String, sid: String, participants: Array[participant], caller: String? }
+      # One fact that reached the agent from outside the conversation, kept by name and origin.
+      type received_event = { seq: Integer, name: String, source: event_source, ?identity: String }
+      # A line the app wrote into the log with call.log.
+      type custom_note = { seq: Integer, name: String, data: Hash[Symbol, untyped] }
+      # The whole of what a log says, at the seq it was read to.
+      type state = { seq: Integer, agent: String, call: String?, status: call_status, channel: channel?, direction: direction?, from: String?, to: String?, caller: contact?, room: room?, started_at: Float?, ended_at: Float?, end_reason: end_reason?, outcome: String?, user_state: user_state?, agent_state: agent_state?, live: live_transcript, turns: Array[turn], metrics: collected_metrics, tools: Array[tool_run], app_state: Hash[Symbol, untyped], events: Array[received_event], prompt: prompt_state, tools_visible: Array[String], confirms: Array[confirm], memory: Array[memory_op], sources: Array[doc_source], handoff: handoff, held: bool, muted: bool, transfer: transfer_state?, usage: Array[model_usage], cost: cost?, routes: Array[route], gaps: Array[gap], errors: Array[logged_error], custom: Array[custom_note] }
+      # Make the agent say this, verbatim, to the caller.
+      type say_verb = { verb: "say", text: String }
+      # Tell the agent something the caller never hears; it goes into the prompt's view region.
+      type whisper_verb = { verb: "whisper", text: String }
+      # The supervisor takes the line: the agent goes quiet and the supervisor's audio replaces it.
+      type takeover_verb = { verb: "takeover" }
+      # The supervisor hands the line back to the agent, which resumes with the history intact.
+      type release_verb = { verb: "release" }
+      # Send the caller to another number.
+      type transfer_verb = { verb: "transfer", to: String, mode: transfer_mode }
+      # Hang up on the caller's behalf.
+      type end_verb = { verb: "end", ?reason: String }
+      # One supervise verb, told apart by its verb field.
+      type verb = say_verb | whisper_verb | takeover_verb | release_verb | transfer_verb | end_verb
+      # Declare or change what the agent is: voice, models, language, greeting, the full tool list.
+      type agent_configure = { config: agent_config }
+      # The app's first message: this socket speaks for this agent and answers these doors.
+      type agent_register = { routes: Array[route], ?sdk: String, ?takes_unclaimed: bool }
+      # Make the model speak now, guided by an instruction it reads and the caller never hears: 'tell them a slot at 10:15 just opened'.
+      type agent_reply = { instructions: String, ?allow_interruptions: bool }
+      # Make the agent say this text now, verbatim, outside the model's turn: a greeting, a read-back, a system notice.
+      type agent_say = { text: String, ?allow_interruptions: bool }
+      # Place an outbound call as this agent.
+      type call_dial = { to: String, ?from: String, ?caller: contact, ?metadata: Hash[Symbol, untyped] }
+      # Send touch tones down the line, for an IVR on the far end.
+      type call_dtmf = { digits: String }
+      # Hand the agent a fact from the tenant's backend: a slot freed, an order shipped, a payment confirmed.
+      type call_event = { name: String, data: Hash[Symbol, untyped] }
+      # End the call from the app's side.
+      type call_hangup = { ?reason: String }
+      # Put the caller on hold: they hear hold audio, the agent hears nothing.
+      type call_hold = { }
+      # Write a line of the app's own into the call's log.
+      type call_log = { name: String, data: Hash[Symbol, untyped] }
+      # Mute the agent: it keeps listening and thinking, produces no audio.
+      type call_mute = { }
+      # Send the caller to another number.
+      type call_transfer = { to: String, mode: transfer_mode }
+      # Take the caller off hold.
+      type call_unhold = { }
+      # Unmute the agent.
+      type call_unmute = { }
+      # Silence a participant for the rest of the call: their audio leaves the room, for everyone in it.
+      type participant_mute = { identity: String }
+      # Put a participant out of the room.
+      type participant_remove = { identity: String }
+      # Is the socket alive? The gateway answers pong.
+      type ping = { }
+      # Rewrite one region of the prompt.
+      type prompt_set = { region: prompt_region, text: String }
+      # Bring somebody else into the call's room.
+      type room_invite = { to: String, kind: "sip" | "participant" }
+      # Push a payload to a browser in the room over the DataChannel: a card to render, a form to open.
+      type room_send = { topic: String, data: Hash[Symbol, untyped], ?to: String }
+      # Set up this one call before the first turn: the app's initial state, and any config that differs from the agent's defaults for this caller.
+      type session_configure = { ?state: Hash[Symbol, untyped], ?config: agent_config }
+      # The app's state changed and this is all of it.
+      type state_set = { state: Hash[Symbol, untyped], ?changed: Array[String] }
+      # One supervise verb, from the human the door named.
+      type supervisor_verb = { by: supervisor, verb: verb }
+      # The tools the model may see now.
+      type tools_set = { tools: Array[tool_spec] }
+      # The gateway applied an agent.configure.
+      type agent_configured = { changed: Array[String] }
+      # The gateway accepted an agent.register: this socket now speaks for the agent and answers its routes.
+      type agent_registered = { routes: Array[route], app: String, ?sdk: String }
+      # The agent's state changed, in the session's own words.
+      type agent_state_changed = { state: agent_state }
+      # Words from the agent as they are played, synced to the audio.
+      type agent_transcript = { speech_id: String, text: String, final: bool, ?start: Float, ?end: Float }
+      # The platform is placing an outbound call and the far end has not answered yet.
+      type call_dialing = { channel: channel, from: String, to: String, caller: contact?, ?external_id: String }
+      # The call is over.
+      type call_ended = { reason: end_reason, ended_by: ended_by, ended_at: Float, duration_s: Float }
+      # The line's hold and mute flags after one of them changed.
+      type call_line = { held: bool, muted: bool }
+      # An inbound call is offered to this agent and has not been answered yet.
+      type call_ringing = { channel: channel, from: String, to: String, route: route, caller: contact?, ?external_id: String }
+      # The last entry of a call: what the judges said about it at hang-up, one row per judge.
+      type call_score = { ?passed: bool, ?not_judged: String, judges: Array[judgment], ?panel: Array[String], judge_calls: Integer, ?judge_cost_eur: Float }
+      # One judge's answer about one call: the question it was asked, the word it answered and the sentence that says why.
+      type judgment = { name: String, verdict: score_verdict, criteria: String, reason: String, evidence: judgment_evidence }
+      # Where in the call's own log a judgment is about.
+      type judgment_evidence = { seqs: Array[Integer], ?said: String }
+      # Media is up: the caller and the agent can hear each other, or the text session is open.
+      type call_started = { channel: channel, direction: direction, from: String, to: String, caller: contact?, started_at: Float }
+      # What the call was about, how it went, what it consumed and what that cost.
+      type call_summary = { reason: end_reason, outcome: String, duration_s: Float, turns: Integer, usage: Array[model_usage], cost: cost, ?recording: String }
+      # A transfer asked for by the agent or a supervisor finished, one way or the other.
+      type call_transferred = { to: String, mode: transfer_mode, ok: bool, ?error: String }
+      # The caller did not say yes, or the request lapsed.
+      type confirm_declined = { tool: String, call_id: String, audience: String, ?said: String, reason: "no" | "timeout" | "changed" | "cancelled" }
+      # The caller said yes.
+      type confirm_granted = { tool: String, call_id: String, audience: String, said: String, ttl_s: Integer }
+      # A tool with confirm set is about to run and the platform is asking the caller.
+      type confirm_request = { tool: String, call_id: String, arguments: Hash[Symbol, untyped], audience: String, phrase: String, ttl_s: Integer }
+      # The gateway refused a call or a register because one of the org's quotas ran out.
+      type credits_exhausted = { org: String, quota: "minutes" | "messages" | "agents" | "concurrent_calls", used: Float, limit: Integer }
+      # A line the app wrote into the log with call.log.
+      type custom = { name: String, data: Hash[Symbol, untyped] }
+      # What retrieval put in front of the model for this turn.
+      type docs_sources = { query: String, sources: Array[doc_source], took_ms: Float, ?speech_id: String }
+      # Something went wrong.
+      type error_event = { code: String, message: String, ?command: String, ?id: String, recoverable: bool }
+      # The replay is done: everything up to seq has been sent and what follows is live.
+      type log_caught_up = { seq: Integer }
+      # This reader missed a stretch: it reconnected too late for the store, or fell behind and the fanout dropped ephemeral entries.
+      type log_gap = { from_seq: Integer, to_seq: Integer, snapshot: state? }
+      # What memory did for this turn or at hangup: a recall before the reply, a remember after the call, a forget on request.
+      type memory_ops = { ops: Array[memory_op], ?speech_id: String }
+      # The answer to ping.
+      type pong = { ts: Float }
+      # A region of the prompt was rewritten.
+      type prompt_changed = { region: prompt_region, hash: String, chars: Integer }
+      # The app's declared state changed.
+      type state_changed = { state: Hash[Symbol, untyped], changed: Array[String], ?cause: state_cause }
+      # What changed the state: a tool's result, or a fact from outside.
+      type state_cause = state_cause_tool | state_cause_event
+      # A tool call's result changed the state.
+      type state_cause_tool = { kind: "tool", tool: String, call_id: String }
+      # A fact from outside changed the state: the app's handler for an event.received moved a field.
+      type state_cause_event = { kind: "event", name: String, seq: Integer }
+      # A supervisor hung up the call.
+      type supervisor_ended = { by: supervisor, ?reason: String }
+      # The supervisor gave the line back; the agent resumes with the history intact.
+      type supervisor_released = { by: supervisor }
+      # A supervisor made the agent say this to the caller.
+      type supervisor_said = { by: supervisor, text: String }
+      # A supervisor took the line; the agent is quiet until supervisor.released.
+      type supervisor_took_over = { by: supervisor }
+      # A supervisor asked for a transfer.
+      type supervisor_transferred = { by: supervisor, to: String, mode: transfer_mode }
+      # A supervisor told the agent something the caller never heard.
+      type supervisor_whispered = { by: supervisor, text: String }
+      # The model called a tool.
+      type tool_call = { call_id: String, name: String, arguments: Hash[Symbol, untyped], ?speech_id: String }
+      # The tools the model can see changed.
+      type tools_changed = { visible: Array[String] }
+      # The agent's reply is over and this is what was said.
+      type agent_turn_ended = { speech_id: String, ?item_id: String, text: String, interrupted: bool, metrics: agent_turn_metrics }
+      # The caller's turn is over and this is what they said.
+      type user_turn_ended = { speech_id: String, ?item_id: String, text: String, ?language: String, ?transcript_confidence: Float, metrics: user_turn_metrics }
+      # The caller's state changed, in the session's own words.
+      type user_state_changed = { state: user_state }
+      # Words from the caller as the recognizer hears them.
+      type user_transcript = { text: String, final: bool, ?language: String, ?confidence: Float }
+    end
+  end
+end

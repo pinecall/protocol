@@ -1,0 +1,95 @@
+# The hand-written half of the gem, as types. The generated half is in protocol/generated.rbs.
+
+module Pinecall
+  module Protocol
+    VERSION: String
+
+    class ProtocolError < StandardError
+    end
+
+    # One line of a log: the envelope is the event.
+    class Entry < ::Data
+      attr_reader seq: Integer
+      attr_reader ts: Float
+      attr_reader call: String?
+      attr_reader agent: String
+      attr_reader type: String
+      attr_reader ephemeral: bool
+      attr_reader data: Hash[Symbol, untyped]
+
+      def self.new: (seq: Integer, ts: Float, call: String?, agent: String, type: String,
+                     ephemeral: bool, data: Hash[Symbol, untyped]) -> Entry
+    end
+
+    # One instruction from an app to the gateway.
+    class Command < ::Data
+      attr_reader type: String
+      attr_reader agent: String
+      attr_reader call: String?
+      attr_reader id: String?
+      attr_reader data: Hash[Symbol, untyped]
+
+      def self.new: (type: String, agent: String, call: String?, id: String?,
+                     data: Hash[Symbol, untyped]) -> Command
+    end
+
+    # An entry read as what it means.
+    class Event < ::Data
+      attr_reader type: String
+      attr_reader data: Hash[Symbol, untyped]
+
+      def self.new: (type: String, data: Hash[Symbol, untyped]) -> Event
+    end
+
+    module Enums
+      ALL: Hash[String, Array[String]]
+    end
+
+    module Shapes
+      SHAPES: Hash[String, Hash[Symbol, Hash[Symbol, untyped]]]
+      UNIONS: Hash[String, Hash[Symbol, untyped]]
+    end
+
+    module Registry
+      EVENTS: Hash[String, String]
+      COMMANDS: Hash[String, String]
+      EVENT_TYPES: Array[String]
+      COMMAND_TYPES: Array[String]
+      EPHEMERAL_EVENTS: Set[String]
+      TERMINAL_EVENT: String
+      PRODUCES: Hash[String, Array[String]]
+    end
+
+    module Validate
+      def self?.call!: (String name, untyped value, ?where: String) -> untyped
+      def self?.field!: (Hash[Symbol, untyped] spec, untyped value, String where) -> untyped
+    end
+
+    module Codec
+      def self?.decode_entry: (untyped raw) -> Entry
+      def self?.decode_entries: (String text) -> Array[Entry]
+      def self?.event_of: (Entry entry) -> Event
+      def self?.command: (type: String, agent: String, data: Hash[Symbol, untyped],
+                          ?call: String?, ?id: String?) -> Command
+      def self?.encode: (Entry | Command frame) -> String
+      def self?.ephemeral?: (String type) -> bool
+    end
+
+    module State
+      def self?.initial: () -> Hash[Symbol, untyped]
+    end
+
+    module Reduce
+      def self?.reduce: (_Each[Entry] entries) -> Hash[Symbol, untyped]
+      def self?.apply: (Hash[Symbol, untyped] state, Entry entry) -> Hash[Symbol, untyped]
+    end
+
+    def self.decode_entry: (untyped raw) -> Entry
+    def self.decode_entries: (String text) -> Array[Entry]
+    def self.event_of: (Entry entry) -> Event
+    def self.encode: (Entry | Command frame) -> String
+    def self.reduce: (_Each[Entry] entries) -> Hash[Symbol, untyped]
+    def self.apply: (Hash[Symbol, untyped] state, Entry entry) -> Hash[Symbol, untyped]
+    def self.initial_state: () -> Hash[Symbol, untyped]
+  end
+end

@@ -1,0 +1,16 @@
+# frozen_string_literal: true
+
+require "rake/testtask"
+
+Rake::TestTask.new(:test) do |task|
+  task.libs = %w[lib test]
+  task.test_files = FileList["test/**/*_test.rb"]
+  task.warning = false
+end
+
+desc "Check the RBS the generator wrote"
+task :rbs do
+  sh "rbs -I sig validate"
+end
+
+task default: %i[test rbs]

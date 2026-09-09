@@ -7,3 +7,8 @@ dist/
 
 # The decision page is this laptop's engineering notes, not documentation: on disk, out of every clone.
 docs/decision.md
+
+# Ruby
+Gemfile.lock
+pkg/
+.bundle/

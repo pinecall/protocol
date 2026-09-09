@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The gate: what is committed is what the schema says. Regenerates, diffs, then tests both sides.
+# The gate: what is committed is what the schema says. Regenerates, diffs, then tests all three.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -8,7 +8,8 @@ scripts/generate
 # because hatchling cannot pack a file from outside the project it builds, so an honest edit
 # there must not read as stale output.
 git diff --exit-code -- python/pinecall_protocol ':!python/pinecall_protocol/fixtures' \
-  typescript/src/generated docs \
+  typescript/src/generated ruby/lib/pinecall/protocol/generated ruby/sig/pinecall/protocol/generated.rbs docs \
   || { echo "generated output is stale: commit what scripts/generate wrote" >&2; exit 1; }
 (cd python && uv run ruff check . ../tests && uv run pyright && uv run pytest -q)
 [ -d typescript/node_modules ] && (cd typescript && pnpm test)
+(cd ruby && rake)

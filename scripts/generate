@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# schema/ -> python/pinecall_protocol (pydantic), typescript/src/generated (zod), docs/ (the
-# reference tables). Idempotent: a second run changes nothing.
+# schema/ -> python/pinecall_protocol (pydantic), typescript/src/generated (zod),
+# ruby/lib/pinecall/protocol/generated (frozen tables) + ruby/sig (RBS), docs/ (the reference
+# tables). Idempotent: a second run changes nothing.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
