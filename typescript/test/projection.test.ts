@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { decodeEntries, reduce, type State } from "../src/index.js";
 
-const fixtures = fileURLToPath(new URL("../../fixtures/", import.meta.url));
+const fixtures = fileURLToPath(new URL("../../python/pinecall_protocol/fixtures/", import.meta.url));
 const golden = reduce(decodeEntries(readFileSync(`${fixtures}call-log-golden.json`, "utf8")));
 const MASK = "***";
 

@@ -4,5 +4,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "schema"
-FIXTURES = ROOT / "fixtures"
+
 DOCS = ROOT / "docs"
+FIXTURES = ROOT / "python" / "pinecall_protocol" / "fixtures"
