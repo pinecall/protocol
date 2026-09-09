@@ -20,7 +20,7 @@ tests/          the Python side; typescript/test is the other
 scripts/generate      rewrite everything generated from schema/
 scripts/check         regenerate, diff, lint, test — what CI runs
 cd python && uv sync  the Python side, with its tools
-cd typescript && pnpm install && pnpm test
+cd typescript && pnpm install && pnpm test    (its exports point at src/; publishConfig swaps in dist/)
 ```
 
 Edit the schema, run `scripts/generate`, commit what it wrote. Nothing under
