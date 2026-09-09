@@ -11,6 +11,8 @@
     "ScoreVerdict": {"type": "string", "enum": ["held", "broken", "deferred", "skipped"], "description": "What one judge answered about a finished call. Held: the rule held. Broken: it did not, and the reason names the evidence. Deferred: the judge was asked and could not settle it. Skipped: nobody asked it — no model was reachable inside the call's judging budget."},
     "TransferMode": {"type": "string", "enum": ["cold", "warm"], "description": "Cold: the caller is sent on and the agent leaves. Warm: the agent stays on the line until the other side answers, then leaves."},
     "PromptRegion": {"type": "string", "enum": ["static", "dynamic"], "description": "Which region of the prompt a block lives in: static, before the history, cached by the provider; or dynamic, after the history, replaced every turn. The append-only history in between is never written by the app."},
+    "DocsMode": {"type": "string", "enum": ["retrieved", "tool"], "description": "How the knowledge base reaches the model: retrieved, the runtime searches it every turn and fills the retrieved marker before the model is asked; or tool, the model searches it itself through a tool the runtime declares."},
+    "MarkerName": {"type": "string", "enum": ["memory", "retrieved", "knowledge"], "description": "The three markers a view may write in a block and never resolves: memory (the contact's facts, per turn), retrieved (chunks of the knowledge base, per turn), knowledge (the one file, once per call). The runtime reads the line, does the work, and replaces it."},
     "PromptBlockSpec": {
       "type": "object",
       "description": "One named block of the prompt and the region it lives in. The default layout, when an agent declares none, is identity, knowledge and tools (static), then the history, then view (dynamic). A block's text is written per call with prompt.set.",
@@ -97,6 +99,7 @@
       "properties": {
         "id": {"type": "string", "description": "The fact's id in the memory store."},
         "text": {"type": "string", "description": "The fact itself, as one sentence: 'prefers mornings', 'allergic to penicillin'."},
+        "category": {"type": "string", "description": "The tenant's own word for what kind of fact this is, from its memory.remember list: 'alergias', 'preference'."},
         "score": {"type": "number", "description": "How well it matched the recall query, 0 to 1. Absent when remembering, which has no query."},
         "source": {"type": "string", "description": "The call this fact was extracted from, when known."}
       },
@@ -237,6 +240,37 @@
       "required": ["name", "from"],
       "additionalProperties": false
     },
+    "KnowledgeFile": {
+      "type": "object",
+      "description": "One file of knowledge, sent whole: its path as the tenant keeps it, and its text.",
+      "properties": {
+        "path": {"type": "string", "description": "The file's path as the tenant keeps it, relative to the agent: 'knowledge/clinica.md', 'faq/horarios.md'."},
+        "text": {"type": "string", "description": "The file's whole text, as the app read it from disk."}
+      },
+      "required": ["path", "text"],
+      "additionalProperties": false
+    },
+    "DocsConfig": {
+      "type": "object",
+      "description": "The knowledge base the agent answers from, and how its chunks reach the model. It is named by the base it was pushed under, with PUT /v1/knowledge/{base}.",
+      "properties": {
+        "base": {"type": "string", "description": "The base's name, the one it was pushed to with PUT /v1/knowledge/{base}: 'clinica-norte'."},
+        "mode": {"$ref": "#/$defs/DocsMode", "default": "retrieved"},
+        "k": {"type": "integer", "minimum": 1, "default": 8, "description": "How many chunks a turn's retrieval puts in front of the model at most. A retrieved marker's own k overrides it."},
+        "min_score": {"type": "number", "minimum": 0, "description": "The fused rank score a chunk must reach to be put in front of the model. Absent, nothing is dropped from the top k."}
+      },
+      "required": ["base"],
+      "additionalProperties": false
+    },
+    "MemoryConfig": {
+      "type": "object",
+      "description": "What memory keeps about a contact across calls, and what it must never keep. Both lists are in the tenant's own words.",
+      "properties": {
+        "remember": {"type": "array", "items": {"type": "string"}, "default": [], "description": "The kinds of fact worth keeping, as the tenant names them: 'alergias', 'preference', 'pets'. They become the categories remember extracts and a memory marker may ask for."},
+        "forget": {"type": "array", "items": {"type": "string"}, "default": [], "description": "The kinds of fact that are never written, whatever the call said: 'card_numbers', 'diagnosis'. Dropped before they touch the store."}
+      },
+      "additionalProperties": false
+    },
     "AgentConfig": {
       "type": "object",
       "description": "What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what. Every field is optional so a configure can change one thing.",
@@ -250,6 +284,9 @@
         "turn": {"$ref": "#/$defs/TurnConfig"},
         "says": {"type": "array", "items": {"$ref": "#/$defs/Pronunciation"}, "description": "How the voice says the words it would otherwise get wrong. Applied to the reply on its way to the TTS."},
         "hears": {"type": "array", "items": {"type": "string"}, "description": "The words the ears must know: the agent's own name, the doctors', the streets. Given to the STT as keyterms."},
+        "knowledge": {"$ref": "#/$defs/KnowledgeFile", "description": "The one file the agent knows by heart, sent whole: the bridge reads it beside the class and the runtime puts its text where the knowledge marker is, in the static block, once per call."},
+        "docs": {"$ref": "#/$defs/DocsConfig", "description": "The knowledge base the agent answers from, by the name it was pushed under, and how its chunks reach the model."},
+        "memory": {"$ref": "#/$defs/MemoryConfig", "description": "What memory keeps about a contact across calls, in the tenant's words, and what it must never keep."},
         "tools": {"type": "array", "items": {"$ref": "#/$defs/ToolSpec"}, "description": "Every tool the agent may ever see. Which ones are visible now is tools.set."},
         "state_fields": {"type": "array", "items": {"$ref": "#/$defs/StateFieldSpec"}, "description": "Who may see each field of the app's state. A field not listed is tenant: seen by the tenant's readers, never by the public."},
         "events": {"type": "array", "items": {"$ref": "#/$defs/EventSpec"}, "description": "The outside events this agent accepts and from whom. Anything else is refused before it touches the log."}

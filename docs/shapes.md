@@ -71,6 +71,18 @@ Which region of the prompt a block lives in: static, before the history, cached 
 
 One of: `static`, `dynamic`.
 
+### `DocsMode`
+
+How the knowledge base reaches the model: retrieved, the runtime searches it every turn and fills the retrieved marker before the model is asked; or tool, the model searches it itself through a tool the runtime declares.
+
+One of: `retrieved`, `tool`.
+
+### `MarkerName`
+
+The three markers a view may write in a block and never resolves: memory (the contact's facts, per turn), retrieved (chunks of the knowledge base, per turn), knowledge (the one file, once per call). The runtime reads the line, does the work, and replaces it.
+
+One of: `memory`, `retrieved`, `knowledge`.
+
 ### `PromptBlockSpec`
 
 One named block of the prompt and the region it lives in. The default layout, when an agent declares none, is identity, knowledge and tools (static), then the history, then view (dynamic). A block's text is written per call with prompt.set.
@@ -194,6 +206,7 @@ One thing remembered about a contact: a sentence, where it came from, and how we
 |---|---|---|---|
 | `id` | `string` | no | The fact's id in the memory store. |
 | `text` | `string` | yes | The fact itself, as one sentence: 'prefers mornings', 'allergic to penicillin'. |
+| `category` | `string` | no | The tenant's own word for what kind of fact this is, from its memory.remember list: 'alergias', 'preference'. |
 | `score` | `number` | no | How well it matched the recall query, 0 to 1. Absent when remembering, which has no query. |
 | `source` | `string` | no | The call this fact was extracted from, when known. |
 
@@ -321,6 +334,35 @@ One outside event the agent accepts, and from whom. An event nobody declared is 
 | `name` | `string` | yes | The event's name, dotted, as call.event or pinecall.event will send it: slot.released, form.submitted. |
 | `from` | `EventSource[]` | yes | Who may send it: the tenant's backend, a participant's browser, or both. |
 
+### `KnowledgeFile`
+
+One file of knowledge, sent whole: its path as the tenant keeps it, and its text.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `path` | `string` | yes | The file's path as the tenant keeps it, relative to the agent: 'knowledge/clinica.md', 'faq/horarios.md'. |
+| `text` | `string` | yes | The file's whole text, as the app read it from disk. |
+
+### `DocsConfig`
+
+The knowledge base the agent answers from, and how its chunks reach the model. It is named by the base it was pushed under, with PUT /v1/knowledge/{base}.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `base` | `string` | yes | The base's name, the one it was pushed to with PUT /v1/knowledge/{base}: 'clinica-norte'. |
+| `mode` | `DocsMode` | no | How the knowledge base reaches the model: retrieved, the runtime searches it every turn and fills the retrieved marker before the model is asked; or tool, the model searches it itself through a tool the runtime declares. |
+| `k` | `integer` | no | How many chunks a turn's retrieval puts in front of the model at most. A retrieved marker's own k overrides it. |
+| `min_score` | `number` | no | The fused rank score a chunk must reach to be put in front of the model. Absent, nothing is dropped from the top k. |
+
+### `MemoryConfig`
+
+What memory keeps about a contact across calls, and what it must never keep. Both lists are in the tenant's own words.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `remember` | `string[]` | no | The kinds of fact worth keeping, as the tenant names them: 'alergias', 'preference', 'pets'. They become the categories remember extracts and a memory marker may ask for. |
+| `forget` | `string[]` | no | The kinds of fact that are never written, whatever the call said: 'card_numbers', 'diagnosis'. Dropped before they touch the store. |
+
 ### `AgentConfig`
 
 What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what. Every field is optional so a configure can change one thing.
@@ -336,6 +378,9 @@ What an app declares about its agent: the voice, the models, the language, the g
 | `turn` | `TurnConfig` | no | How the session decides that the caller has finished, and when the caller may interrupt. |
 | `says` | `Pronunciation[]` | no | How the voice says the words it would otherwise get wrong. Applied to the reply on its way to the TTS. |
 | `hears` | `string[]` | no | The words the ears must know: the agent's own name, the doctors', the streets. Given to the STT as keyterms. |
+| `knowledge` | `KnowledgeFile` | no | The one file the agent knows by heart, sent whole: the bridge reads it beside the class and the runtime puts its text where the knowledge marker is, in the static block, once per call. |
+| `docs` | `DocsConfig` | no | The knowledge base the agent answers from, by the name it was pushed under, and how its chunks reach the model. |
+| `memory` | `MemoryConfig` | no | What memory keeps about a contact across calls, in the tenant's words, and what it must never keep. |
 | `tools` | `ToolSpec[]` | no | Every tool the agent may ever see. Which ones are visible now is tools.set. |
 | `state_fields` | `StateFieldSpec[]` | no | Who may see each field of the app's state. A field not listed is tenant: seen by the tenant's readers, never by the public. |
 | `events` | `EventSpec[]` | no | The outside events this agent accepts and from whom. Anything else is refused before it touches the log. |

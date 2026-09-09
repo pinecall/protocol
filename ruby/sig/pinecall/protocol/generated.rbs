@@ -19,6 +19,10 @@ module Pinecall
       type transfer_mode = "cold" | "warm"
       # Which region of the prompt a block lives in: static, before the history, cached by the provider; or dynamic, after the history, replaced every turn.
       type prompt_region = "static" | "dynamic"
+      # How the knowledge base reaches the model: retrieved, the runtime searches it every turn and fills the retrieved marker before the model is asked; or tool, the model searches it itself through a tool the runtime declares.
+      type docs_mode = "retrieved" | "tool"
+      # The three markers a view may write in a block and never resolves: memory (the contact's facts, per turn), retrieved (chunks of the knowledge base, per turn), knowledge (the one file, once per call).
+      type marker_name = "memory" | "retrieved" | "knowledge"
       # One named block of the prompt and the region it lives in.
       type prompt_block_spec = { name: String, region: prompt_region }
       # What the platform believes the person on the line is doing right now.
@@ -48,7 +52,7 @@ module Pinecall
       # What came back from running a tool in the app's process.
       type tool_result = { call_id: String, name: String, ?output: untyped, ?error: String, ?summary: String, ?duration_s: Float }
       # One thing remembered about a contact: a sentence, where it came from, and how well it matched when recalled.
-      type memory_fact = { ?id: String, text: String, ?score: Float, ?source: String }
+      type memory_fact = { ?id: String, text: String, ?category: String, ?score: Float, ?source: String }
       # One operation against the contact's memory: a recall during the turn, a remember at hangup, or a forget on request.
       type memory_op = { op: "recall" | "remember" | "forget", ?contact: String, ?query: String, facts: Array[memory_fact], took_ms: Float }
       # One chunk of the knowledge base that retrieval put in front of the model for this turn.
@@ -73,8 +77,14 @@ module Pinecall
       type state_field_spec = { name: String, visibility: visibility }
       # One outside event the agent accepts, and from whom.
       type event_spec = { name: String, from: Array[event_source] }
+      # One file of knowledge, sent whole: its path as the tenant keeps it, and its text.
+      type knowledge_file = { path: String, text: String }
+      # The knowledge base the agent answers from, and how its chunks reach the model.
+      type docs_config = { base: String, ?mode: docs_mode, ?k: Integer, ?min_score: Float }
+      # What memory keeps about a contact across calls, and what it must never keep.
+      type memory_config = { ?remember: Array[String], ?forget: Array[String] }
       # What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what.
-      type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: String, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?tools: Array[tool_spec], ?state_fields: Array[state_field_spec], ?events: Array[event_spec] }
+      type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: String, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?knowledge: knowledge_file, ?docs: docs_config, ?memory: memory_config, ?tools: Array[tool_spec], ?state_fields: Array[state_field_spec], ?events: Array[event_spec] }
       # One line of a call's log, or of an agent's log when call is null.
       type entry = { seq: Integer, ts: Float, call: String?, agent: String, type: String, ephemeral: bool, data: Hash[Symbol, untyped] }
       # One instruction from an app to the gateway over its WebSocket.
@@ -135,6 +145,30 @@ module Pinecall
       type held_agent = { slug: String, channels: Array[channel] }
       # GET /v1/agents: every agent this fleet is holding right now, as the front page lists them.
       type agent_list = { agents: Array[held_agent] }
+      # PUT /v1/knowledge/{base}, the body: the tenant's folder as of now, sent whole.
+      type knowledge_push = { files: Array[knowledge_file] }
+      # PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that took.
+      type knowledge_pushed = { base: String, chunks: Integer, took_ms: Float }
+      # One knowledge base as the list draws it: its name, its size, and when it was last pushed.
+      type knowledge_base = { base: String, chunks: Integer, pushed_at: Float }
+      # GET /v1/knowledge: every base this org has pushed.
+      type knowledge_list = { bases: Array[knowledge_base] }
+      # One fact of a contact's history: a MemoryFact with the two dates that bound it.
+      type contact_fact = { ?id: String, text: String, ?category: String, ?source: String, valid_from: Float, invalidated_at: Float? }
+      # GET /v1/contacts/{contact}/memory: everything memory ever kept about one contact, current facts first.
+      type contact_memory = { facts: Array[contact_fact] }
+      # DELETE /v1/contacts/{contact}/memory, the answer: how many facts the right to be forgotten erased.
+      type forgotten = { forgotten: Integer }
+      # One marker the worker found in a dynamic block, as the gateway is asked to fill it.
+      type fill_marker = { name: marker_name, payload: String }
+      # POST /v1/calls/{call}/fill, the body: what the caller just said and the markers to fill before the model is asked.
+      type fill_request = { query: String, markers: Array[fill_marker], ?speech_id: String }
+      # One marker filled: the marker as it was asked, and the text that takes its line.
+      type fill = { name: marker_name, payload: String, text: String }
+      # POST /v1/calls/{call}/fill, the answer: every marker filled, and how long the whole fill took.
+      type fills = { fills: Array[fill], took_ms: Float }
+      # POST /v1/calls/{call}/remember, the answer: what the call taught about the contact, counted.
+      type remembered = { ops: Integer, took_ms: Float }
       # The LiveKit room exists and the call lives in it.
       type room_opened = { name: String, sid: String, channel: channel }
       # Somebody joined the room: the caller over SIP or the widget, the agent, a supervisor, a listener, or a second SIP leg.

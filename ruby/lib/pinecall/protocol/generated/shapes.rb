@@ -50,6 +50,7 @@ module Pinecall
         "MemoryFact" => {
           id: { kind: :str },
           text: { kind: :str, required: true },
+          category: { kind: :str },
           score: { kind: :float },
           source: { kind: :str }
         }.freeze,
@@ -117,6 +118,20 @@ module Pinecall
           name: { kind: :str, required: true },
           from: { kind: :list, items: { kind: :ref, ref: "EventSource" }, required: true }
         }.freeze,
+        "KnowledgeFile" => {
+          path: { kind: :str, required: true },
+          text: { kind: :str, required: true }
+        }.freeze,
+        "DocsConfig" => {
+          base: { kind: :str, required: true },
+          mode: { kind: :ref, ref: "DocsMode", default: "retrieved" },
+          k: { kind: :int, default: 8 },
+          min_score: { kind: :float }
+        }.freeze,
+        "MemoryConfig" => {
+          remember: { kind: :list, items: { kind: :str }, default: [] },
+          forget: { kind: :list, items: { kind: :str }, default: [] }
+        }.freeze,
         "AgentConfig" => {
           prompt: { kind: :list, items: { kind: :ref, ref: "PromptBlockSpec" } },
           language: { kind: :str },
@@ -127,6 +142,9 @@ module Pinecall
           turn: { kind: :ref, ref: "TurnConfig" },
           says: { kind: :list, items: { kind: :ref, ref: "Pronunciation" } },
           hears: { kind: :list, items: { kind: :str } },
+          knowledge: { kind: :ref, ref: "KnowledgeFile" },
+          docs: { kind: :ref, ref: "DocsConfig" },
+          memory: { kind: :ref, ref: "MemoryConfig" },
           tools: { kind: :list, items: { kind: :ref, ref: "ToolSpec" } },
           state_fields: { kind: :list, items: { kind: :ref, ref: "StateFieldSpec" } },
           events: { kind: :list, items: { kind: :ref, ref: "EventSpec" } }
@@ -392,6 +410,58 @@ module Pinecall
         }.freeze,
         "AgentList" => {
           agents: { kind: :list, items: { kind: :ref, ref: "HeldAgent" }, required: true }
+        }.freeze,
+        "KnowledgePush" => {
+          files: { kind: :list, items: { kind: :ref, ref: "KnowledgeFile" }, required: true }
+        }.freeze,
+        "KnowledgePushed" => {
+          base: { kind: :str, required: true },
+          chunks: { kind: :int, required: true },
+          took_ms: { kind: :float, required: true }
+        }.freeze,
+        "KnowledgeBase" => {
+          base: { kind: :str, required: true },
+          chunks: { kind: :int, required: true },
+          pushed_at: { kind: :float, required: true }
+        }.freeze,
+        "KnowledgeList" => {
+          bases: { kind: :list, items: { kind: :ref, ref: "KnowledgeBase" }, required: true }
+        }.freeze,
+        "ContactFact" => {
+          id: { kind: :str },
+          text: { kind: :str, required: true },
+          category: { kind: :str },
+          source: { kind: :str },
+          valid_from: { kind: :float, required: true },
+          invalidated_at: { kind: :float, null: true, required: true }
+        }.freeze,
+        "ContactMemory" => {
+          facts: { kind: :list, items: { kind: :ref, ref: "ContactFact" }, required: true }
+        }.freeze,
+        "Forgotten" => {
+          forgotten: { kind: :int, required: true }
+        }.freeze,
+        "FillMarker" => {
+          name: { kind: :ref, ref: "MarkerName", required: true },
+          payload: { kind: :str, required: true }
+        }.freeze,
+        "FillRequest" => {
+          query: { kind: :str, required: true },
+          markers: { kind: :list, items: { kind: :ref, ref: "FillMarker" }, required: true },
+          speech_id: { kind: :str }
+        }.freeze,
+        "Fill" => {
+          name: { kind: :ref, ref: "MarkerName", required: true },
+          payload: { kind: :str, required: true },
+          text: { kind: :str, required: true }
+        }.freeze,
+        "Fills" => {
+          fills: { kind: :list, items: { kind: :ref, ref: "Fill" }, required: true },
+          took_ms: { kind: :float, required: true }
+        }.freeze,
+        "Remembered" => {
+          ops: { kind: :int, required: true },
+          took_ms: { kind: :float, required: true }
         }.freeze,
         "RoomOpened" => {
           name: { kind: :str, required: true },

@@ -29,6 +29,14 @@ module Pinecall
       # provider; or dynamic, after the history, replaced every turn. The append-only history in
       # between is never written by the app.
       PROMPT_REGION = %w[static dynamic].freeze
+      # How the knowledge base reaches the model: retrieved, the runtime searches it every turn
+      # and fills the retrieved marker before the model is asked; or tool, the model searches it
+      # itself through a tool the runtime declares.
+      DOCS_MODE = %w[retrieved tool].freeze
+      # The three markers a view may write in a block and never resolves: memory (the contact's
+      # facts, per turn), retrieved (chunks of the knowledge base, per turn), knowledge (the one
+      # file, once per call). The runtime reads the line, does the work, and replaces it.
+      MARKER_NAME = %w[memory retrieved knowledge].freeze
       # What the platform believes the person on the line is doing right now. The states are the
       # session's own.
       USER_STATE = %w[listening speaking away].freeze
@@ -65,6 +73,8 @@ module Pinecall
         "ScoreVerdict" => SCORE_VERDICT,
         "TransferMode" => TRANSFER_MODE,
         "PromptRegion" => PROMPT_REGION,
+        "DocsMode" => DOCS_MODE,
+        "MarkerName" => MARKER_NAME,
         "UserState" => USER_STATE,
         "AgentState" => AGENT_STATE,
         "ParticipantKind" => PARTICIPANT_KIND,

@@ -76,6 +76,130 @@
       "properties": {
         "agents": {"type": "array", "items": {"$ref": "#/$defs/HeldAgent"}, "description": "One row per agent, in the order their sockets claimed them."}
       }
+    },
+    "KnowledgePush": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/knowledge/{base}, the body: the tenant's folder as of now, sent whole. The base is replaced, never merged.",
+      "required": ["files"],
+      "properties": {
+        "files": {"type": "array", "items": {"$ref": "defs.json#/$defs/KnowledgeFile"}, "description": "Every file of the base, path and text. A file not in the list is gone from the base."}
+      }
+    },
+    "KnowledgePushed": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that took.",
+      "required": ["base", "chunks", "took_ms"],
+      "properties": {
+        "base": {"type": "string", "description": "The base's name, as the path named it."},
+        "chunks": {"type": "integer", "description": "How many chunks the files were cut into and embedded."},
+        "took_ms": {"type": "number", "description": "How long the push took, chunking and embedding included, in milliseconds."}
+      }
+    },
+    "KnowledgeBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One knowledge base as the list draws it: its name, its size, and when it was last pushed.",
+      "required": ["base", "chunks", "pushed_at"],
+      "properties": {
+        "base": {"type": "string", "description": "The base's name."},
+        "chunks": {"type": "integer", "description": "How many chunks it holds."},
+        "pushed_at": {"type": "number", "description": "When it was last pushed, unix seconds."}
+      }
+    },
+    "KnowledgeList": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/knowledge: every base this org has pushed.",
+      "required": ["bases"],
+      "properties": {
+        "bases": {"type": "array", "items": {"$ref": "#/$defs/KnowledgeBase"}, "description": "One row per base, by name."}
+      }
+    },
+    "ContactFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One fact of a contact's history: a MemoryFact with the two dates that bound it. A fact is never deleted, only superseded, so the history keeps every version.",
+      "required": ["text", "valid_from", "invalidated_at"],
+      "properties": {
+        "id": {"type": "string", "description": "The fact's id in the memory store."},
+        "text": {"type": "string", "description": "The fact itself, as one sentence."},
+        "category": {"type": "string", "description": "The tenant's own word for what kind of fact this is, from its memory.remember list."},
+        "source": {"type": "string", "description": "The call this fact was extracted from, when known."},
+        "valid_from": {"type": "number", "description": "When the fact was written, unix seconds."},
+        "invalidated_at": {"type": ["number", "null"], "description": "When a later call superseded or withdrew it, unix seconds; null while it is current."}
+      }
+    },
+    "ContactMemory": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/contacts/{contact}/memory: everything memory ever kept about one contact, current facts first.",
+      "required": ["facts"],
+      "properties": {
+        "facts": {"type": "array", "items": {"$ref": "#/$defs/ContactFact"}, "description": "Every version of every fact, current first, then the superseded ones, newest first."}
+      }
+    },
+    "Forgotten": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "DELETE /v1/contacts/{contact}/memory, the answer: how many facts the right to be forgotten erased.",
+      "required": ["forgotten"],
+      "properties": {
+        "forgotten": {"type": "integer", "description": "How many facts were erased, every version counted."}
+      }
+    },
+    "FillMarker": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One marker the worker found in a dynamic block, as the gateway is asked to fill it. The view wrote it and never resolves it.",
+      "required": ["name", "payload"],
+      "properties": {
+        "name": {"$ref": "defs.json#/$defs/MarkerName"},
+        "payload": {"type": "string", "description": "What the marker carried after its name, verbatim: the JSON of a memory or retrieved marker, the path of a knowledge marker."}
+      }
+    },
+    "FillRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/calls/{call}/fill, the body: what the caller just said and the markers to fill before the model is asked. Worker-only; the gateway writes memory.ops and docs.sources on the call's log itself.",
+      "required": ["query", "markers"],
+      "properties": {
+        "query": {"type": "string", "description": "The caller's finished turn, the text memory and retrieval are searched with."},
+        "markers": {"type": "array", "items": {"$ref": "#/$defs/FillMarker"}, "description": "Every marker of the dynamic blocks, in the order they appear."},
+        "speech_id": {"type": "string", "description": "The turn's speech_id, so the entries the fill writes join the turn's metrics."}
+      }
+    },
+    "Fill": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One marker filled: the marker as it was asked, and the text that takes its line.",
+      "required": ["name", "payload", "text"],
+      "properties": {
+        "name": {"$ref": "defs.json#/$defs/MarkerName"},
+        "payload": {"type": "string", "description": "The marker's payload, repeated so a fill finds its marker."},
+        "text": {"type": "string", "description": "The text that replaces the marker's line. Empty means the line goes, and the blank line after it with it."}
+      }
+    },
+    "Fills": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/calls/{call}/fill, the answer: every marker filled, and how long the whole fill took.",
+      "required": ["fills", "took_ms"],
+      "properties": {
+        "fills": {"type": "array", "items": {"$ref": "#/$defs/Fill"}, "description": "One fill per marker asked, in the same order."},
+        "took_ms": {"type": "number", "description": "How long the whole fill took, recall and retrieval included, in milliseconds. The worker's budget is 250."}
+      }
+    },
+    "Remembered": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/calls/{call}/remember, the answer: what the call taught about the contact, counted. Worker-only; the body is empty, the gateway reads the turns off its own log and writes memory.ops itself.",
+      "required": ["ops", "took_ms"],
+      "properties": {
+        "ops": {"type": "integer", "description": "How many memory operations the call produced: adds, updates and invalidations together."},
+        "took_ms": {"type": "number", "description": "How long remembering took, the one model call included, in milliseconds."}
+      }
     }
   }
 }

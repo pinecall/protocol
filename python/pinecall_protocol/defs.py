@@ -55,6 +55,18 @@ type TransferMode = Literal["cold", "warm"]
 type PromptRegion = Literal["static", "dynamic"]
 
 
+# How the knowledge base reaches the model: retrieved, the runtime searches it every turn and fills
+# the retrieved marker before the model is asked; or tool, the model searches it itself through a
+# tool the runtime declares.
+type DocsMode = Literal["retrieved", "tool"]
+
+
+# The three markers a view may write in a block and never resolves: memory (the contact's facts, per
+# turn), retrieved (chunks of the knowledge base, per turn), knowledge (the one file, once per
+# call). The runtime reads the line, does the work, and replaces it.
+type MarkerName = Literal["memory", "retrieved", "knowledge"]
+
+
 # The default layout, when an agent declares none, is identity, knowledge and tools (static), then
 # the history, then view (dynamic). A block's text is written per call with prompt.set.
 class PromptBlockSpec(WireModel):
@@ -164,6 +176,7 @@ class MemoryFact(WireModel):
 
     id: str | None = None
     text: str
+    category: str | None = None
     score: float | None = None
     source: str | None = None
 
@@ -285,6 +298,31 @@ class EventSpec(WireModel):
     from_: list[EventSource] = Field(alias="from")
 
 
+class KnowledgeFile(WireModel):
+    """One file of knowledge, sent whole: its path as the tenant keeps it, and its text."""
+
+    path: str
+    text: str
+
+
+# It is named by the base it was pushed under, with PUT /v1/knowledge/{base}.
+class DocsConfig(WireModel):
+    """The knowledge base the agent answers from, and how its chunks reach the model."""
+
+    base: str
+    mode: DocsMode = "retrieved"
+    k: int = 8
+    min_score: float | None = None
+
+
+# Both lists are in the tenant's own words.
+class MemoryConfig(WireModel):
+    """What memory keeps about a contact across calls, and what it must never keep."""
+
+    remember: list[str] = Field(default_factory=list)
+    forget: list[str] = Field(default_factory=list)
+
+
 # What an app declares about its agent: the voice, the models, the language, the greeting, the
 # tools, and who may see and send what. Every field is optional so a configure can change one thing.
 class AgentConfig(WireModel):
@@ -299,6 +337,9 @@ class AgentConfig(WireModel):
     turn: TurnConfig | None = None
     says: list[Pronunciation] | None = None
     hears: list[str] | None = None
+    knowledge: KnowledgeFile | None = None
+    docs: DocsConfig | None = None
+    memory: MemoryConfig | None = None
     tools: list[ToolSpec] | None = None
     state_fields: list[StateFieldSpec] | None = None
     events: list[EventSpec] | None = None

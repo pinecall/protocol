@@ -50,6 +50,22 @@ export const PromptRegionSchema = z.enum(["static", "dynamic"]);
 export type PromptRegion = z.infer<typeof PromptRegionSchema>;
 
 /**
+ * How the knowledge base reaches the model: retrieved, the runtime searches it every turn and
+ * fills the retrieved marker before the model is asked; or tool, the model searches it itself
+ * through a tool the runtime declares.
+ */
+export const DocsModeSchema = z.enum(["retrieved", "tool"]);
+export type DocsMode = z.infer<typeof DocsModeSchema>;
+
+/**
+ * The three markers a view may write in a block and never resolves: memory (the contact's facts,
+ * per turn), retrieved (chunks of the knowledge base, per turn), knowledge (the one file, once per
+ * call). The runtime reads the line, does the work, and replaces it.
+ */
+export const MarkerNameSchema = z.enum(["memory", "retrieved", "knowledge"]);
+export type MarkerName = z.infer<typeof MarkerNameSchema>;
+
+/**
  * One named block of the prompt and the region it lives in. The default layout, when an agent
  * declares none, is identity, knowledge and tools (static), then the history, then view (dynamic).
  * A block's text is written per call with prompt.set.
@@ -179,6 +195,7 @@ export type ToolResult = z.infer<typeof ToolResultSchema>;
 export const MemoryFactSchema = z.strictObject({
   id: z.string().nullish(),
   text: z.string(),
+  category: z.string().nullish(),
   score: z.number().nullish(),
   source: z.string().nullish(),
 });
@@ -296,6 +313,35 @@ export const EventSpecSchema = z.strictObject({
 });
 export type EventSpec = z.infer<typeof EventSpecSchema>;
 
+/** One file of knowledge, sent whole: its path as the tenant keeps it, and its text. */
+export const KnowledgeFileSchema = z.strictObject({
+  path: z.string(),
+  text: z.string(),
+});
+export type KnowledgeFile = z.infer<typeof KnowledgeFileSchema>;
+
+/**
+ * The knowledge base the agent answers from, and how its chunks reach the model. It is named by
+ * the base it was pushed under, with PUT /v1/knowledge/{base}.
+ */
+export const DocsConfigSchema = z.strictObject({
+  base: z.string(),
+  mode: DocsModeSchema.nullish(),
+  k: z.int().nullish(),
+  min_score: z.number().nullish(),
+});
+export type DocsConfig = z.infer<typeof DocsConfigSchema>;
+
+/**
+ * What memory keeps about a contact across calls, and what it must never keep. Both lists are in
+ * the tenant's own words.
+ */
+export const MemoryConfigSchema = z.strictObject({
+  remember: z.array(z.string()).nullish(),
+  forget: z.array(z.string()).nullish(),
+});
+export type MemoryConfig = z.infer<typeof MemoryConfigSchema>;
+
 /**
  * What an app declares about its agent: the voice, the models, the language, the greeting, the
  * tools, and who may see and send what. Every field is optional so a configure can change one
@@ -311,6 +357,9 @@ export const AgentConfigSchema = z.strictObject({
   turn: TurnConfigSchema.nullish(),
   says: z.array(PronunciationSchema).nullish(),
   hears: z.array(z.string()).nullish(),
+  knowledge: KnowledgeFileSchema.nullish(),
+  docs: DocsConfigSchema.nullish(),
+  memory: MemoryConfigSchema.nullish(),
   tools: z.array(ToolSpecSchema).nullish(),
   state_fields: z.array(StateFieldSpecSchema).nullish(),
   events: z.array(EventSpecSchema).nullish(),
