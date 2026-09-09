@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/agent.configured.json",
+  "title": "agent.configured",
+  "description": "The gateway applied an agent.configure. Live calls keep their session; the next call starts with the new config.",
+  "x-pinecall": {"kind": "event", "type": "agent.configured", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/AgentConfigured",
+  "$defs": {
+    "AgentConfigured": {
+      "type": "object",
+      "description": "The gateway applied an agent.configure. Live calls keep their session; the next call starts with the new config.",
+      "properties": {
+        "changed": {"type": "array", "items": {"type": "string"}, "description": "The config fields that changed."}
+      },
+      "required": ["changed"],
+      "additionalProperties": false
+    }
+  }
+}

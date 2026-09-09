@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/agent.state.json",
+  "title": "agent.state",
+  "description": "The agent's state changed, in the session's own words.",
+  "x-pinecall": {"kind": "event", "type": "agent.state", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/AgentStateChanged",
+  "$defs": {
+    "AgentStateChanged": {
+      "type": "object",
+      "description": "The agent's state changed, in the session's own words.",
+      "properties": {
+        "state": {"$ref": "../defs.json#/$defs/AgentState"}
+      },
+      "required": ["state"],
+      "additionalProperties": false
+    }
+  }
+}

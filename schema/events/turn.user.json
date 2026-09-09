@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/turn.user.json",
+  "title": "turn.user",
+  "description": "The caller's turn is over and this is what they said. With it, everything the session measured about the turn.",
+  "x-pinecall": {"kind": "event", "type": "turn.user", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/UserTurnEnded",
+  "$defs": {
+    "UserTurnEnded": {
+      "type": "object",
+      "description": "The caller's turn is over and this is what they said. With it, everything the session measured about the turn.",
+      "properties": {
+        "speech_id": {"type": "string", "description": "The id of the reply this turn triggers; turn.agent and its llm, tts and eou blocks carry the same id. That is the join."},
+        "item_id": {"type": "string", "description": "The session's id for this message in the chat history."},
+        "text": {"type": "string", "description": "The final transcript, or the message as typed."},
+        "language": {"type": "string", "description": "The language heard, as a BCP 47 tag."},
+        "transcript_confidence": {"type": "number", "description": "The recognizer's confidence, 0 to 1, when it reports one."},
+        "metrics": {"$ref": "../metrics.json#/$defs/UserTurnMetrics"}
+      },
+      "required": ["speech_id", "text", "metrics"],
+      "additionalProperties": false
+    }
+  }
+}

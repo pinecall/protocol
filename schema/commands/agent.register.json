@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/agent.register.json",
+  "title": "agent.register",
+  "description": "The app's first message: this socket speaks for this agent and answers these doors. The gateway answers agent.registered, or error.",
+  "x-pinecall": {"kind": "command", "type": "agent.register", "scope": "agent", "produces": ["agent.registered"]},
+  "$ref": "#/$defs/AgentRegister",
+  "$defs": {
+    "AgentRegister": {
+      "type": "object",
+      "description": "The app's first message: this socket speaks for this agent and answers these doors. The gateway answers agent.registered, or error.",
+      "properties": {
+        "routes": {"type": "array", "items": {"$ref": "../defs.json#/$defs/Route"}, "description": "The doors this agent answers. A number may belong to one agent at a time."},
+        "sdk": {"type": "string", "description": "The SDK and version the app runs: pinecall/2.0.0."},
+        "takes_unclaimed": {"type": "boolean", "default": true, "description": "Whether this socket may be handed a call that named no app — every phone call, and every web call that did not ask for one. A console holds the agent to serve the call it opens itself and says false, so a real caller is never answered from somebody's terminal. Absent means yes."}
+      },
+      "required": ["routes"],
+      "additionalProperties": false
+    }
+  }
+}

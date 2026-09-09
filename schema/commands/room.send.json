@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/room.send.json",
+  "title": "room.send",
+  "description": "Push a payload to a browser in the room over the DataChannel: a card to render, a form to open. Lands as room.sent with the size, never the payload. The widget listens on pinecall.ui; a topic of the tenant's own reaches the tenant's own page code.",
+  "x-pinecall": {"kind": "command", "type": "room.send", "scope": "call", "produces": ["room.sent"]},
+  "$ref": "#/$defs/RoomSend",
+  "$defs": {
+    "RoomSend": {
+      "type": "object",
+      "description": "Push a payload to a browser in the room over the DataChannel: a card to render, a form to open. Lands as room.sent with the size, never the payload. The widget listens on pinecall.ui; a topic of the tenant's own reaches the tenant's own page code.",
+      "properties": {
+        "topic": {"type": "string", "description": "The DataChannel topic: pinecall.ui, or the tenant's own."},
+        "data": {"type": "object", "additionalProperties": true, "description": "The payload, as JSON. The browser gets it whole; the log keeps its size."},
+        "to": {"type": "string", "description": "One participant's identity. Absent: everyone in the room."}
+      },
+      "required": ["topic", "data"],
+      "additionalProperties": false
+    }
+  }
+}

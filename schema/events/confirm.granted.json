@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/confirm.granted.json",
+  "title": "confirm.granted",
+  "description": "The caller said yes. The platform minted a one-shot token bound to the audience and the tool now runs. The token itself never enters the log.",
+  "x-pinecall": {"kind": "event", "type": "confirm.granted", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/ConfirmGranted",
+  "$defs": {
+    "ConfirmGranted": {
+      "type": "object",
+      "description": "The caller said yes. The platform minted a one-shot token bound to the audience and the tool now runs. The token itself never enters the log.",
+      "properties": {
+        "tool": {"type": "string", "description": "The tool that may now run."},
+        "call_id": {"type": "string", "description": "The tool call released."},
+        "audience": {"type": "string", "description": "What the token is bound to, repeated from the request."},
+        "said": {"type": "string", "description": "What the caller actually said."},
+        "ttl_s": {"type": "integer", "description": "How many seconds the token stays valid."}
+      },
+      "required": ["tool", "call_id", "audience", "said", "ttl_s"],
+      "additionalProperties": false
+    }
+  }
+}

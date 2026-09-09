@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/call.dialing.json",
+  "title": "call.dialing",
+  "description": "The platform is placing an outbound call and the far end has not answered yet. The first entry of an outbound call's log.",
+  "x-pinecall": {"kind": "event", "type": "call.dialing", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/CallDialing",
+  "$defs": {
+    "CallDialing": {
+      "type": "object",
+      "description": "The platform is placing an outbound call and the far end has not answered yet. The first entry of an outbound call's log.",
+      "properties": {
+        "channel": {"$ref": "../defs.json#/$defs/Channel"},
+        "from": {"type": "string", "description": "The number the call shows as coming from, E.164."},
+        "to": {"type": "string", "description": "The number being dialed, E.164."},
+        "caller": {"anyOf": [{"$ref": "../defs.json#/$defs/Contact"}, {"type": "null"}], "description": "Who is being called, when the app said."},
+        "external_id": {"type": "string", "description": "The carrier or SIP call id, once assigned."}
+      },
+      "required": ["channel", "from", "to", "caller"],
+      "additionalProperties": false
+    }
+  }
+}

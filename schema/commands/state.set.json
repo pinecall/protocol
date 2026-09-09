@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/state.set.json",
+  "title": "state.set",
+  "description": "The app's state changed and this is all of it. The platform logs state.changed and re-renders.",
+  "x-pinecall": {"kind": "command", "type": "state.set", "scope": "call", "produces": ["state.changed"]},
+  "$ref": "#/$defs/StateSet",
+  "$defs": {
+    "StateSet": {
+      "type": "object",
+      "description": "The app's state changed and this is all of it. The platform logs state.changed and re-renders.",
+      "properties": {
+        "state": {"type": "object", "additionalProperties": true, "description": "The whole state after the change."},
+        "changed": {"type": "array", "items": {"type": "string"}, "description": "The names of the fields that changed, when the app knows. Absent means: compare yourself."}
+      },
+      "required": ["state"],
+      "additionalProperties": false
+    }
+  }
+}

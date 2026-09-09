@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/state.json",
+  "title": "State",
+  "description": "What a log reduces to: fold every entry in seq order and this is what you hold. The console renders it; a log.gap may carry it as a snapshot. The reducer is written by hand on both sides and must agree byte for byte on the golden fixture.",
+  "$ref": "#/$defs/State",
+  "$defs": {
+    "CallStatus": {"type": "string", "enum": ["idle", "ringing", "dialing", "active", "ended"], "description": "Where the call is in its life. idle before any call.* entry, which is what an agent's own log looks like."},
+    "UserTurn": {
+      "type": "object",
+      "description": "One finished turn of the caller, with what the session measured about it.",
+      "properties": {
+        "role": {"type": "string", "const": "user", "description": "Who spoke."},
+        "speech_id": {"type": "string", "description": "The id of the reply this turn triggered; the same id the agent's turn and its blocks carry."},
+        "item_id": {"type": "string", "description": "The session's id for this message in the chat history."},
+        "text": {"type": "string", "description": "The final transcript, or the message as typed."},
+        "language": {"type": "string", "description": "The language the recognizer heard, as a BCP 47 tag."},
+        "transcript_confidence": {"type": "number", "description": "The recognizer's confidence in the transcript, 0 to 1, when it reports one."},
+        "metrics": {"$ref": "metrics.json#/$defs/UserTurnMetrics"}
+      },
+      "required": ["role", "speech_id", "text", "metrics"],
+      "additionalProperties": false
+    },
+    "AgentTurn": {
+      "type": "object",
+      "description": "One finished reply of the agent, with what the session measured about it.",
+      "properties": {
+        "role": {"type": "string", "const": "agent", "description": "Who spoke."},
+        "speech_id": {"type": "string", "description": "The reply's id, shared with the caller's turn that triggered it and with the llm, tts and eou blocks."},
+        "item_id": {"type": "string", "description": "The session's id for this message in the chat history."},
+        "text": {"type": "string", "description": "What the agent said. When interrupted, only what was actually played."},
+        "interrupted": {"type": "boolean", "description": "True when the caller cut the reply short."},
+        "metrics": {"$ref": "metrics.json#/$defs/AgentTurnMetrics"}
+      },
+      "required": ["role", "speech_id", "text", "interrupted", "metrics"],
+      "additionalProperties": false
+    },
+    "Turn": {
+      "description": "One turn of either side, told apart by role.",
+      "oneOf": [
+        {"$ref": "#/$defs/UserTurn"},
+        {"$ref": "#/$defs/AgentTurn"}
+      ],
+      "discriminator": {"propertyName": "role"}
+    },
+    "CollectedMetrics": {
+      "type": "object",
+      "description": "Every raw metric block of the call, by kind, in the order it arrived. The turns hold the join; this holds the measurements.",
+      "properties": {
+        "llm": {"type": "array", "items": {"$ref": "metrics.json#/$defs/LLMMetrics"}, "description": "Every LLM request."},
+        "stt": {"type": "array", "items": {"$ref": "metrics.json#/$defs/STTMetrics"}, "description": "Every STT request or stream segment."},
+        "tts": {"type": "array", "items": {"$ref": "metrics.json#/$defs/TTSMetrics"}, "description": "Every TTS request."},
+        "vad": {"type": "array", "items": {"$ref": "metrics.json#/$defs/VADMetrics"}, "description": "Every VAD health report that was kept."},
+        "eou": {"type": "array", "items": {"$ref": "metrics.json#/$defs/EOUMetrics"}, "description": "One per caller turn."},
+        "eot": {"type": "array", "items": {"$ref": "metrics.json#/$defs/EOTInferenceMetrics"}, "description": "Every end-of-turn prediction."},
+        "interruption": {"type": "array", "items": {"$ref": "metrics.json#/$defs/InterruptionMetrics"}, "description": "Every interruption detector report."},
+        "realtime": {"type": "array", "items": {"$ref": "metrics.json#/$defs/RealtimeModelMetrics"}, "description": "Every realtime model response, when a speech-to-speech model runs."},
+        "avatar": {"type": "array", "items": {"$ref": "metrics.json#/$defs/AvatarMetrics"}, "description": "Every avatar report, when an avatar runs."}
+      },
+      "required": ["llm", "stt", "tts", "vad", "eou", "eot", "interruption", "realtime", "avatar"],
+      "additionalProperties": false
+    },
+    "ToolRun": {
+      "type": "object",
+      "description": "One tool call and, once the app answered, its result.",
+      "properties": {
+        "call_id": {"type": "string", "description": "The id the model's call carried."},
+        "name": {"type": "string", "description": "The tool's name."},
+        "arguments": {"type": "object", "additionalProperties": true, "description": "The arguments the model chose, as JSON."},
+        "speech_id": {"type": "string", "description": "The reply during which the model called it."},
+        "status": {"type": "string", "enum": ["running", "done", "failed"], "description": "running until tool.result arrives; then done, or failed when it carried an error."},
+        "output": {"description": "What the tool returned, as JSON, once done."},
+        "error": {"type": "string", "description": "What went wrong, once failed."},
+        "summary": {"type": "string", "description": "The app's one-line summary of the output, when it wrote one."},
+        "duration_s": {"type": "number", "description": "How long the app's method took, seconds."},
+        "seq": {"type": "integer", "description": "The seq of the tool.call entry."}
+      },
+      "required": ["call_id", "name", "arguments", "status", "seq"],
+      "additionalProperties": false
+    },
+    "PromptRegionState": {
+      "type": "object",
+      "description": "What is known about one region of the prompt without storing its text.",
+      "properties": {
+        "hash": {"type": "string", "description": "sha256 of the region's text, so two states can be compared."},
+        "chars": {"type": "integer", "description": "The region's length in characters."},
+        "seq": {"type": "integer", "description": "The seq of the prompt.changed that set it."}
+      },
+      "required": ["hash", "chars", "seq"],
+      "additionalProperties": false
+    },
+    "PromptState": {
+      "type": "object",
+      "description": "The two regions the app writes. The history in between is the turns.",
+      "properties": {
+        "static": {"anyOf": [{"$ref": "#/$defs/PromptRegionState"}, {"type": "null"}], "description": "The cached prefix, or null before it was set."},
+        "view": {"anyOf": [{"$ref": "#/$defs/PromptRegionState"}, {"type": "null"}], "description": "The rendered view at the end, or null before it was set."}
+      },
+      "required": ["static", "view"],
+      "additionalProperties": false
+    },
+    "Confirm": {
+      "type": "object",
+      "description": "One confirmation the platform asked for, and how it went.",
+      "properties": {
+        "tool": {"type": "string", "description": "The tool that needed a yes."},
+        "call_id": {"type": "string", "description": "The tool call waiting on it."},
+        "audience": {"type": "string", "description": "sha256 of tool plus arguments: what the yes is bound to."},
+        "phrase": {"type": "string", "description": "What the agent read back to the caller."},
+        "status": {"type": "string", "enum": ["pending", "granted", "declined"], "description": "pending until the caller answered."},
+        "said": {"type": "string", "description": "What the caller actually said, once they answered."},
+        "reason": {"type": "string", "description": "Why it was declined: no, timeout, changed, cancelled."}
+      },
+      "required": ["tool", "call_id", "audience", "phrase", "status"],
+      "additionalProperties": false
+    },
+    "Handoff": {
+      "type": "object",
+      "description": "Whether a supervisor holds the line right now.",
+      "properties": {
+        "active": {"type": "boolean", "description": "True between supervisor.took_over and supervisor.released."},
+        "by": {"anyOf": [{"$ref": "defs.json#/$defs/Supervisor"}, {"type": "null"}], "description": "Who holds it, or null."}
+      },
+      "required": ["active", "by"],
+      "additionalProperties": false
+    },
+    "TransferState": {
+      "type": "object",
+      "description": "The transfer in flight or the one that happened.",
+      "properties": {
+        "to": {"type": "string", "description": "The destination."},
+        "mode": {"$ref": "defs.json#/$defs/TransferMode"},
+        "status": {"type": "string", "enum": ["requested", "done", "failed"], "description": "requested until call.transferred reports the outcome."},
+        "by": {"type": "string", "enum": ["agent", "supervisor"], "description": "Who asked for it."}
+      },
+      "required": ["to", "mode", "status", "by"],
+      "additionalProperties": false
+    },
+    "LiveTranscript": {
+      "type": "object",
+      "description": "The words on screen right now: interim transcripts that a finished turn clears.",
+      "properties": {
+        "user": {"type": ["string", "null"], "description": "What the caller is saying, so far."},
+        "agent": {"type": ["string", "null"], "description": "What the agent is saying, so far."}
+      },
+      "required": ["user", "agent"],
+      "additionalProperties": false
+    },
+    "Gap": {
+      "type": "object",
+      "description": "A stretch of seqs this reader never saw.",
+      "properties": {
+        "from_seq": {"type": "integer", "description": "The first missing seq."},
+        "to_seq": {"type": "integer", "description": "The last missing seq."}
+      },
+      "required": ["from_seq", "to_seq"],
+      "additionalProperties": false
+    },
+    "LoggedError": {
+      "type": "object",
+      "description": "An error entry, kept so the console can show what went wrong and when.",
+      "properties": {
+        "seq": {"type": "integer", "description": "The seq of the error entry."},
+        "code": {"type": "string", "description": "The error's code."},
+        "message": {"type": "string", "description": "The error's message."}
+      },
+      "required": ["seq", "code", "message"],
+      "additionalProperties": false
+    },
+    "Participant": {
+      "type": "object",
+      "description": "One participant in the room right now, as the room reported them when they joined.",
+      "properties": {
+        "identity": {"type": "string", "description": "The identity the room knows them by: sip_+34600123456, agent-AJ_5d2e8f, a visitor id."},
+        "kind": {"$ref": "defs.json#/$defs/ParticipantKind"},
+        "name": {"type": "string", "description": "Their display name, when the room carried one."},
+        "joined_at": {"type": "number", "description": "When they joined, unix seconds: the ts of their participant.joined."},
+        "speaking": {"type": "boolean", "description": "True while the room reports them speaking, from participant.speaking."},
+        "attributes": {"type": "object", "additionalProperties": true, "description": "livekit's participant attributes verbatim, sip.* included. The public projection drops them."}
+      },
+      "required": ["identity", "kind", "joined_at", "speaking", "attributes"],
+      "additionalProperties": false
+    },
+    "Room": {
+      "type": "object",
+      "description": "The LiveKit room the call lives in, and who is in it right now.",
+      "properties": {
+        "name": {"type": "string", "description": "The room's name, as room.opened reported it."},
+        "sid": {"type": "string", "description": "livekit's id for the room."},
+        "participants": {"type": "array", "items": {"$ref": "#/$defs/Participant"}, "description": "Who is in the room now, in the order they joined. A participant.left removes them."},
+        "caller": {"type": ["string", "null"], "description": "The identity of the participant of kind caller, or null before they joined or after they left."}
+      },
+      "required": ["name", "sid", "participants", "caller"],
+      "additionalProperties": false
+    },
+    "ReceivedEvent": {
+      "type": "object",
+      "description": "One fact that reached the agent from outside the conversation, kept by name and origin. Its data is in the log at that seq.",
+      "properties": {
+        "seq": {"type": "integer", "description": "The seq of the event.received entry."},
+        "name": {"type": "string", "description": "The event's name."},
+        "source": {"$ref": "defs.json#/$defs/EventSource"},
+        "identity": {"type": "string", "description": "The participant that sent it, for source participant."}
+      },
+      "required": ["seq", "name", "source"],
+      "additionalProperties": false
+    },
+    "CustomNote": {
+      "type": "object",
+      "description": "A line the app wrote into the log with call.log.",
+      "properties": {
+        "seq": {"type": "integer", "description": "The seq of the custom entry."},
+        "name": {"type": "string", "description": "The app's name for the line."},
+        "data": {"type": "object", "additionalProperties": true, "description": "Whatever the app attached."}
+      },
+      "required": ["seq", "name", "data"],
+      "additionalProperties": false
+    },
+    "State": {
+      "type": "object",
+      "description": "The whole of what a log says, at the seq it was read to.",
+      "properties": {
+        "seq": {"type": "integer", "description": "The last seq folded in. 0 for an empty log."},
+        "agent": {"type": "string", "description": "The agent's slug. Empty for an empty log."},
+        "call": {"type": ["string", "null"], "description": "The call id, or null for an agent's own log."},
+        "status": {"$ref": "#/$defs/CallStatus"},
+        "channel": {"anyOf": [{"$ref": "defs.json#/$defs/Channel"}, {"type": "null"}], "description": "The door, once known."},
+        "direction": {"anyOf": [{"$ref": "defs.json#/$defs/Direction"}, {"type": "null"}], "description": "Inbound or outbound, once known."},
+        "from": {"type": ["string", "null"], "description": "The calling number or identity, once known."},
+        "to": {"type": ["string", "null"], "description": "The called number or identity, once known."},
+        "caller": {"anyOf": [{"$ref": "defs.json#/$defs/Contact"}, {"type": "null"}], "description": "Who is on the line, once known."},
+        "room": {"anyOf": [{"$ref": "#/$defs/Room"}, {"type": "null"}], "description": "The room the call lives in and who is in it, once room.opened. Null for a text session."},
+        "started_at": {"type": ["number", "null"], "description": "When media came up, unix seconds."},
+        "ended_at": {"type": ["number", "null"], "description": "When the call ended, unix seconds."},
+        "end_reason": {"anyOf": [{"$ref": "defs.json#/$defs/EndReason"}, {"type": "null"}], "description": "Why it ended, once it did."},
+        "outcome": {"type": ["string", "null"], "description": "The one-line outcome from call.summary."},
+        "user_state": {"anyOf": [{"$ref": "defs.json#/$defs/UserState"}, {"type": "null"}], "description": "What the caller is doing, latest."},
+        "agent_state": {"anyOf": [{"$ref": "defs.json#/$defs/AgentState"}, {"type": "null"}], "description": "What the agent is doing, latest."},
+        "live": {"$ref": "#/$defs/LiveTranscript"},
+        "turns": {"type": "array", "items": {"$ref": "#/$defs/Turn"}, "description": "Every finished turn, in order."},
+        "metrics": {"$ref": "#/$defs/CollectedMetrics"},
+        "tools": {"type": "array", "items": {"$ref": "#/$defs/ToolRun"}, "description": "Every tool call, in order, with its result once it came."},
+        "app_state": {"type": "object", "additionalProperties": true, "description": "The app's declared state, as of the last state.changed."},
+        "events": {"type": "array", "items": {"$ref": "#/$defs/ReceivedEvent"}, "description": "Every fact that arrived from outside, in order."},
+        "prompt": {"$ref": "#/$defs/PromptState"},
+        "tools_visible": {"type": "array", "items": {"type": "string"}, "description": "The tools the model can see right now, by name."},
+        "confirms": {"type": "array", "items": {"$ref": "#/$defs/Confirm"}, "description": "Every confirmation asked, in order."},
+        "memory": {"type": "array", "items": {"$ref": "defs.json#/$defs/MemoryOp"}, "description": "Every memory operation, in order."},
+        "sources": {"type": "array", "items": {"$ref": "defs.json#/$defs/DocSource"}, "description": "The chunks retrieved for the latest turn that used the knowledge base."},
+        "handoff": {"$ref": "#/$defs/Handoff"},
+        "held": {"type": "boolean", "description": "True while the caller is on hold."},
+        "muted": {"type": "boolean", "description": "True while the agent's audio is muted."},
+        "transfer": {"anyOf": [{"$ref": "#/$defs/TransferState"}, {"type": "null"}], "description": "The transfer, once one was asked for."},
+        "usage": {"type": "array", "items": {"$ref": "metrics.json#/$defs/ModelUsage"}, "description": "The usage rows from call.summary."},
+        "cost": {"anyOf": [{"$ref": "defs.json#/$defs/Cost"}, {"type": "null"}], "description": "The cost from call.summary."},
+        "routes": {"type": "array", "items": {"$ref": "defs.json#/$defs/Route"}, "description": "The agent's doors, from agent.registered."},
+        "gaps": {"type": "array", "items": {"$ref": "#/$defs/Gap"}, "description": "Every stretch this reader missed."},
+        "errors": {"type": "array", "items": {"$ref": "#/$defs/LoggedError"}, "description": "Every error entry."},
+        "custom": {"type": "array", "items": {"$ref": "#/$defs/CustomNote"}, "description": "Every line the app wrote."}
+      },
+      "required": ["seq", "agent", "call", "status", "channel", "direction", "from", "to", "caller", "room", "started_at", "ended_at", "end_reason", "outcome", "user_state", "agent_state", "live", "turns", "metrics", "tools", "app_state", "events", "prompt", "tools_visible", "confirms", "memory", "sources", "handoff", "held", "muted", "transfer", "usage", "cost", "routes", "gaps", "errors", "custom"],
+      "additionalProperties": false
+    }
+  }
+}

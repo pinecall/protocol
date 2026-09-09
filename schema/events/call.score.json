@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/call.score.json",
+  "title": "call.score",
+  "description": "The last entry of a call: what the judges said about it at hang-up, one row per judge. Written after call.summary, and the entry the log seals on.",
+  "x-pinecall": {"kind": "event", "type": "call.score", "scope": "call", "ephemeral": false, "terminal": true},
+  "$ref": "#/$defs/CallScore",
+  "$defs": {
+    "CallScore": {
+      "type": "object",
+      "description": "The last entry of a call: what the judges said about it at hang-up, one row per judge. Written after call.summary, and the entry the log seals on.",
+      "properties": {
+        "passed": {"type": "boolean", "description": "Whether no judge answered broken. A deferred or a skipped judge is an answer nobody gave, never a fault of the call. ABSENT when no judge answered at all, which is not the same as false: read not_judged for why nobody did."},
+        "not_judged": {"type": "string", "description": "Why nothing judged this call, when nothing did: the judges are not installed on this box, or the judging itself failed. Absent on every call a judge answered."},
+        "judges": {"type": "array", "items": {"$ref": "#/$defs/Judgment"}, "description": "One row per judge that was run over this call, in the order they were declared."},
+        "panel": {"type": "array", "items": {"type": "string", "description": "One judge's own name."}, "description": "Every judge this call declared, whether or not it answered: a judge that raised is here and absent from judges. Empty when nothing was ever declared, and absent on entries written before this field existed."},
+        "judge_calls": {"type": "integer", "description": "How many questions judging this call actually put to a model. Zero is the happy path: a policy answers by code."},
+        "judge_cost_eur": {"type": "number", "description": "What those questions cost in euros, priced from the judge model's own usage rows. Absent when no usage was reported, never zero."}
+      },
+      "required": ["judges", "judge_calls"],
+      "additionalProperties": false
+    },
+    "Judgment": {
+      "type": "object",
+      "description": "One judge's answer about one call: the question it was asked, the word it answered and the sentence that says why.",
+      "properties": {
+        "name": {"type": "string", "description": "The judge's own name, as the judge itself declares it: consent, grounded, register, leakage."},
+        "verdict": {"$ref": "../defs.json#/$defs/ScoreVerdict"},
+        "criteria": {"type": "string", "description": "The question this judge answered, as it hangs it on every judgment it makes."},
+        "reason": {"type": "string", "description": "The judgment's own reasoning: a policy writes the evidence, a model writes one sentence."},
+        "evidence": {"$ref": "#/$defs/JudgmentEvidence"}
+      },
+      "required": ["name", "verdict", "criteria", "reason", "evidence"],
+      "additionalProperties": false
+    },
+    "JudgmentEvidence": {
+      "type": "object",
+      "description": "Where in the call's own log a judgment is about. A reader who disagrees with a verdict opens the log at those lines.",
+      "properties": {
+        "seqs": {"type": "array", "items": {"type": "integer", "description": "One entry of this call, by its seq."}, "description": "Every entry the judgment named, in the order it named them. Empty when it named none."},
+        "said": {"type": "string", "description": "The words the log carries at the first of those entries that carries any: the caller's own yes, the agent's own sentence."}
+      },
+      "required": ["seqs"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/agent.registered.json",
+  "title": "agent.registered",
+  "description": "The gateway accepted an agent.register: this socket now speaks for the agent and answers its routes. Many sockets may hold one agent at once — a new call takes the newest of them, unless the caller names one by its `app` id.",
+  "x-pinecall": {"kind": "event", "type": "agent.registered", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/AgentRegistered",
+  "$defs": {
+    "AgentRegistered": {
+      "type": "object",
+      "description": "The gateway accepted an agent.register: this socket now speaks for the agent and answers its routes. Many sockets may hold one agent at once — a new call takes the newest of them, unless the caller names one by its `app` id.",
+      "properties": {
+        "routes": {"type": "array", "items": {"$ref": "../defs.json#/$defs/Route"}, "description": "The doors the agent now answers."},
+        "app": {"type": "string", "description": "This socket, opaque and minted by the gateway: `?app=<id>` on the chat door asks to be served by it."},
+        "sdk": {"type": "string", "description": "The SDK and version the app runs, as it reported them."}
+      },
+      "required": ["routes", "app"],
+      "additionalProperties": false
+    }
+  }
+}

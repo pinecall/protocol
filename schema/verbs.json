@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/verbs.json",
+  "title": "Supervise verbs",
+  "description": "What a human with a supervise token may do to a live call over WS /v1/attach. Each verb lands in the log as its own supervisor.* event.",
+  "$ref": "#/$defs/Verb",
+  "$defs": {
+    "SayVerb": {
+      "type": "object",
+      "description": "Make the agent say this, verbatim, to the caller. Logged as supervisor.said.",
+      "properties": {
+        "verb": {"type": "string", "const": "say", "description": "The verb."},
+        "text": {"type": "string", "description": "What the agent will say, word for word."}
+      },
+      "required": ["verb", "text"],
+      "additionalProperties": false
+    },
+    "WhisperVerb": {
+      "type": "object",
+      "description": "Tell the agent something the caller never hears; it goes into the prompt's view region. Logged as supervisor.whispered.",
+      "properties": {
+        "verb": {"type": "string", "const": "whisper", "description": "The verb."},
+        "text": {"type": "string", "description": "The instruction for the agent, in words the model reads."}
+      },
+      "required": ["verb", "text"],
+      "additionalProperties": false
+    },
+    "TakeoverVerb": {
+      "type": "object",
+      "description": "The supervisor takes the line: the agent goes quiet and the supervisor's audio replaces it. Logged as supervisor.took_over.",
+      "properties": {
+        "verb": {"type": "string", "const": "takeover", "description": "The verb."}
+      },
+      "required": ["verb"],
+      "additionalProperties": false
+    },
+    "ReleaseVerb": {
+      "type": "object",
+      "description": "The supervisor hands the line back to the agent, which resumes with the history intact. Logged as supervisor.released.",
+      "properties": {
+        "verb": {"type": "string", "const": "release", "description": "The verb."}
+      },
+      "required": ["verb"],
+      "additionalProperties": false
+    },
+    "TransferVerb": {
+      "type": "object",
+      "description": "Send the caller to another number. Logged as supervisor.transferred, then call.transferred says whether it worked.",
+      "properties": {
+        "verb": {"type": "string", "const": "transfer", "description": "The verb."},
+        "to": {"type": "string", "description": "The destination number in E.164 form, or a SIP URI."},
+        "mode": {"$ref": "defs.json#/$defs/TransferMode"}
+      },
+      "required": ["verb", "to", "mode"],
+      "additionalProperties": false
+    },
+    "EndVerb": {
+      "type": "object",
+      "description": "Hang up on the caller's behalf. Logged as supervisor.ended, then call.ended with reason supervisor_ended.",
+      "properties": {
+        "verb": {"type": "string", "const": "end", "description": "The verb."},
+        "reason": {"type": "string", "description": "Why, in the supervisor's words, for the log."}
+      },
+      "required": ["verb"],
+      "additionalProperties": false
+    },
+    "Verb": {
+      "description": "One supervise verb, told apart by its verb field.",
+      "oneOf": [
+        {"$ref": "#/$defs/SayVerb"},
+        {"$ref": "#/$defs/WhisperVerb"},
+        {"$ref": "#/$defs/TakeoverVerb"},
+        {"$ref": "#/$defs/ReleaseVerb"},
+        {"$ref": "#/$defs/TransferVerb"},
+        {"$ref": "#/$defs/EndVerb"}
+      ],
+      "discriminator": {"propertyName": "verb"}
+    }
+  }
+}

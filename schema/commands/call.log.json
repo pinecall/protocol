@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.log.json",
+  "title": "call.log",
+  "description": "Write a line of the app's own into the call's log. It gets a seq like everything else and lands as custom.",
+  "x-pinecall": {"kind": "command", "type": "call.log", "scope": "call", "produces": ["custom"]},
+  "$ref": "#/$defs/CallLog",
+  "$defs": {
+    "CallLog": {
+      "type": "object",
+      "description": "Write a line of the app's own into the call's log. It gets a seq like everything else and lands as custom.",
+      "properties": {
+        "name": {"type": "string", "description": "The app's name for the line."},
+        "data": {"type": "object", "additionalProperties": true, "description": "Whatever the app wants kept."}
+      },
+      "required": ["name", "data"],
+      "additionalProperties": false
+    }
+  }
+}

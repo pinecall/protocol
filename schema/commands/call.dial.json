@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.dial.json",
+  "title": "call.dial",
+  "description": "Place an outbound call as this agent. The new call's log opens with call.dialing; call.started follows when the far end answers.",
+  "x-pinecall": {"kind": "command", "type": "call.dial", "scope": "agent", "produces": ["call.dialing"]},
+  "$ref": "#/$defs/CallDial",
+  "$defs": {
+    "CallDial": {
+      "type": "object",
+      "description": "Place an outbound call as this agent. The new call's log opens with call.dialing; call.started follows when the far end answers.",
+      "properties": {
+        "to": {"type": "string", "description": "The number to call, E.164."},
+        "from": {"type": "string", "description": "The number to show, E.164. Absent means the agent's first phone route."},
+        "caller": {"$ref": "../defs.json#/$defs/Contact"},
+        "metadata": {"type": "object", "additionalProperties": true, "description": "Anything the app wants handed to the session at start, sealed by the platform, never seen by the far end."}
+      },
+      "required": ["to"],
+      "additionalProperties": false
+    }
+  }
+}

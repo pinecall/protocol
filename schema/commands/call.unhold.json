@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.unhold.json",
+  "title": "call.unhold",
+  "description": "Take the caller off hold.",
+  "x-pinecall": {"kind": "command", "type": "call.unhold", "scope": "call", "produces": ["call.line"]},
+  "$ref": "#/$defs/CallUnhold",
+  "$defs": {
+    "CallUnhold": {
+      "type": "object",
+      "description": "Take the caller off hold.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+}

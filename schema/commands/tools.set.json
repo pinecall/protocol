@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/tools.set.json",
+  "title": "tools.set",
+  "description": "The tools the model may see now. The full list was declared in agent.configure; this is the subset whose when allows them in this state.",
+  "x-pinecall": {"kind": "command", "type": "tools.set", "scope": "call", "produces": ["tools.changed"]},
+  "$ref": "#/$defs/ToolsSet",
+  "$defs": {
+    "ToolsSet": {
+      "type": "object",
+      "description": "The tools the model may see now. The full list was declared in agent.configure; this is the subset whose when allows them in this state.",
+      "properties": {
+        "tools": {"type": "array", "items": {"$ref": "../defs.json#/$defs/ToolSpec"}, "description": "The visible tools, whole specs, so a tool can change its description with the state."}
+      },
+      "required": ["tools"],
+      "additionalProperties": false
+    }
+  }
+}

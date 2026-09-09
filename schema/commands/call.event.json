@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.event.json",
+  "title": "call.event",
+  "description": "Hand the agent a fact from the tenant's backend: a slot freed, an order shipped, a payment confirmed. Lands as event.received with source app. The agent must have declared the name in its events with app among the senders, or the gateway answers error and nothing touches the log.",
+  "x-pinecall": {"kind": "command", "type": "call.event", "scope": "call", "produces": ["event.received"]},
+  "$ref": "#/$defs/CallEvent",
+  "$defs": {
+    "CallEvent": {
+      "type": "object",
+      "description": "Hand the agent a fact from the tenant's backend: a slot freed, an order shipped, a payment confirmed. Lands as event.received with source app. The agent must have declared the name in its events with app among the senders, or the gateway answers error and nothing touches the log.",
+      "properties": {
+        "name": {"type": "string", "description": "The event's name, dotted, as the agent declared it: slot.released."},
+        "data": {"type": "object", "additionalProperties": true, "description": "Whatever comes with it, as JSON, for the app's handler."}
+      },
+      "required": ["name", "data"],
+      "additionalProperties": false
+    }
+  }
+}

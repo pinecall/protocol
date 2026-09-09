@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/call.line.json",
+  "title": "call.line",
+  "description": "The line's hold and mute flags after one of them changed. Both are stated so a reader never has to remember the other.",
+  "x-pinecall": {"kind": "event", "type": "call.line", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/CallLine",
+  "$defs": {
+    "CallLine": {
+      "type": "object",
+      "description": "The line's hold and mute flags after one of them changed. Both are stated so a reader never has to remember the other.",
+      "properties": {
+        "held": {"type": "boolean", "description": "True while the caller is on hold and hears nothing from the agent."},
+        "muted": {"type": "boolean", "description": "True while the agent produces no audio."}
+      },
+      "required": ["held", "muted"],
+      "additionalProperties": false
+    }
+  }
+}

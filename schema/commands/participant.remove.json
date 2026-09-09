@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/participant.remove.json",
+  "title": "participant.remove",
+  "description": "Put a participant out of the room. Lands as participant.left with reason participant_removed. Removing the caller ends the call.",
+  "x-pinecall": {"kind": "command", "type": "participant.remove", "scope": "call", "produces": ["participant.left"]},
+  "$ref": "#/$defs/ParticipantRemove",
+  "$defs": {
+    "ParticipantRemove": {
+      "type": "object",
+      "description": "Put a participant out of the room. Lands as participant.left with reason participant_removed. Removing the caller ends the call.",
+      "properties": {
+        "identity": {"type": "string", "description": "Whom to remove, by the identity participant.joined gave them."}
+      },
+      "required": ["identity"],
+      "additionalProperties": false
+    }
+  }
+}

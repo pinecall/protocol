@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/confirm.request.json",
+  "title": "confirm.request",
+  "description": "A tool with confirm set is about to run and the platform is asking the caller. The agent reads the phrase; nothing runs until confirm.granted.",
+  "x-pinecall": {"kind": "event", "type": "confirm.request", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/ConfirmRequest",
+  "$defs": {
+    "ConfirmRequest": {
+      "type": "object",
+      "description": "A tool with confirm set is about to run and the platform is asking the caller. The agent reads the phrase; nothing runs until confirm.granted.",
+      "properties": {
+        "tool": {"type": "string", "description": "The tool waiting for a yes."},
+        "call_id": {"type": "string", "description": "The tool call waiting."},
+        "arguments": {"type": "object", "additionalProperties": true, "description": "The arguments the yes will be bound to."},
+        "audience": {"type": "string", "description": "sha256 of tool plus canonical arguments: the one thing the token will be good for."},
+        "phrase": {"type": "string", "description": "What the agent reads back: the action in the caller's words."},
+        "ttl_s": {"type": "integer", "description": "How many seconds the caller has to answer before the request lapses."}
+      },
+      "required": ["tool", "call_id", "arguments", "audience", "phrase", "ttl_s"],
+      "additionalProperties": false
+    }
+  }
+}

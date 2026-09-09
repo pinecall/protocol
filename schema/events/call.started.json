@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/call.started.json",
+  "title": "call.started",
+  "description": "Media is up: the caller and the agent can hear each other, or the text session is open. Everything the agent says and hears comes after this.",
+  "x-pinecall": {"kind": "event", "type": "call.started", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/CallStarted",
+  "$defs": {
+    "CallStarted": {
+      "type": "object",
+      "description": "Media is up: the caller and the agent can hear each other, or the text session is open. Everything the agent says and hears comes after this.",
+      "properties": {
+        "channel": {"$ref": "../defs.json#/$defs/Channel"},
+        "direction": {"$ref": "../defs.json#/$defs/Direction"},
+        "from": {"type": "string", "description": "The calling side, E.164 or a visitor id."},
+        "to": {"type": "string", "description": "The called side."},
+        "caller": {"anyOf": [{"$ref": "../defs.json#/$defs/Contact"}, {"type": "null"}], "description": "Who is on the line, as far as the platform knows now."},
+        "started_at": {"type": "number", "description": "When media came up, unix seconds."}
+      },
+      "required": ["channel", "direction", "from", "to", "caller", "started_at"],
+      "additionalProperties": false
+    }
+  }
+}

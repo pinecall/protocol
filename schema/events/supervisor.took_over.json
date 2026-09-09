@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/supervisor.took_over.json",
+  "title": "supervisor.took_over",
+  "description": "A supervisor took the line; the agent is quiet until supervisor.released.",
+  "x-pinecall": {"kind": "event", "type": "supervisor.took_over", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/SupervisorTookOver",
+  "$defs": {
+    "SupervisorTookOver": {
+      "type": "object",
+      "description": "A supervisor took the line; the agent is quiet until supervisor.released.",
+      "properties": {
+        "by": {"$ref": "../defs.json#/$defs/Supervisor"}
+      },
+      "required": ["by"],
+      "additionalProperties": false
+    }
+  }
+}

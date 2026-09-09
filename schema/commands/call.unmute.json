@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.unmute.json",
+  "title": "call.unmute",
+  "description": "Unmute the agent.",
+  "x-pinecall": {"kind": "command", "type": "call.unmute", "scope": "call", "produces": ["call.line"]},
+  "$ref": "#/$defs/CallUnmute",
+  "$defs": {
+    "CallUnmute": {
+      "type": "object",
+      "description": "Unmute the agent.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+}

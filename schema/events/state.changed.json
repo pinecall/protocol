@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/state.changed.json",
+  "title": "state.changed",
+  "description": "The app's declared state changed. A tool's result or an outside fact caused it, and the cause says which; the whole state travels so a reader never needs the previous entry.",
+  "x-pinecall": {"kind": "event", "type": "state.changed", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/StateChanged",
+  "$defs": {
+    "StateChanged": {
+      "type": "object",
+      "description": "The app's declared state changed. A tool's result or an outside fact caused it, and the cause says which; the whole state travels so a reader never needs the previous entry.",
+      "properties": {
+        "state": {"type": "object", "additionalProperties": true, "description": "The app's state after the change, whole, as the app declares it: its fields are the object's fields."},
+        "changed": {"type": "array", "items": {"type": "string"}, "description": "The names of the fields that changed."},
+        "cause": {"$ref": "#/$defs/StateCause", "description": "What changed it, when the platform knows: the tool whose result moved a field, or the outside fact the app's handler acted on."}
+      },
+      "required": ["state", "changed"],
+      "additionalProperties": false
+    },
+    "StateCause": {
+      "description": "What changed the state: a tool's result, or a fact from outside. Told apart by kind.",
+      "oneOf": [
+        {"$ref": "#/$defs/StateCauseTool"},
+        {"$ref": "#/$defs/StateCauseEvent"}
+      ],
+      "discriminator": {"propertyName": "kind"}
+    },
+    "StateCauseTool": {
+      "type": "object",
+      "description": "A tool call's result changed the state.",
+      "properties": {
+        "kind": {"type": "string", "const": "tool", "description": "What kind of cause."},
+        "tool": {"type": "string", "description": "The tool's name."},
+        "call_id": {"type": "string", "description": "The call id of the tool.call."}
+      },
+      "required": ["kind", "tool", "call_id"],
+      "additionalProperties": false
+    },
+    "StateCauseEvent": {
+      "type": "object",
+      "description": "A fact from outside changed the state: the app's handler for an event.received moved a field.",
+      "properties": {
+        "kind": {"type": "string", "const": "event", "description": "What kind of cause."},
+        "name": {"type": "string", "description": "The event's name."},
+        "seq": {"type": "integer", "description": "The seq of the event.received entry."}
+      },
+      "required": ["kind", "name", "seq"],
+      "additionalProperties": false
+    }
+  }
+}

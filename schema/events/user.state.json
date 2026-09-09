@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/user.state.json",
+  "title": "user.state",
+  "description": "The caller's state changed, in the session's own words.",
+  "x-pinecall": {"kind": "event", "type": "user.state", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/UserStateChanged",
+  "$defs": {
+    "UserStateChanged": {
+      "type": "object",
+      "description": "The caller's state changed, in the session's own words.",
+      "properties": {
+        "state": {"$ref": "../defs.json#/$defs/UserState"}
+      },
+      "required": ["state"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/error.json",
+  "title": "error",
+  "description": "Something went wrong. Inside a call it says what failed; outside a call it says which command the gateway refused.",
+  "x-pinecall": {"kind": "event", "type": "error", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/ErrorEvent",
+  "$defs": {
+    "ErrorEvent": {
+      "type": "object",
+      "description": "Something went wrong. Inside a call it says what failed; outside a call it says which command the gateway refused.",
+      "properties": {
+        "code": {"type": "string", "description": "A stable code a program can match: unknown_command, bad_shape, no_route, tool_timeout, provider_error."},
+        "message": {"type": "string", "description": "What happened, for a person."},
+        "command": {"type": "string", "description": "The type of the command that failed, when one did."},
+        "id": {"type": "string", "description": "The app's id for that command, when it sent one."},
+        "recoverable": {"type": "boolean", "description": "True when the call goes on; false when this is why it ended."}
+      },
+      "required": ["code", "message", "recoverable"],
+      "additionalProperties": false
+    }
+  }
+}

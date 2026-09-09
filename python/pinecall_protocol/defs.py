@@ -1,0 +1,294 @@
+"""Generated from schema/defs.json: the shapes shared across the wire."""
+
+from typing import Any, Literal
+
+from pydantic import Field
+
+from pinecall_protocol._base import WireModel
+
+# The door the public came through: a phone call over SIP, the browser widget over WebRTC, or
+# WhatsApp text.
+type Channel = Literal["phone", "web", "whatsapp"]
+
+
+# Inbound: the public reached the agent. Outbound: the agent reached out (a dial).
+type Direction = Literal["inbound", "outbound"]
+
+
+# Why the call is over. Who hung up, what failed before anybody could, drained: the platform took
+# the worker down (a deploy, a stop) with the call still on it, or app_detached: the app holding the
+# agent closed its socket mid-call, so nothing was rendering the prompt or answering a tool — both
+# are nobody's fault and neither is an error.
+type EndReason = Literal[
+    "caller_hung_up",
+    "agent_hung_up",
+    "supervisor_ended",
+    "transferred",
+    "no_answer",
+    "busy",
+    "dial_failed",
+    "timeout",
+    "drained",
+    "app_detached",
+    "error",
+]
+
+
+# Whose action ended the call. platform covers timeouts, errors and a drained worker.
+type EndedBy = Literal["caller", "agent", "supervisor", "platform"]
+
+
+# What one judge answered about a finished call. Held: the rule held. Broken: it did not, and the
+# reason names the evidence. Deferred: the judge was asked and could not settle it. Skipped: nobody
+# asked it — no model was reachable inside the call's judging budget.
+type ScoreVerdict = Literal["held", "broken", "deferred", "skipped"]
+
+
+# Cold: the caller is sent on and the agent leaves. Warm: the agent stays on the line until the
+# other side answers, then leaves.
+type TransferMode = Literal["cold", "warm"]
+
+
+# Which region of the prompt: the cached static prefix (instructions), or the dynamic view rendered
+# from state at the end. The append-only history in between is never written by the app.
+type PromptRegion = Literal["static", "view"]
+
+
+# What the platform believes the person on the line is doing right now. The states are the session's
+# own.
+type UserState = Literal["listening", "speaking", "away"]
+
+
+# What the agent is doing right now, in the session's own words: warming up, waiting, hearing the
+# caller, generating, or playing audio.
+type AgentState = Literal["initializing", "idle", "listening", "thinking", "speaking"]
+
+
+# Who a participant is to the call: the person the agent serves (over SIP or the widget), the agent
+# itself, a supervisor who took a seat in the room, a listener who only hears, or a second SIP leg
+# that room.invite brought in.
+type ParticipantKind = Literal["caller", "agent", "supervisor", "listener", "sip"]
+
+
+# What a track carries: a microphone's audio, a camera's video, or a screen share.
+type TrackKind = Literal["audio", "video", "screen"]
+
+
+# Where a track comes from, as livekit's TrackSource names it, in lower case.
+type TrackSource = Literal["microphone", "camera", "screen_share", "screen_share_audio", "unknown"]
+
+
+# Where an outside fact came from: the tenant's backend over the app socket (app), or a
+# participant's browser over the DataChannel (participant).
+type EventSource = Literal["app", "participant"]
+
+
+# Who may see a field of the app's state: everyone in the call (public), the tenant's own readers
+# (tenant, the default for a field never declared), or nobody without masking (pii).
+type Visibility = Literal["public", "tenant", "pii"]
+
+
+# Which projection a sink applies before a state or an entry leaves the platform: public for a
+# participant reading its own call, tenant for the tenant's readers. The contract is
+# docs/protocol/projections.md; a client never applies one.
+type Projection = Literal["public", "tenant"]
+
+
+# Everything is optional: a web visitor may be nobody yet.
+class Contact(WireModel):
+    """Who is on the line, as far as the platform knows."""
+
+    id: str | None = None
+    phone: str | None = None
+    name: str | None = None
+    email: str | None = None
+    external_id: str | None = None
+
+
+# A number is a route, never an agent.
+class Route(WireModel):
+    """One door to an agent: a channel and, for phone and WhatsApp, the number that answers."""
+
+    channel: Channel
+    number: str | None
+    label: str | None = None
+
+
+class Supervisor(WireModel):
+    """The human who sent a supervise verb, as the token that let them in names them."""
+
+    id: str
+    name: str | None = None
+
+
+# What the app declares about one tool: the contract the model sees and the rules the platform
+# enforces before running it.
+class ToolSpec(WireModel):
+    """What the app declares about one tool."""
+
+    name: str
+    description: str
+    parameters: dict[str, Any]
+    side_effect: Literal["read", "write", "irreversible"] = "read"
+    confirm: str | None = None
+    pii: list[str] | None = None
+    timeout_s: float | None = None
+
+
+# Either an output or an error, never both.
+class ToolResult(WireModel):
+    """What came back from running a tool in the app's process."""
+
+    call_id: str
+    name: str
+    output: Any = None
+    error: str | None = None
+    summary: str | None = None
+    duration_s: float | None = None
+
+
+# One thing remembered about a contact: a sentence, where it came from, and how well it matched when
+# recalled.
+class MemoryFact(WireModel):
+    """One thing remembered about a contact."""
+
+    id: str | None = None
+    text: str
+    score: float | None = None
+    source: str | None = None
+
+
+# One operation against the contact's memory: a recall during the turn, a remember at hangup, or a
+# forget on request.
+class MemoryOp(WireModel):
+    """One operation against the contact's memory."""
+
+    op: Literal["recall", "remember", "forget"]
+    contact: str | None = None
+    query: str | None = None
+    facts: list[MemoryFact]
+    took_ms: float
+
+
+class DocSource(WireModel):
+    """One chunk of the knowledge base that retrieval put in front of the model for this turn."""
+
+    id: str
+    path: str
+    heading: str | None = None
+    score: float
+    excerpt: str | None = None
+
+
+class CostRate(WireModel):
+    """The exchange rate the cost was computed with, stated so the number can be reproduced."""
+
+    currency: Literal["EUR"] = "EUR"
+    usd_to_eur: float
+    as_of: str
+
+
+class CostRow(WireModel):
+    """One priced line: a model, what was counted, how much, and what it came to."""
+
+    provider: str
+    model: str
+    unit: Literal[
+        "input_tokens",
+        "cached_input_tokens",
+        "cache_creation_tokens",
+        "output_tokens",
+        "characters",
+        "audio_seconds",
+        "requests",
+        "session_seconds",
+    ]
+    quantity: float
+    unit_price_usd: float
+    eur: float
+
+
+# It is listed, never priced at zero.
+class UnpricedRow(WireModel):
+    """A usage row the price table does not know."""
+
+    provider: str
+    model: str
+
+
+# The runtime never prices commercially; this is the provider's bill as best we know it.
+class Cost(WireModel):
+    """What the call cost in provider fees, informational, in euros."""
+
+    eur: float
+    rate: CostRate
+    rows: list[CostRow]
+    unpriced: list[UnpricedRow]
+
+
+# Which voice speaks for the agent: the name it was asked for, or the id the provider knows it by.
+class VoiceConfig(WireModel):
+    """Which voice speaks for the agent."""
+
+    name: str | None = None
+    provider: str | None = None
+    model: str | None = None
+    voice_id: str | None = None
+
+
+class ModelConfig(WireModel):
+    """Which model does a job (the LLM, or the STT), and the one or two knobs worth turning."""
+
+    provider: str
+    model: str
+    temperature: float | None = None
+
+
+class TurnConfig(WireModel):
+    """How the session decides that the caller has finished, and when the caller may interrupt."""
+
+    min_interruption_words: int | None = None
+    endpointing_ms: int | None = None
+
+
+# How the voice says one word it would otherwise get wrong: a proper name, a brand, a street.
+class Pronunciation(WireModel):
+    """How the voice says one word it would otherwise get wrong."""
+
+    word: str
+    spoken: str
+
+
+# A field never declared is tenant.
+class StateFieldSpec(WireModel):
+    """What the app declares about one field of its state: who may see it."""
+
+    name: str
+    visibility: Visibility
+
+
+# An event nobody declared is refused before it touches the log.
+class EventSpec(WireModel):
+    """One outside event the agent accepts, and from whom."""
+
+    name: str
+    from_: list[EventSource] = Field(alias="from")
+
+
+# What an app declares about its agent: the voice, the models, the language, the greeting, the
+# tools, and who may see and send what. Every field is optional so a configure can change one thing.
+class AgentConfig(WireModel):
+    """What an app declares about its agent."""
+
+    instructions: str | None = None
+    language: str | None = None
+    greeting: str | None = None
+    voice: VoiceConfig | None = None
+    llm: ModelConfig | None = None
+    stt: ModelConfig | None = None
+    turn: TurnConfig | None = None
+    says: list[Pronunciation] | None = None
+    hears: list[str] | None = None
+    tools: list[ToolSpec] | None = None
+    state_fields: list[StateFieldSpec] | None = None
+    events: list[EventSpec] | None = None

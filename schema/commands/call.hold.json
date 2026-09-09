@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.hold.json",
+  "title": "call.hold",
+  "description": "Put the caller on hold: they hear hold audio, the agent hears nothing.",
+  "x-pinecall": {"kind": "command", "type": "call.hold", "scope": "call", "produces": ["call.line"]},
+  "$ref": "#/$defs/CallHold",
+  "$defs": {
+    "CallHold": {
+      "type": "object",
+      "description": "Put the caller on hold: they hear hold audio, the agent hears nothing.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+}

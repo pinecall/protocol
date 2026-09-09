@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/pong.json",
+  "title": "pong",
+  "description": "The answer to ping. Ephemeral: it proves the socket is alive and says nothing else.",
+  "x-pinecall": {"kind": "event", "type": "pong", "scope": "agent", "ephemeral": true},
+  "$ref": "#/$defs/Pong",
+  "$defs": {
+    "Pong": {
+      "type": "object",
+      "description": "The answer to ping. Ephemeral: it proves the socket is alive and says nothing else.",
+      "properties": {
+        "ts": {"type": "number", "description": "The gateway's clock when it answered, unix seconds."}
+      },
+      "required": ["ts"],
+      "additionalProperties": false
+    }
+  }
+}

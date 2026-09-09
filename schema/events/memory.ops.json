@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/memory.ops.json",
+  "title": "memory.ops",
+  "description": "What memory did for this turn or at hangup: a recall before the reply, a remember after the call, a forget on request.",
+  "x-pinecall": {"kind": "event", "type": "memory.ops", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/MemoryOps",
+  "$defs": {
+    "MemoryOps": {
+      "type": "object",
+      "description": "What memory did for this turn or at hangup: a recall before the reply, a remember after the call, a forget on request.",
+      "properties": {
+        "ops": {"type": "array", "items": {"$ref": "../defs.json#/$defs/MemoryOp"}, "description": "The operations, in order."},
+        "speech_id": {"type": "string", "description": "The reply a recall served, when it served one."}
+      },
+      "required": ["ops"],
+      "additionalProperties": false
+    }
+  }
+}

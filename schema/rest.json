@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The JSON envelopes the read doors wrap the protocol in. The contents are the protocol's own.",
+  "$defs": {
+    "CallState": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/calls/{call}/state: the whole log folded, and the seq a stream resumes from.",
+      "required": ["state", "last_seq", "live"],
+      "properties": {
+        "state": {"$ref": "state.json#/$defs/State"},
+        "last_seq": {"type": "integer", "description": "The seq the fold reached; a stream opens after it."},
+        "live": {"type": "boolean", "description": "True while the log is still open."}
+      }
+    },
+    "LogPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One page of a log: what this reader may see, whether the log is open, and where to resume.",
+      "required": ["entries", "live", "next"],
+      "properties": {
+        "entries": {"type": "array", "items": {"$ref": "envelope.json#/$defs/Entry"}, "description": "The entries this reader may see, in seq order."},
+        "live": {"type": "boolean", "description": "True while the log is still open."},
+        "next": {"type": ["integer", "null"], "description": "The last seq the page READ, or null when it read nothing."}
+      }
+    },
+    "SessionLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One call as a list draws it: which call, how far the log got, and the state's own fields.",
+      "required": [
+        "call", "live", "last_seq", "status", "channel", "direction", "from", "to",
+        "caller", "started_at", "ended_at", "end_reason", "outcome", "cost"
+      ],
+      "properties": {
+        "call": {"type": "string", "description": "The call id."},
+        "live": {"type": "boolean", "description": "True while the call's log is still open."},
+        "last_seq": {"type": "integer", "description": "The seq its fold reached."},
+        "status": {"$ref": "state.json#/$defs/CallStatus"},
+        "channel": {"anyOf": [{"$ref": "defs.json#/$defs/Channel"}, {"type": "null"}], "description": "The door it came in by, once known."},
+        "direction": {"anyOf": [{"$ref": "defs.json#/$defs/Direction"}, {"type": "null"}], "description": "Inbound or outbound, once known."},
+        "from": {"type": ["string", "null"], "description": "The calling number or identity, once known."},
+        "to": {"type": ["string", "null"], "description": "The called number or identity, once known."},
+        "caller": {"anyOf": [{"$ref": "defs.json#/$defs/Contact"}, {"type": "null"}], "description": "Who was on the line, once known."},
+        "started_at": {"type": ["number", "null"], "description": "When media came up, unix seconds."},
+        "ended_at": {"type": ["number", "null"], "description": "When the call ended, unix seconds."},
+        "end_reason": {"anyOf": [{"$ref": "defs.json#/$defs/EndReason"}, {"type": "null"}], "description": "Why it ended, once it did."},
+        "outcome": {"type": ["string", "null"], "description": "The one-line outcome from call.summary."},
+        "cost": {"anyOf": [{"$ref": "defs.json#/$defs/Cost"}, {"type": "null"}], "description": "The cost from call.summary."}
+      }
+    },
+    "SessionList": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/agents/{slug}/sessions: which calls that agent handled, newest first.",
+      "required": ["calls"],
+      "properties": {
+        "calls": {"type": "array", "items": {"$ref": "#/$defs/SessionLine"}, "description": "One line per call, newest first."}
+      }
+    },
+    "HeldAgent": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One agent, as somebody choosing which to open needs to see it: its name and its channels.",
+      "required": ["slug", "channels"],
+      "properties": {
+        "slug": {"type": "string", "description": "The agent's slug, which every other door takes."},
+        "channels": {"type": "array", "items": {"$ref": "defs.json#/$defs/Channel"}, "description": "The doors it answers on, sorted."}
+      }
+    },
+    "AgentList": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/agents: every agent this fleet is holding right now, as the front page lists them.",
+      "required": ["agents"],
+      "properties": {
+        "agents": {"type": "array", "items": {"$ref": "#/$defs/HeldAgent"}, "description": "One row per agent, in the order their sockets claimed them."}
+      }
+    }
+  }
+}

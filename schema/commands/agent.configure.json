@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/agent.configure.json",
+  "title": "agent.configure",
+  "description": "Declare or change what the agent is: voice, models, language, greeting, the full tool list. Only the fields sent change.",
+  "x-pinecall": {"kind": "command", "type": "agent.configure", "scope": "agent", "produces": ["agent.configured"]},
+  "$ref": "#/$defs/AgentConfigure",
+  "$defs": {
+    "AgentConfigure": {
+      "type": "object",
+      "description": "Declare or change what the agent is: voice, models, language, greeting, the full tool list. Only the fields sent change.",
+      "properties": {
+        "config": {"$ref": "../defs.json#/$defs/AgentConfig"}
+      },
+      "required": ["config"],
+      "additionalProperties": false
+    }
+  }
+}

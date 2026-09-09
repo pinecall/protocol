@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/call.summary.json",
+  "title": "call.summary",
+  "description": "What the call was about, how it went, what it consumed and what that cost. Written after call.ended, once memory and pricing are done; call.score follows it and seals the log.",
+  "x-pinecall": {"kind": "event", "type": "call.summary", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/CallSummary",
+  "$defs": {
+    "CallSummary": {
+      "type": "object",
+      "description": "What the call was about, how it went, what it consumed and what that cost. Written after call.ended, once memory and pricing are done; call.score follows it and seals the log.",
+      "properties": {
+        "reason": {"$ref": "../defs.json#/$defs/EndReason"},
+        "outcome": {"type": "string", "description": "One line on how it went, in the agent's words: booked, no slot, wrong number."},
+        "duration_s": {"type": "number", "description": "Seconds of conversation."},
+        "turns": {"type": "integer", "description": "How many turns, both sides together."},
+        "usage": {"type": "array", "items": {"$ref": "../metrics.json#/$defs/ModelUsage"}, "description": "One row per model used, as the session summed them."},
+        "cost": {"$ref": "../defs.json#/$defs/Cost"},
+        "recording": {"type": "string", "description": "Where the recording is, when one was made."}
+      },
+      "required": ["reason", "outcome", "duration_s", "turns", "usage", "cost"],
+      "additionalProperties": false
+    }
+  }
+}

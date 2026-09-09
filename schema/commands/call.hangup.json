@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.hangup.json",
+  "title": "call.hangup",
+  "description": "End the call from the app's side. call.ended follows with reason agent_hung_up.",
+  "x-pinecall": {"kind": "command", "type": "call.hangup", "scope": "call", "produces": ["call.ended"]},
+  "$ref": "#/$defs/CallHangup",
+  "$defs": {
+    "CallHangup": {
+      "type": "object",
+      "description": "End the call from the app's side. call.ended follows with reason agent_hung_up.",
+      "properties": {
+        "reason": {"type": "string", "description": "Why, in the app's words, for the log."}
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+}

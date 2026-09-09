@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/supervisor.verb.json",
+  "title": "supervisor.verb",
+  "description": "One supervise verb, from the human the door named. Each verb lands in the caller's log as its own supervisor.* entry before the session acts on it.",
+  "x-pinecall": {
+    "kind": "command",
+    "type": "supervisor.verb",
+    "scope": "call",
+    "produces": [
+      "supervisor.said",
+      "supervisor.whispered",
+      "supervisor.took_over",
+      "supervisor.released",
+      "supervisor.transferred",
+      "supervisor.ended"
+    ]
+  },
+  "$ref": "#/$defs/SupervisorVerb",
+  "$defs": {
+    "SupervisorVerb": {
+      "type": "object",
+      "description": "One supervise verb, from the human the door named.",
+      "properties": {
+        "by": {"$ref": "../defs.json#/$defs/Supervisor"},
+        "verb": {"$ref": "../verbs.json#/$defs/Verb"}
+      },
+      "required": ["by", "verb"],
+      "additionalProperties": false
+    }
+  }
+}

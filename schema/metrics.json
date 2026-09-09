@@ -1,0 +1,369 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/metrics.json",
+  "title": "Metrics",
+  "description": "Everything livekit-agents 1.8 measures, under its own field names. The blocks are the session's metrics classes verbatim; the turn metrics are its ChatMessage report split by role; the usage rows are its per-model summary. Times are seconds unless the name says ms; timestamps are unix seconds. A field the measuring side could not fill is absent, never zero.",
+  "$defs": {
+    "Metadata": {
+      "type": "object",
+      "description": "Which model and provider produced a block. livekit's Metadata, nested exactly as it nests it.",
+      "properties": {
+        "model_name": {"type": ["string", "null"], "description": "The model's name as the provider plugin reports it.", "x-unit": "name"},
+        "model_provider": {"type": ["string", "null"], "description": "The provider's name as the plugin reports it: anthropic, elevenlabs, soniox.", "x-unit": "name"}
+      },
+      "additionalProperties": false,
+      "x-measured-by": "the provider plugin"
+    },
+    "LLMMetrics": {
+      "type": "object",
+      "description": "One LLM request, measured by the session's llm node. Two arrive for one reply when a tool ran in between; they share the speech_id.",
+      "properties": {
+        "type": {"type": "string", "const": "llm_metrics", "description": "livekit's tag for this block.", "x-unit": "tag"},
+        "label": {"type": "string", "description": "The node that measured: the plugin's label for its LLM.", "x-unit": "name"},
+        "request_id": {"type": "string", "description": "The provider's id for this request, for correlating with their logs.", "x-unit": "id"},
+        "timestamp": {"type": "number", "description": "When the request completed, unix seconds.", "x-unit": "unix s"},
+        "duration": {"type": "number", "description": "The whole request, first byte sent to last token received, seconds.", "x-unit": "s"},
+        "ttft": {"type": "number", "description": "Time to first token, seconds. -1 when the reply produced no token.", "x-unit": "s"},
+        "cancelled": {"type": "boolean", "description": "True when the request was cut short, usually because the caller interrupted.", "x-unit": "flag"},
+        "completion_tokens": {"type": "integer", "description": "Tokens the model wrote, reasoning included.", "x-unit": "tokens"},
+        "prompt_tokens": {"type": "integer", "description": "Tokens the model read, cache hits included.", "x-unit": "tokens"},
+        "prompt_cached_tokens": {"type": "integer", "description": "Of the prompt tokens, how many were served from the provider's cache.", "x-unit": "tokens"},
+        "cache_creation_tokens": {"type": "integer", "description": "Prompt tokens written into the cache on this request (Anthropic cache writes). 0 when the provider does not report it.", "x-unit": "tokens"},
+        "reasoning_tokens": {"type": "integer", "description": "Completion tokens spent on hidden reasoning. Already inside completion_tokens; never add it again.", "x-unit": "tokens"},
+        "total_tokens": {"type": "integer", "description": "prompt_tokens plus completion_tokens, as the provider counts them.", "x-unit": "tokens"},
+        "tokens_per_second": {"type": "number", "description": "completion_tokens over the streaming window.", "x-unit": "tokens/s"},
+        "speech_id": {"type": ["string", "null"], "description": "The reply this request served, joining it to turn.agent. Null for a request outside a reply.", "x-unit": "id"},
+        "metadata": {"anyOf": [{"$ref": "#/$defs/Metadata"}, {"type": "null"}], "description": "The model and provider.", "x-unit": "object"}
+      },
+      "required": ["type", "label", "request_id", "timestamp", "duration", "ttft", "cancelled", "completion_tokens", "prompt_tokens", "prompt_cached_tokens", "total_tokens", "tokens_per_second"],
+      "additionalProperties": false,
+      "x-measured-by": "the session's llm node"
+    },
+    "STTMetrics": {
+      "type": "object",
+      "description": "One speech-to-text request, measured by the session's stt node. A streaming STT reports one per connection segment, with duration 0.",
+      "properties": {
+        "type": {"type": "string", "const": "stt_metrics", "description": "livekit's tag for this block.", "x-unit": "tag"},
+        "label": {"type": "string", "description": "The node that measured: the plugin's label for its STT.", "x-unit": "name"},
+        "request_id": {"type": "string", "description": "The provider's id for this request.", "x-unit": "id"},
+        "timestamp": {"type": "number", "description": "When the request completed, unix seconds.", "x-unit": "unix s"},
+        "duration": {"type": "number", "description": "The request's length in seconds. 0 when the STT streams, since a stream has no single request.", "x-unit": "s"},
+        "audio_duration": {"type": "number", "description": "How much audio was pushed to the recognizer, seconds.", "x-unit": "s"},
+        "input_tokens": {"type": "integer", "description": "Audio tokens in, for providers that bill by token. 0 otherwise.", "x-unit": "tokens"},
+        "output_tokens": {"type": "integer", "description": "Text tokens out, for providers that bill by token. 0 otherwise.", "x-unit": "tokens"},
+        "streamed": {"type": "boolean", "description": "True when the recognizer ran over a websocket stream rather than one request per utterance.", "x-unit": "flag"},
+        "acquire_time": {"type": "number", "description": "Seconds spent getting a connection before the audio could flow. Websocket providers only.", "x-unit": "s"},
+        "connection_reused": {"type": "boolean", "description": "True when the connection came from the pool rather than a fresh handshake.", "x-unit": "flag"},
+        "metadata": {"anyOf": [{"$ref": "#/$defs/Metadata"}, {"type": "null"}], "description": "The model and provider.", "x-unit": "object"}
+      },
+      "required": ["type", "label", "request_id", "timestamp", "duration", "audio_duration", "streamed"],
+      "additionalProperties": false,
+      "x-measured-by": "the session's stt node"
+    },
+    "TTSMetrics": {
+      "type": "object",
+      "description": "One text-to-speech request, measured by the session's tts node. One reply may produce several, one per sentence segment.",
+      "properties": {
+        "type": {"type": "string", "const": "tts_metrics", "description": "livekit's tag for this block.", "x-unit": "tag"},
+        "label": {"type": "string", "description": "The node that measured: the plugin's label for its TTS.", "x-unit": "name"},
+        "request_id": {"type": "string", "description": "The provider's id for this request.", "x-unit": "id"},
+        "timestamp": {"type": "number", "description": "When the request completed, unix seconds.", "x-unit": "unix s"},
+        "ttfb": {"type": "number", "description": "Time to first byte of audio after the text was sent, seconds.", "x-unit": "s"},
+        "duration": {"type": "number", "description": "The whole request, seconds.", "x-unit": "s"},
+        "audio_duration": {"type": "number", "description": "How much audio came back, seconds of playback.", "x-unit": "s"},
+        "cancelled": {"type": "boolean", "description": "True when synthesis was cut short, usually by an interruption.", "x-unit": "flag"},
+        "characters_count": {"type": "integer", "description": "Characters synthesized, what character-billed providers charge for.", "x-unit": "chars"},
+        "input_tokens": {"type": "integer", "description": "Text tokens in, for token-billed TTS. 0 otherwise.", "x-unit": "tokens"},
+        "output_tokens": {"type": "integer", "description": "Audio tokens out, for token-billed TTS. 0 otherwise.", "x-unit": "tokens"},
+        "streamed": {"type": "boolean", "description": "True when the audio streamed back over a websocket.", "x-unit": "flag"},
+        "acquire_time": {"type": "number", "description": "Seconds spent getting a connection first. Websocket providers only.", "x-unit": "s"},
+        "connection_reused": {"type": "boolean", "description": "True when the connection came from the pool.", "x-unit": "flag"},
+        "segment_id": {"type": ["string", "null"], "description": "Which sentence segment of the reply this was.", "x-unit": "id"},
+        "speech_id": {"type": ["string", "null"], "description": "The reply this audio belongs to, joining it to turn.agent.", "x-unit": "id"},
+        "metadata": {"anyOf": [{"$ref": "#/$defs/Metadata"}, {"type": "null"}], "description": "The model and provider.", "x-unit": "object"}
+      },
+      "required": ["type", "label", "request_id", "timestamp", "ttfb", "duration", "audio_duration", "cancelled", "characters_count", "streamed"],
+      "additionalProperties": false,
+      "x-measured-by": "the session's tts node"
+    },
+    "VADMetrics": {
+      "type": "object",
+      "description": "The voice activity detector's health, reported about once a second while it runs. Not a per-turn measure.",
+      "properties": {
+        "type": {"type": "string", "const": "vad_metrics", "description": "livekit's tag for this block.", "x-unit": "tag"},
+        "label": {"type": "string", "description": "The VAD plugin's label.", "x-unit": "name"},
+        "timestamp": {"type": "number", "description": "When the report was cut, unix seconds.", "x-unit": "unix s"},
+        "idle_time": {"type": "number", "description": "Seconds the detector spent waiting for audio in this window.", "x-unit": "s"},
+        "inference_duration_total": {"type": "number", "description": "Seconds spent inside the model in this window.", "x-unit": "s"},
+        "inference_count": {"type": "integer", "description": "How many frames the model scored in this window.", "x-unit": "count"},
+        "metadata": {"anyOf": [{"$ref": "#/$defs/Metadata"}, {"type": "null"}], "description": "The model and provider.", "x-unit": "object"}
+      },
+      "required": ["type", "label", "timestamp", "idle_time", "inference_duration_total", "inference_count"],
+      "additionalProperties": false,
+      "x-measured-by": "the VAD plugin"
+    },
+    "EOUMetrics": {
+      "type": "object",
+      "description": "How long the session took to decide that the caller had finished. One per user turn.",
+      "properties": {
+        "type": {"type": "string", "const": "eou_metrics", "description": "livekit's tag for this block.", "x-unit": "tag"},
+        "timestamp": {"type": "number", "description": "When the turn was closed, unix seconds.", "x-unit": "unix s"},
+        "end_of_utterance_delay": {"type": "number", "description": "Seconds from the VAD hearing silence to the decision that the turn is over. 0 when no end of speech was detected.", "x-unit": "s"},
+        "transcription_delay": {"type": "number", "description": "Seconds from the end of speech to the final transcript. 0 when no end of speech was detected.", "x-unit": "s"},
+        "on_user_turn_completed_delay": {"type": "number", "description": "Seconds the app's on_user_turn_completed hook took.", "x-unit": "s"},
+        "speech_id": {"type": ["string", "null"], "description": "The reply this turn triggered, joining it to turn.user and turn.agent.", "x-unit": "id"},
+        "metadata": {"anyOf": [{"$ref": "#/$defs/Metadata"}, {"type": "null"}], "description": "The model and provider.", "x-unit": "object"}
+      },
+      "required": ["type", "timestamp", "end_of_utterance_delay", "transcription_delay", "on_user_turn_completed_delay"],
+      "additionalProperties": false,
+      "x-measured-by": "the session's turn detection"
+    },
+    "EOTInferenceMetrics": {
+      "type": "object",
+      "description": "One prediction by the end-of-turn model. It listens to the audio and says whether the caller is done.",
+      "properties": {
+        "type": {"type": "string", "const": "eot_inference_metrics", "description": "livekit's tag for this block.", "x-unit": "tag"},
+        "timestamp": {"type": "number", "description": "When the prediction came back, unix seconds.", "x-unit": "unix s"},
+        "total_duration": {"type": "number", "description": "Seconds from the earliest audio in the inference to the answer.", "x-unit": "s"},
+        "detection_delay": {"type": "number", "description": "Seconds from the latest audio in the inference to the answer.", "x-unit": "s"},
+        "prediction_duration": {"type": "number", "description": "Seconds the model itself took.", "x-unit": "s"},
+        "num_requests": {"type": "integer", "description": "How many requests one inference needed. Usually 1.", "x-unit": "count"},
+        "metadata": {"anyOf": [{"$ref": "#/$defs/Metadata"}, {"type": "null"}], "description": "The model and provider.", "x-unit": "object"}
+      },
+      "required": ["type", "timestamp", "total_duration", "detection_delay", "prediction_duration"],
+      "additionalProperties": false,
+      "x-measured-by": "the end-of-turn model"
+    },
+    "InterruptionMetrics": {
+      "type": "object",
+      "description": "The interruption detector's latest inference and its running counts. Reported when the detector runs, not per turn.",
+      "properties": {
+        "type": {"type": "string", "const": "interruption_metrics", "description": "livekit's tag for this block.", "x-unit": "tag"},
+        "timestamp": {"type": "number", "description": "When the inference came back, unix seconds.", "x-unit": "unix s"},
+        "total_duration": {"type": "number", "description": "Round trip of the latest inference, seconds.", "x-unit": "s"},
+        "prediction_duration": {"type": "number", "description": "The model's own time on the latest inference, seconds.", "x-unit": "s"},
+        "detection_delay": {"type": "number", "description": "Seconds from the onset of speech to the final prediction, latest inference.", "x-unit": "s"},
+        "num_interruptions": {"type": "integer", "description": "Interruptions detected so far in the session.", "x-unit": "count"},
+        "num_backchannels": {"type": "integer", "description": "Backchannels ('mm-hm', 'sí') detected so far and not treated as interruptions.", "x-unit": "count"},
+        "num_requests": {"type": "integer", "description": "Requests sent to the detector so far.", "x-unit": "count"},
+        "metadata": {"anyOf": [{"$ref": "#/$defs/Metadata"}, {"type": "null"}], "description": "The model and provider.", "x-unit": "object"}
+      },
+      "required": ["type", "timestamp", "total_duration", "prediction_duration", "detection_delay", "num_interruptions", "num_backchannels", "num_requests"],
+      "additionalProperties": false,
+      "x-measured-by": "the interruption detector"
+    },
+    "RealtimeCachedTokenDetails": {
+      "type": "object",
+      "description": "Of a realtime model's cached input, how much was audio, text or image.",
+      "properties": {
+        "audio_tokens": {"type": "integer", "description": "Cached audio tokens.", "x-unit": "tokens"},
+        "text_tokens": {"type": "integer", "description": "Cached text tokens.", "x-unit": "tokens"},
+        "image_tokens": {"type": "integer", "description": "Cached image tokens.", "x-unit": "tokens"}
+      },
+      "additionalProperties": false,
+      "x-measured-by": "the realtime plugin"
+    },
+    "RealtimeInputTokenDetails": {
+      "type": "object",
+      "description": "What a realtime model read, by kind, with the cached part broken out.",
+      "properties": {
+        "audio_tokens": {"type": "integer", "description": "Audio tokens read.", "x-unit": "tokens"},
+        "text_tokens": {"type": "integer", "description": "Text tokens read.", "x-unit": "tokens"},
+        "image_tokens": {"type": "integer", "description": "Image tokens read.", "x-unit": "tokens"},
+        "cached_tokens": {"type": "integer", "description": "Of all input tokens, how many came from the cache.", "x-unit": "tokens"},
+        "cached_tokens_details": {"anyOf": [{"$ref": "#/$defs/RealtimeCachedTokenDetails"}, {"type": "null"}], "description": "The cached tokens by kind, when the provider breaks them out.", "x-unit": "object"}
+      },
+      "additionalProperties": false,
+      "x-measured-by": "the realtime plugin"
+    },
+    "RealtimeOutputTokenDetails": {
+      "type": "object",
+      "description": "What a realtime model produced, by kind.",
+      "properties": {
+        "text_tokens": {"type": "integer", "description": "Text tokens produced.", "x-unit": "tokens"},
+        "audio_tokens": {"type": "integer", "description": "Audio tokens produced.", "x-unit": "tokens"},
+        "image_tokens": {"type": "integer", "description": "Image tokens produced. Realtime models no longer emit these; kept because the library keeps it.", "x-unit": "tokens"}
+      },
+      "additionalProperties": false,
+      "x-measured-by": "the realtime plugin"
+    },
+    "RealtimeModelMetrics": {
+      "type": "object",
+      "description": "One response from a speech-to-speech model, which replaces STT, LLM and TTS at once. Pinecall's default pipeline never emits it; a realtime provider would.",
+      "properties": {
+        "type": {"type": "string", "const": "realtime_model_metrics", "description": "livekit's tag for this block.", "x-unit": "tag"},
+        "label": {"type": "string", "description": "The realtime plugin's label.", "x-unit": "name"},
+        "request_id": {"type": "string", "description": "The provider's id for the response.", "x-unit": "id"},
+        "timestamp": {"type": "number", "description": "When the response was created, unix seconds.", "x-unit": "unix s"},
+        "duration": {"type": "number", "description": "Seconds from response created to response done.", "x-unit": "s"},
+        "session_duration": {"type": "number", "description": "Seconds the session connection has been open, for providers that bill by session time.", "x-unit": "s"},
+        "ttft": {"type": "number", "description": "Seconds to the first audio token. -1 when no audio token was sent.", "x-unit": "s"},
+        "cancelled": {"type": "boolean", "description": "True when the response was cut short.", "x-unit": "flag"},
+        "input_tokens": {"type": "integer", "description": "Tokens read, text and audio together.", "x-unit": "tokens"},
+        "output_tokens": {"type": "integer", "description": "Tokens produced, text and audio together.", "x-unit": "tokens"},
+        "total_tokens": {"type": "integer", "description": "input_tokens plus output_tokens.", "x-unit": "tokens"},
+        "tokens_per_second": {"type": "number", "description": "Output tokens over the response's duration.", "x-unit": "tokens/s"},
+        "input_token_details": {"$ref": "#/$defs/RealtimeInputTokenDetails", "x-unit": "object"},
+        "output_token_details": {"$ref": "#/$defs/RealtimeOutputTokenDetails", "x-unit": "object"},
+        "acquire_time": {"type": "number", "description": "Seconds spent getting a connection first.", "x-unit": "s"},
+        "connection_reused": {"type": "boolean", "description": "True when the connection came from the pool.", "x-unit": "flag"},
+        "metadata": {"anyOf": [{"$ref": "#/$defs/Metadata"}, {"type": "null"}], "description": "The model and provider.", "x-unit": "object"}
+      },
+      "required": ["type", "request_id", "timestamp", "input_token_details", "output_token_details"],
+      "additionalProperties": false,
+      "x-measured-by": "the realtime plugin"
+    },
+    "AvatarMetrics": {
+      "type": "object",
+      "description": "Timing of a video avatar worker, when one is in the chain. No Pinecall channel has one today; carried because the library measures it.",
+      "properties": {
+        "type": {"type": "string", "const": "avatar_metrics", "description": "livekit's tag for this block.", "x-unit": "tag"},
+        "timestamp": {"type": "number", "description": "When the report was cut, unix seconds.", "x-unit": "unix s"},
+        "playback_latency": {"type": "number", "description": "Seconds between forwarding the first audio frame to the avatar and the avatar reporting playback.", "x-unit": "s"},
+        "session_started_time": {"type": ["number", "null"], "description": "When the avatar session started, unix seconds.", "x-unit": "unix s"},
+        "avatar_joined_time": {"type": ["number", "null"], "description": "When the avatar participant joined the room with its video track, unix seconds.", "x-unit": "unix s"},
+        "metadata": {"anyOf": [{"$ref": "#/$defs/Metadata"}, {"type": "null"}], "description": "The model and provider.", "x-unit": "object"}
+      },
+      "required": ["type", "timestamp"],
+      "additionalProperties": false,
+      "x-measured-by": "the avatar worker"
+    },
+    "TurnMetadata": {
+      "type": "object",
+      "description": "Which model handled one leg of a turn. livekit's MetricsMetadata, as it sits on the ChatMessage.",
+      "properties": {
+        "model_name": {"type": "string", "description": "The model's name as the plugin reports it.", "x-unit": "name"},
+        "model_provider": {"type": "string", "description": "The provider's name as the plugin reports it.", "x-unit": "name"}
+      },
+      "additionalProperties": false,
+      "x-measured-by": "the session, on the ChatMessage"
+    },
+    "UserTurnMetrics": {
+      "type": "object",
+      "description": "What the session measured about the caller's turn. livekit stamps it on the user ChatMessage; every field is optional, since a text session has no speech to time.",
+      "properties": {
+        "started_speaking_at": {"type": "number", "description": "When the caller began speaking, unix seconds.", "x-unit": "unix s"},
+        "stopped_speaking_at": {"type": "number", "description": "When the caller stopped speaking, unix seconds.", "x-unit": "unix s"},
+        "transcription_delay": {"type": "number", "description": "Seconds from the end of speech to the final transcript.", "x-unit": "s"},
+        "end_of_turn_delay": {"type": "number", "description": "Seconds from the end of speech to the decision that the turn was over.", "x-unit": "s"},
+        "on_user_turn_completed_delay": {"type": "number", "description": "Seconds the app's on_user_turn_completed hook took.", "x-unit": "s"},
+        "stt_metadata": {"$ref": "#/$defs/TurnMetadata", "x-unit": "object"}
+      },
+      "additionalProperties": false,
+      "x-measured-by": "the session, on the user ChatMessage"
+    },
+    "AgentTurnMetrics": {
+      "type": "object",
+      "description": "What the session measured about the agent's reply. livekit stamps it on the assistant ChatMessage; every field is optional, since a text session has no audio to time.",
+      "properties": {
+        "started_speaking_at": {"type": "number", "description": "When the first audio frame of the reply went out, unix seconds.", "x-unit": "unix s"},
+        "stopped_speaking_at": {"type": "number", "description": "When the last audio frame of the reply went out, unix seconds.", "x-unit": "unix s"},
+        "llm_node_ttft": {"type": "number", "description": "Seconds until the llm node returned its first token.", "x-unit": "s"},
+        "llm_node_tps": {"type": "number", "description": "Output tokens per second over the streaming window. Absent for a reply that arrived in one chunk.", "x-unit": "tokens/s"},
+        "llm_node_ttfs": {"type": "number", "description": "Seconds from generation start until the first sentence reached the TTS. Absent when no audio came from a LiveKit TTS.", "x-unit": "s"},
+        "tts_node_ttfb": {"type": "number", "description": "Seconds until the tts node returned its first audio chunk, counted from the first text token.", "x-unit": "s"},
+        "playback_latency": {"type": "number", "description": "Seconds between forwarding the first audio frame and the output reporting playback. Near zero on a room; meaningful with an avatar.", "x-unit": "s"},
+        "e2e_latency": {"type": "number", "description": "Seconds from the caller finishing to the agent starting to answer. The number a caller feels.", "x-unit": "s"},
+        "provider_request_ids": {"type": "array", "items": {"type": "string"}, "description": "The provider-side request ids behind this reply, for correlating with their logs.", "x-unit": "ids"},
+        "llm_metadata": {"$ref": "#/$defs/TurnMetadata", "x-unit": "object"},
+        "tts_metadata": {"$ref": "#/$defs/TurnMetadata", "x-unit": "object"}
+      },
+      "additionalProperties": false,
+      "x-measured-by": "the session, on the assistant ChatMessage"
+    },
+    "LLMModelUsage": {
+      "type": "object",
+      "description": "Everything one LLM consumed over the call. One row per provider and model, as livekit's usage collector sums it.",
+      "properties": {
+        "type": {"type": "string", "const": "llm_usage", "description": "livekit's tag for this row.", "x-unit": "tag"},
+        "provider": {"type": "string", "description": "The provider: anthropic, openai.", "x-unit": "name"},
+        "model": {"type": "string", "description": "The model name.", "x-unit": "name"},
+        "input_tokens": {"type": "integer", "description": "All tokens read.", "x-unit": "tokens"},
+        "input_cached_tokens": {"type": "integer", "description": "Of the input, tokens served from cache.", "x-unit": "tokens"},
+        "input_cache_creation_tokens": {"type": "integer", "description": "Of the input, tokens written into the cache.", "x-unit": "tokens"},
+        "input_audio_tokens": {"type": "integer", "description": "Audio tokens read, multimodal models only.", "x-unit": "tokens"},
+        "input_cached_audio_tokens": {"type": "integer", "description": "Cached audio tokens read.", "x-unit": "tokens"},
+        "input_text_tokens": {"type": "integer", "description": "Text tokens read, when the provider breaks input out by kind.", "x-unit": "tokens"},
+        "input_cached_text_tokens": {"type": "integer", "description": "Cached text tokens read.", "x-unit": "tokens"},
+        "input_image_tokens": {"type": "integer", "description": "Image tokens read, multimodal models only.", "x-unit": "tokens"},
+        "input_cached_image_tokens": {"type": "integer", "description": "Cached image tokens read.", "x-unit": "tokens"},
+        "output_tokens": {"type": "integer", "description": "All tokens written, reasoning included.", "x-unit": "tokens"},
+        "output_audio_tokens": {"type": "integer", "description": "Audio tokens written, multimodal models only.", "x-unit": "tokens"},
+        "output_text_tokens": {"type": "integer", "description": "Text tokens written, when the provider breaks output out by kind.", "x-unit": "tokens"},
+        "output_reasoning_tokens": {"type": "integer", "description": "Tokens spent on hidden reasoning. Already inside output_tokens.", "x-unit": "tokens"},
+        "session_duration": {"type": "number", "description": "Seconds of session connection, for providers that bill by session time.", "x-unit": "s"}
+      },
+      "required": ["type", "provider", "model"],
+      "additionalProperties": false,
+      "x-measured-by": "the session's usage collector"
+    },
+    "TTSModelUsage": {
+      "type": "object",
+      "description": "Everything one TTS consumed over the call.",
+      "properties": {
+        "type": {"type": "string", "const": "tts_usage", "description": "livekit's tag for this row.", "x-unit": "tag"},
+        "provider": {"type": "string", "description": "The provider: elevenlabs.", "x-unit": "name"},
+        "model": {"type": "string", "description": "The model name.", "x-unit": "name"},
+        "input_tokens": {"type": "integer", "description": "Text tokens in, for token-billed TTS.", "x-unit": "tokens"},
+        "output_tokens": {"type": "integer", "description": "Audio tokens out, for token-billed TTS.", "x-unit": "tokens"},
+        "characters_count": {"type": "integer", "description": "Characters synthesized, for character-billed TTS.", "x-unit": "chars"},
+        "audio_duration": {"type": "number", "description": "Seconds of audio generated.", "x-unit": "s"}
+      },
+      "required": ["type", "provider", "model"],
+      "additionalProperties": false,
+      "x-measured-by": "the session's usage collector"
+    },
+    "STTModelUsage": {
+      "type": "object",
+      "description": "Everything one STT consumed over the call.",
+      "properties": {
+        "type": {"type": "string", "const": "stt_usage", "description": "livekit's tag for this row.", "x-unit": "tag"},
+        "provider": {"type": "string", "description": "The provider: soniox, deepgram.", "x-unit": "name"},
+        "model": {"type": "string", "description": "The model name.", "x-unit": "name"},
+        "input_tokens": {"type": "integer", "description": "Audio tokens in, for token-billed STT.", "x-unit": "tokens"},
+        "output_tokens": {"type": "integer", "description": "Text tokens out, for token-billed STT.", "x-unit": "tokens"},
+        "audio_duration": {"type": "number", "description": "Seconds of audio recognized.", "x-unit": "s"}
+      },
+      "required": ["type", "provider", "model"],
+      "additionalProperties": false,
+      "x-measured-by": "the session's usage collector"
+    },
+    "InterruptionModelUsage": {
+      "type": "object",
+      "description": "How often the interruption detector was asked over the call.",
+      "properties": {
+        "type": {"type": "string", "const": "interruption_usage", "description": "livekit's tag for this row.", "x-unit": "tag"},
+        "provider": {"type": "string", "description": "The provider: livekit.", "x-unit": "name"},
+        "model": {"type": "string", "description": "The model name.", "x-unit": "name"},
+        "total_requests": {"type": "integer", "description": "Requests sent to the detector.", "x-unit": "count"}
+      },
+      "required": ["type", "provider", "model"],
+      "additionalProperties": false,
+      "x-measured-by": "the session's usage collector"
+    },
+    "EOTModelUsage": {
+      "type": "object",
+      "description": "How often the end-of-turn model was asked over the call.",
+      "properties": {
+        "type": {"type": "string", "const": "eot_usage", "description": "livekit's tag for this row.", "x-unit": "tag"},
+        "provider": {"type": "string", "description": "The provider: livekit.", "x-unit": "name"},
+        "model": {"type": "string", "description": "The model name.", "x-unit": "name"},
+        "total_requests": {"type": "integer", "description": "Inference requests sent to the model.", "x-unit": "count"}
+      },
+      "required": ["type", "provider", "model"],
+      "additionalProperties": false,
+      "x-measured-by": "the session's usage collector"
+    },
+    "ModelUsage": {
+      "description": "One usage row, told apart by its type tag.",
+      "oneOf": [
+        {"$ref": "#/$defs/LLMModelUsage"},
+        {"$ref": "#/$defs/TTSModelUsage"},
+        {"$ref": "#/$defs/STTModelUsage"},
+        {"$ref": "#/$defs/InterruptionModelUsage"},
+        {"$ref": "#/$defs/EOTModelUsage"}
+      ],
+      "discriminator": {"propertyName": "type"}
+    }
+  }
+}

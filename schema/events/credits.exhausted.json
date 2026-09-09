@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/credits.exhausted.json",
+  "title": "credits.exhausted",
+  "description": "The gateway refused a call or a register because one of the org's quotas ran out. Written into the agent's own log, which is the org's, before the door says no.",
+  "x-pinecall": {"kind": "event", "type": "credits.exhausted", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/CreditsExhausted",
+  "$defs": {
+    "CreditsExhausted": {
+      "type": "object",
+      "description": "The gateway refused a call or a register because one of the org's quotas ran out. Written into the agent's own log, which is the org's, before the door says no.",
+      "properties": {
+        "org": {"type": "string", "description": "The org whose quota ran out."},
+        "quota": {"type": "string", "enum": ["minutes", "messages", "agents", "concurrent_calls"], "description": "Which quota: minutes of call, messages, agents held, calls at once."},
+        "used": {"type": "number", "description": "How much the org had consumed when the door refused."},
+        "limit": {"type": "integer", "description": "The quota the operator set."}
+      },
+      "required": ["org", "quota", "used", "limit"],
+      "additionalProperties": false
+    }
+  }
+}

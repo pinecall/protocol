@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.mute.json",
+  "title": "call.mute",
+  "description": "Mute the agent: it keeps listening and thinking, produces no audio.",
+  "x-pinecall": {"kind": "command", "type": "call.mute", "scope": "call", "produces": ["call.line"]},
+  "$ref": "#/$defs/CallMute",
+  "$defs": {
+    "CallMute": {
+      "type": "object",
+      "description": "Mute the agent: it keeps listening and thinking, produces no audio.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/supervisor.transferred.json",
+  "title": "supervisor.transferred",
+  "description": "A supervisor asked for a transfer. call.transferred says how it went.",
+  "x-pinecall": {"kind": "event", "type": "supervisor.transferred", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/SupervisorTransferred",
+  "$defs": {
+    "SupervisorTransferred": {
+      "type": "object",
+      "description": "A supervisor asked for a transfer. call.transferred says how it went.",
+      "properties": {
+        "by": {"$ref": "../defs.json#/$defs/Supervisor"},
+        "to": {"type": "string", "description": "The destination."},
+        "mode": {"$ref": "../defs.json#/$defs/TransferMode"}
+      },
+      "required": ["by", "to", "mode"],
+      "additionalProperties": false
+    }
+  }
+}

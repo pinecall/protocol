@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/supervisor.whispered.json",
+  "title": "supervisor.whispered",
+  "description": "A supervisor told the agent something the caller never heard.",
+  "x-pinecall": {"kind": "event", "type": "supervisor.whispered", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/SupervisorWhispered",
+  "$defs": {
+    "SupervisorWhispered": {
+      "type": "object",
+      "description": "A supervisor told the agent something the caller never heard.",
+      "properties": {
+        "by": {"$ref": "../defs.json#/$defs/Supervisor"},
+        "text": {"type": "string", "description": "The instruction the agent received."}
+      },
+      "required": ["by", "text"],
+      "additionalProperties": false
+    }
+  }
+}

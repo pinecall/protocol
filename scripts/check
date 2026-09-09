@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# The gate: what is committed is what the schema says. Regenerates, diffs, then tests both sides.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+scripts/generate
+git diff --exit-code -- python typescript/src/generated docs \
+  || { echo "generated output is stale: commit what scripts/generate wrote" >&2; exit 1; }
+(cd python && uv run ruff check . ../tests && uv run pyright && uv run pytest -q)
+[ -d typescript/node_modules ] && (cd typescript && pnpm test)

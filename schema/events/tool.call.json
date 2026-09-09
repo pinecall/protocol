@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/tool.call.json",
+  "title": "tool.call",
+  "description": "The model called a tool. The platform sends this to the app and the app's method runs in the app's own process; tool.result closes it.",
+  "x-pinecall": {"kind": "event", "type": "tool.call", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/ToolCall",
+  "$defs": {
+    "ToolCall": {
+      "type": "object",
+      "description": "The model called a tool. The platform sends this to the app and the app's method runs in the app's own process; tool.result closes it.",
+      "properties": {
+        "call_id": {"type": "string", "description": "The model's id for this call, which the result must repeat."},
+        "name": {"type": "string", "description": "The tool's name, as declared in its ToolSpec."},
+        "arguments": {"type": "object", "additionalProperties": true, "description": "The arguments the model chose, as JSON matching the tool's parameters."},
+        "speech_id": {"type": "string", "description": "The reply during which the model called it."}
+      },
+      "required": ["call_id", "name", "arguments"],
+      "additionalProperties": false
+    }
+  }
+}

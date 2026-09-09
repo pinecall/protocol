@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/participant.mute.json",
+  "title": "participant.mute",
+  "description": "Silence a participant for the rest of the call: their audio leaves the room, for everyone in it. Lands as track.unpublished for their microphone. There is no unmute; a leg that must speak again is invited again.",
+  "x-pinecall": {"kind": "command", "type": "participant.mute", "scope": "call", "produces": ["track.unpublished"]},
+  "$ref": "#/$defs/ParticipantMute",
+  "$defs": {
+    "ParticipantMute": {
+      "type": "object",
+      "description": "Silence a participant for the rest of the call: their audio leaves the room, for everyone in it. Lands as track.unpublished for their microphone. There is no unmute; a leg that must speak again is invited again.",
+      "properties": {
+        "identity": {"type": "string", "description": "Whom to silence, by the identity participant.joined gave them."}
+      },
+      "required": ["identity"],
+      "additionalProperties": false
+    }
+  }
+}

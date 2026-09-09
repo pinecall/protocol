@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/tools.changed.json",
+  "title": "tools.changed",
+  "description": "The tools the model can see changed. The app's state moved and each tool's when was recomputed.",
+  "x-pinecall": {"kind": "event", "type": "tools.changed", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/ToolsChanged",
+  "$defs": {
+    "ToolsChanged": {
+      "type": "object",
+      "description": "The tools the model can see changed. The app's state moved and each tool's when was recomputed.",
+      "properties": {
+        "visible": {"type": "array", "items": {"type": "string"}, "description": "The tools the model can see now, by name."}
+      },
+      "required": ["visible"],
+      "additionalProperties": false
+    }
+  }
+}

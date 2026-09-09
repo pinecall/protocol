@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/call.ended.json",
+  "title": "call.ended",
+  "description": "The call is over. Nothing about the conversation follows; call.summary still does.",
+  "x-pinecall": {"kind": "event", "type": "call.ended", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/CallEnded",
+  "$defs": {
+    "CallEnded": {
+      "type": "object",
+      "description": "The call is over. Nothing about the conversation follows; call.summary still does.",
+      "properties": {
+        "reason": {"$ref": "../defs.json#/$defs/EndReason"},
+        "ended_by": {"$ref": "../defs.json#/$defs/EndedBy"},
+        "ended_at": {"type": "number", "description": "When it ended, unix seconds."},
+        "duration_s": {"type": "number", "description": "Seconds from call.started to now. 0 for a call that never started."}
+      },
+      "required": ["reason", "ended_by", "ended_at", "duration_s"],
+      "additionalProperties": false
+    }
+  }
+}

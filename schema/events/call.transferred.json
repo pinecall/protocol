@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/call.transferred.json",
+  "title": "call.transferred",
+  "description": "A transfer asked for by the agent or a supervisor finished, one way or the other.",
+  "x-pinecall": {"kind": "event", "type": "call.transferred", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/CallTransferred",
+  "$defs": {
+    "CallTransferred": {
+      "type": "object",
+      "description": "A transfer asked for by the agent or a supervisor finished, one way or the other.",
+      "properties": {
+        "to": {"type": "string", "description": "Where the caller was sent."},
+        "mode": {"$ref": "../defs.json#/$defs/TransferMode"},
+        "ok": {"type": "boolean", "description": "True when the far end took the call."},
+        "error": {"type": "string", "description": "Why it failed, when it did."}
+      },
+      "required": ["to", "mode", "ok"],
+      "additionalProperties": false
+    }
+  }
+}

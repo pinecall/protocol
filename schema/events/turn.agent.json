@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/turn.agent.json",
+  "title": "turn.agent",
+  "description": "The agent's reply is over and this is what was said. With it, everything the session measured about the reply.",
+  "x-pinecall": {"kind": "event", "type": "turn.agent", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/AgentTurnEnded",
+  "$defs": {
+    "AgentTurnEnded": {
+      "type": "object",
+      "description": "The agent's reply is over and this is what was said. With it, everything the session measured about the reply.",
+      "properties": {
+        "speech_id": {"type": "string", "description": "The reply's id, shared with the caller's turn and with the metrics blocks."},
+        "item_id": {"type": "string", "description": "The session's id for this message in the chat history."},
+        "text": {"type": "string", "description": "What was said. When interrupted, only what was actually played."},
+        "interrupted": {"type": "boolean", "description": "True when the caller cut the reply short."},
+        "metrics": {"$ref": "../metrics.json#/$defs/AgentTurnMetrics"}
+      },
+      "required": ["speech_id", "text", "interrupted", "metrics"],
+      "additionalProperties": false
+    }
+  }
+}

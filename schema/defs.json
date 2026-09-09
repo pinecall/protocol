@@ -1,0 +1,250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/defs.json",
+  "title": "Shared shapes",
+  "description": "The shapes more than one event, command or state field refers to. Anything used once lives next to its use.",
+  "$defs": {
+    "Channel": {"type": "string", "enum": ["phone", "web", "whatsapp"], "description": "The door the public came through: a phone call over SIP, the browser widget over WebRTC, or WhatsApp text."},
+    "Direction": {"type": "string", "enum": ["inbound", "outbound"], "description": "Inbound: the public reached the agent. Outbound: the agent reached out (a dial)."},
+    "EndReason": {"type": "string", "enum": ["caller_hung_up", "agent_hung_up", "supervisor_ended", "transferred", "no_answer", "busy", "dial_failed", "timeout", "drained", "app_detached", "error"], "description": "Why the call is over. Who hung up, what failed before anybody could, drained: the platform took the worker down (a deploy, a stop) with the call still on it, or app_detached: the app holding the agent closed its socket mid-call, so nothing was rendering the prompt or answering a tool — both are nobody's fault and neither is an error."},
+    "EndedBy": {"type": "string", "enum": ["caller", "agent", "supervisor", "platform"], "description": "Whose action ended the call. platform covers timeouts, errors and a drained worker."},
+    "ScoreVerdict": {"type": "string", "enum": ["held", "broken", "deferred", "skipped"], "description": "What one judge answered about a finished call. Held: the rule held. Broken: it did not, and the reason names the evidence. Deferred: the judge was asked and could not settle it. Skipped: nobody asked it — no model was reachable inside the call's judging budget."},
+    "TransferMode": {"type": "string", "enum": ["cold", "warm"], "description": "Cold: the caller is sent on and the agent leaves. Warm: the agent stays on the line until the other side answers, then leaves."},
+    "PromptRegion": {"type": "string", "enum": ["static", "view"], "description": "Which region of the prompt: the cached static prefix (instructions), or the dynamic view rendered from state at the end. The append-only history in between is never written by the app."},
+    "UserState": {"type": "string", "enum": ["listening", "speaking", "away"], "description": "What the platform believes the person on the line is doing right now. The states are the session's own."},
+    "AgentState": {"type": "string", "enum": ["initializing", "idle", "listening", "thinking", "speaking"], "description": "What the agent is doing right now, in the session's own words: warming up, waiting, hearing the caller, generating, or playing audio."},
+    "ParticipantKind": {"type": "string", "enum": ["caller", "agent", "supervisor", "listener", "sip"], "description": "Who a participant is to the call: the person the agent serves (over SIP or the widget), the agent itself, a supervisor who took a seat in the room, a listener who only hears, or a second SIP leg that room.invite brought in."},
+    "TrackKind": {"type": "string", "enum": ["audio", "video", "screen"], "description": "What a track carries: a microphone's audio, a camera's video, or a screen share."},
+    "TrackSource": {"type": "string", "enum": ["microphone", "camera", "screen_share", "screen_share_audio", "unknown"], "description": "Where a track comes from, as livekit's TrackSource names it, in lower case."},
+    "EventSource": {"type": "string", "enum": ["app", "participant"], "description": "Where an outside fact came from: the tenant's backend over the app socket (app), or a participant's browser over the DataChannel (participant)."},
+    "Visibility": {"type": "string", "enum": ["public", "tenant", "pii"], "description": "Who may see a field of the app's state: everyone in the call (public), the tenant's own readers (tenant, the default for a field never declared), or nobody without masking (pii)."},
+    "Projection": {"type": "string", "enum": ["public", "tenant"], "description": "Which projection a sink applies before a state or an entry leaves the platform: public for a participant reading its own call, tenant for the tenant's readers. The contract is docs/protocol/projections.md; a client never applies one."},
+    "Contact": {
+      "type": "object",
+      "description": "Who is on the line, as far as the platform knows. Everything is optional: a web visitor may be nobody yet.",
+      "properties": {
+        "id": {"type": "string", "description": "The platform's own id for this contact, stable across channels and calls."},
+        "phone": {"type": "string", "description": "The caller's number in E.164 form (+34 600 000 000 written as +34600000000)."},
+        "name": {"type": "string", "description": "The name the contact is known by, when memory or the app supplied one."},
+        "email": {"type": "string", "description": "An e-mail address, when the web widget or the app supplied one."},
+        "external_id": {"type": "string", "description": "The id the tenant's own system uses for this person, when the app told the platform."}
+      },
+      "additionalProperties": false
+    },
+    "Route": {
+      "type": "object",
+      "description": "One door to an agent: a channel and, for phone and WhatsApp, the number that answers. A number is a route, never an agent.",
+      "properties": {
+        "channel": {"$ref": "#/$defs/Channel"},
+        "number": {"type": ["string", "null"], "description": "The number in E.164 form for phone and WhatsApp; null for the web widget, which needs none."},
+        "label": {"type": "string", "description": "A human name for the door, for the console: 'main line', 'after hours'."}
+      },
+      "required": ["channel", "number"],
+      "additionalProperties": false
+    },
+    "Supervisor": {
+      "type": "object",
+      "description": "The human who sent a supervise verb, as the token that let them in names them.",
+      "properties": {
+        "id": {"type": "string", "description": "The supervisor's id, from their token."},
+        "name": {"type": "string", "description": "Their display name, when the token carried one."}
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    },
+    "ToolSpec": {
+      "type": "object",
+      "description": "What the app declares about one tool: the contract the model sees and the rules the platform enforces before running it.",
+      "properties": {
+        "name": {"type": "string", "description": "The name the model calls, unique within the agent: find_patient, book_slot."},
+        "description": {"type": "string", "description": "What the tool does, as the model reads it. In the app this is the method's docstring."},
+        "parameters": {"type": "object", "additionalProperties": true, "description": "The arguments, as a JSON Schema object the model must satisfy."},
+        "side_effect": {"type": "string", "enum": ["read", "write", "irreversible"], "default": "read", "description": "read looks at the world; write changes it and can be undone; irreversible changes it for good, so the platform asks the caller first. Absent means read."},
+        "confirm": {"type": "string", "description": "The read-back the agent says before the tool runs, with {argument} placeholders filled from the call: 'Le reservo con la doctora {doctor} el {at}. \u00bfConfirmo?'. Absent means no confirmation."},
+        "pii": {"type": "array", "items": {"type": "string"}, "description": "Argument names that carry personal data, masked in the log by declaration."},
+        "timeout_s": {"type": "number", "description": "How long the platform waits for the app's result before reporting an error to the model, in seconds."}
+      },
+      "required": ["name", "description", "parameters"],
+      "additionalProperties": false
+    },
+    "ToolResult": {
+      "type": "object",
+      "description": "What came back from running a tool in the app's process. Either an output or an error, never both.",
+      "properties": {
+        "call_id": {"type": "string", "description": "The id the tool.call carried, so the result finds its call."},
+        "name": {"type": "string", "description": "The tool's name, repeated so a log line stands on its own."},
+        "output": {"description": "Whatever the method returned, as JSON. Absent when the tool failed."},
+        "error": {"type": "string", "description": "What went wrong, in words the model may read. Absent when the tool succeeded."},
+        "summary": {"type": "string", "description": "A one-line version of the output for the console and for memory, when the app wrote one."},
+        "duration_s": {"type": "number", "description": "How long the app's method took, in seconds."}
+      },
+      "required": ["call_id", "name"],
+      "additionalProperties": false
+    },
+    "MemoryFact": {
+      "type": "object",
+      "description": "One thing remembered about a contact: a sentence, where it came from, and how well it matched when recalled.",
+      "properties": {
+        "id": {"type": "string", "description": "The fact's id in the memory store."},
+        "text": {"type": "string", "description": "The fact itself, as one sentence: 'prefers mornings', 'allergic to penicillin'."},
+        "score": {"type": "number", "description": "How well it matched the recall query, 0 to 1. Absent when remembering, which has no query."},
+        "source": {"type": "string", "description": "The call this fact was extracted from, when known."}
+      },
+      "required": ["text"],
+      "additionalProperties": false
+    },
+    "MemoryOp": {
+      "type": "object",
+      "description": "One operation against the contact's memory: a recall during the turn, a remember at hangup, or a forget on request.",
+      "properties": {
+        "op": {"type": "string", "enum": ["recall", "remember", "forget"], "description": "recall reads facts for the turn; remember writes facts extracted at hangup; forget erases on the contact's request."},
+        "contact": {"type": "string", "description": "The contact id the memory belongs to."},
+        "query": {"type": "string", "description": "What was asked of memory, for a recall."},
+        "facts": {"type": "array", "items": {"$ref": "#/$defs/MemoryFact"}, "description": "The facts read, written or erased."},
+        "took_ms": {"type": "number", "description": "How long the operation took, in milliseconds. A recall in the turn must stay under 150."}
+      },
+      "required": ["op", "facts", "took_ms"],
+      "additionalProperties": false
+    },
+    "DocSource": {
+      "type": "object",
+      "description": "One chunk of the knowledge base that retrieval put in front of the model for this turn.",
+      "properties": {
+        "id": {"type": "string", "description": "The chunk's id in the knowledge store."},
+        "path": {"type": "string", "description": "The document the chunk came from, as the tenant pushed it: 'faq/horarios.md'."},
+        "heading": {"type": "string", "description": "The heading the chunk sits under, since chunks are cut by heading."},
+        "score": {"type": "number", "description": "The fused rank score (vector and BM25 through RRF), higher is better."},
+        "excerpt": {"type": "string", "description": "The first line or so of the chunk, for the console."}
+      },
+      "required": ["id", "path", "score"],
+      "additionalProperties": false
+    },
+    "CostRate": {
+      "type": "object",
+      "description": "The exchange rate the cost was computed with, stated so the number can be reproduced.",
+      "properties": {
+        "currency": {"type": "string", "const": "EUR", "description": "Costs are always stated in euros."},
+        "usd_to_eur": {"type": "number", "description": "How many euros one US dollar bought, since providers price in dollars."},
+        "as_of": {"type": "string", "description": "The day the rate is from, as YYYY-MM-DD."}
+      },
+      "required": ["currency", "usd_to_eur", "as_of"],
+      "additionalProperties": false
+    },
+    "CostRow": {
+      "type": "object",
+      "description": "One priced line: a model, what was counted, how much, and what it came to.",
+      "properties": {
+        "provider": {"type": "string", "description": "The provider, as the usage row names it: anthropic, elevenlabs, soniox."},
+        "model": {"type": "string", "description": "The model, as the usage row names it."},
+        "unit": {"type": "string", "enum": ["input_tokens", "cached_input_tokens", "cache_creation_tokens", "output_tokens", "characters", "audio_seconds", "requests", "session_seconds"], "description": "What the provider bills by for this line."},
+        "quantity": {"type": "number", "description": "How many of that unit the call used."},
+        "unit_price_usd": {"type": "number", "description": "The provider's list price per unit, in US dollars, from the price table."},
+        "eur": {"type": "number", "description": "quantity times unit_price_usd times the rate, in euros."}
+      },
+      "required": ["provider", "model", "unit", "quantity", "unit_price_usd", "eur"],
+      "additionalProperties": false
+    },
+    "UnpricedRow": {
+      "type": "object",
+      "description": "A usage row the price table does not know. It is listed, never priced at zero.",
+      "properties": {
+        "provider": {"type": "string", "description": "The provider of the row nobody could price."},
+        "model": {"type": "string", "description": "The model of the row nobody could price."}
+      },
+      "required": ["provider", "model"],
+      "additionalProperties": false
+    },
+    "Cost": {
+      "type": "object",
+      "description": "What the call cost in provider fees, informational, in euros. The runtime never prices commercially; this is the provider's bill as best we know it.",
+      "properties": {
+        "eur": {"type": "number", "description": "The sum of every priced row, in euros."},
+        "rate": {"$ref": "#/$defs/CostRate"},
+        "rows": {"type": "array", "items": {"$ref": "#/$defs/CostRow"}, "description": "Every usage row that had a price, one line per unit billed."},
+        "unpriced": {"type": "array", "items": {"$ref": "#/$defs/UnpricedRow"}, "description": "The usage rows the price table did not know, so the total is known to be incomplete."}
+      },
+      "required": ["eur", "rate", "rows", "unpriced"],
+      "additionalProperties": false
+    },
+    "VoiceConfig": {
+      "type": "object",
+      "description": "Which voice speaks for the agent: the name it was asked for, or the id the provider knows it by.",
+      "properties": {
+        "name": {"type": "string", "description": "The voice as the app wrote it: one of the platform's curated names, or a provider's own id. Resolved to a provider and an id when the app declares itself, so an unknown name is refused there and never at the first utterance."},
+        "provider": {"type": "string", "description": "The TTS provider: elevenlabs. Absent when the curated name decides it."},
+        "model": {"type": "string", "description": "The provider's model, when the default is not wanted."},
+        "voice_id": {"type": "string", "description": "The provider's id for the voice."}
+      },
+      "additionalProperties": false
+    },
+    "ModelConfig": {
+      "type": "object",
+      "description": "Which model does a job (the LLM, or the STT), and the one or two knobs worth turning.",
+      "properties": {
+        "provider": {"type": "string", "description": "The provider: anthropic, openai, soniox, deepgram."},
+        "model": {"type": "string", "description": "The provider's model name."},
+        "temperature": {"type": "number", "description": "Sampling temperature, for an LLM. Absent means the provider's default."}
+      },
+      "required": ["provider", "model"],
+      "additionalProperties": false
+    },
+    "TurnConfig": {
+      "type": "object",
+      "description": "How the session decides that the caller has finished, and when the caller may interrupt.",
+      "properties": {
+        "min_interruption_words": {"type": "integer", "description": "How many words the caller must say before the agent stops talking. Guards against 'mm-hm'."},
+        "endpointing_ms": {"type": "integer", "description": "How long a silence, in milliseconds, before the turn detector is asked whether the caller is done."}
+      },
+      "additionalProperties": false
+    },
+    "Pronunciation": {
+      "type": "object",
+      "description": "How the voice says one word it would otherwise get wrong: a proper name, a brand, a street.",
+      "properties": {
+        "word": {"type": "string", "description": "The word as the model writes it: Vidal."},
+        "spoken": {"type": "string", "description": "What the voice is given instead: bidál. Applied to the reply before it is spoken, never to the log."}
+      },
+      "required": ["word", "spoken"],
+      "additionalProperties": false
+    },
+    "StateFieldSpec": {
+      "type": "object",
+      "description": "What the app declares about one field of its state: who may see it. A field never declared is tenant.",
+      "properties": {
+        "name": {"type": "string", "description": "The field's name in the app's state, as state.set sends it: patient, slots."},
+        "visibility": {"$ref": "#/$defs/Visibility"}
+      },
+      "required": ["name", "visibility"],
+      "additionalProperties": false
+    },
+    "EventSpec": {
+      "type": "object",
+      "description": "One outside event the agent accepts, and from whom. An event nobody declared is refused before it touches the log.",
+      "properties": {
+        "name": {"type": "string", "description": "The event's name, dotted, as call.event or pinecall.event will send it: slot.released, form.submitted."},
+        "from": {"type": "array", "items": {"$ref": "#/$defs/EventSource"}, "description": "Who may send it: the tenant's backend, a participant's browser, or both."}
+      },
+      "required": ["name", "from"],
+      "additionalProperties": false
+    },
+    "AgentConfig": {
+      "type": "object",
+      "description": "What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what. Every field is optional so a configure can change one thing.",
+      "properties": {
+        "instructions": {"type": "string", "description": "The static prefix of the prompt: who the agent is and how it behaves. Cached by the provider."},
+        "language": {"type": "string", "description": "The language the agent speaks and expects, as a BCP 47 tag: es-ES, es-UY."},
+        "greeting": {"type": "string", "description": "What the agent says first, verbatim, when a call starts."},
+        "voice": {"$ref": "#/$defs/VoiceConfig"},
+        "llm": {"$ref": "#/$defs/ModelConfig"},
+        "stt": {"$ref": "#/$defs/ModelConfig"},
+        "turn": {"$ref": "#/$defs/TurnConfig"},
+        "says": {"type": "array", "items": {"$ref": "#/$defs/Pronunciation"}, "description": "How the voice says the words it would otherwise get wrong. Applied to the reply on its way to the TTS."},
+        "hears": {"type": "array", "items": {"type": "string"}, "description": "The words the ears must know: the agent's own name, the doctors', the streets. Given to the STT as keyterms."},
+        "tools": {"type": "array", "items": {"$ref": "#/$defs/ToolSpec"}, "description": "Every tool the agent may ever see. Which ones are visible now is tools.set."},
+        "state_fields": {"type": "array", "items": {"$ref": "#/$defs/StateFieldSpec"}, "description": "Who may see each field of the app's state. A field not listed is tenant: seen by the tenant's readers, never by the public."},
+        "events": {"type": "array", "items": {"$ref": "#/$defs/EventSpec"}, "description": "The outside events this agent accepts and from whom. Anything else is refused before it touches the log."}
+      },
+      "additionalProperties": false
+    }
+  }
+}

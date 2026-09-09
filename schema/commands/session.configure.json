@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/session.configure.json",
+  "title": "session.configure",
+  "description": "Set up this one call before the first turn: the app's initial state, and any config that differs from the agent's defaults for this caller.",
+  "x-pinecall": {"kind": "command", "type": "session.configure", "scope": "call", "produces": ["state.changed", "agent.configured"]},
+  "$ref": "#/$defs/SessionConfigure",
+  "$defs": {
+    "SessionConfigure": {
+      "type": "object",
+      "description": "Set up this one call before the first turn: the app's initial state, and any config that differs from the agent's defaults for this caller.",
+      "properties": {
+        "state": {"type": "object", "additionalProperties": true, "description": "The app's state at the start of the call, whole."},
+        "config": {"$ref": "../defs.json#/$defs/AgentConfig"}
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+}

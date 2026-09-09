@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.dtmf.json",
+  "title": "call.dtmf",
+  "description": "Send touch tones down the line, for an IVR on the far end.",
+  "x-pinecall": {"kind": "command", "type": "call.dtmf", "scope": "call", "produces": []},
+  "$ref": "#/$defs/CallDtmf",
+  "$defs": {
+    "CallDtmf": {
+      "type": "object",
+      "description": "Send touch tones down the line, for an IVR on the far end.",
+      "properties": {
+        "digits": {"type": "string", "description": "The tones to send, in order: 0-9, *, #. A comma is a short pause."}
+      },
+      "required": ["digits"],
+      "additionalProperties": false
+    }
+  }
+}

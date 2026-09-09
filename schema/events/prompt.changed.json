@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/prompt.changed.json",
+  "title": "prompt.changed",
+  "description": "A region of the prompt was rewritten. The text stays out of the log; its hash and length let two states be compared.",
+  "x-pinecall": {"kind": "event", "type": "prompt.changed", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/PromptChanged",
+  "$defs": {
+    "PromptChanged": {
+      "type": "object",
+      "description": "A region of the prompt was rewritten. The text stays out of the log; its hash and length let two states be compared.",
+      "properties": {
+        "region": {"$ref": "../defs.json#/$defs/PromptRegion"},
+        "hash": {"type": "string", "description": "sha256 of the region's new text, hex."},
+        "chars": {"type": "integer", "description": "The new text's length in characters."}
+      },
+      "required": ["region", "hash", "chars"],
+      "additionalProperties": false
+    }
+  }
+}

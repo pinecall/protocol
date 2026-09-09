@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/supervisor.released.json",
+  "title": "supervisor.released",
+  "description": "The supervisor gave the line back; the agent resumes with the history intact.",
+  "x-pinecall": {"kind": "event", "type": "supervisor.released", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/SupervisorReleased",
+  "$defs": {
+    "SupervisorReleased": {
+      "type": "object",
+      "description": "The supervisor gave the line back; the agent resumes with the history intact.",
+      "properties": {
+        "by": {"$ref": "../defs.json#/$defs/Supervisor"}
+      },
+      "required": ["by"],
+      "additionalProperties": false
+    }
+  }
+}

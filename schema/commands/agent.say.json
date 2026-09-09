@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/agent.say.json",
+  "title": "agent.say",
+  "description": "Make the agent say this text now, verbatim, outside the model's turn: a greeting, a read-back, a system notice. The reply lands as turn.agent.",
+  "x-pinecall": {"kind": "command", "type": "agent.say", "scope": "call", "produces": ["turn.agent"]},
+  "$ref": "#/$defs/AgentSay",
+  "$defs": {
+    "AgentSay": {
+      "type": "object",
+      "description": "Make the agent say this text now, verbatim, outside the model's turn: a greeting, a read-back, a system notice. The reply lands as turn.agent.",
+      "properties": {
+        "text": {"type": "string", "description": "What to say, word for word."},
+        "allow_interruptions": {"type": "boolean", "description": "Whether the caller may cut it short. Default true; a legal notice sets false."}
+      },
+      "required": ["text"],
+      "additionalProperties": false
+    }
+  }
+}

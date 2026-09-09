@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/call.ringing.json",
+  "title": "call.ringing",
+  "description": "An inbound call is offered to this agent and has not been answered yet. The first entry of an inbound call's log.",
+  "x-pinecall": {"kind": "event", "type": "call.ringing", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/CallRinging",
+  "$defs": {
+    "CallRinging": {
+      "type": "object",
+      "description": "An inbound call is offered to this agent and has not been answered yet. The first entry of an inbound call's log.",
+      "properties": {
+        "channel": {"$ref": "../defs.json#/$defs/Channel"},
+        "from": {"type": "string", "description": "The calling number in E.164 form, or the web visitor id."},
+        "to": {"type": "string", "description": "The number or route that was called."},
+        "route": {"$ref": "../defs.json#/$defs/Route"},
+        "caller": {"anyOf": [{"$ref": "../defs.json#/$defs/Contact"}, {"type": "null"}], "description": "Who this seems to be, from the number alone. Null when nobody is known."},
+        "external_id": {"type": "string", "description": "The carrier or SIP call id, for tracing outside Pinecall."}
+      },
+      "required": ["channel", "from", "to", "route", "caller"],
+      "additionalProperties": false
+    }
+  }
+}

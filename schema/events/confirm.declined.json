@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/confirm.declined.json",
+  "title": "confirm.declined",
+  "description": "The caller did not say yes, or the request lapsed. The tool does not run; the model is told.",
+  "x-pinecall": {"kind": "event", "type": "confirm.declined", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/ConfirmDeclined",
+  "$defs": {
+    "ConfirmDeclined": {
+      "type": "object",
+      "description": "The caller did not say yes, or the request lapsed. The tool does not run; the model is told.",
+      "properties": {
+        "tool": {"type": "string", "description": "The tool that will not run."},
+        "call_id": {"type": "string", "description": "The tool call refused."},
+        "audience": {"type": "string", "description": "What was asked, repeated from the request."},
+        "said": {"type": "string", "description": "What the caller said, when they said anything."},
+        "reason": {"type": "string", "enum": ["no", "timeout", "changed", "cancelled"], "description": "no: they refused. timeout: ttl ran out. changed: they asked for something else. cancelled: the call moved on."}
+      },
+      "required": ["tool", "call_id", "audience", "reason"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/room.json",
+  "title": "The room and the outside world",
+  "description": "What reaches the log from outside the conversation's own turns. The LiveKit room's facts, as the room reports them: it opened, who joined and with which attributes, who left, who is speaking, which tracks they publish. And the facts that cross the room's edge: what the outside world hands the agent (an event from the tenant's backend or from a participant) and what the agent hands a browser. The agent never touches LiveKit; it reads these facts. Each is one event under events/.",
+  "$defs": {
+    "RoomOpened": {
+      "type": "object",
+      "description": "The LiveKit room exists and the call lives in it. Phone and web calls have one; a text session has no room and never logs this.",
+      "properties": {
+        "name": {"type": "string", "description": "The room's name, the one a browser or a SIP leg joins: call-CA_8f4a2c."},
+        "sid": {"type": "string", "description": "livekit's id for the room, for tracing in its logs."},
+        "channel": {"$ref": "defs.json#/$defs/Channel"}
+      },
+      "required": ["name", "sid", "channel"],
+      "additionalProperties": false
+    },
+    "ParticipantJoined": {
+      "type": "object",
+      "description": "Somebody joined the room: the caller over SIP or the widget, the agent, a supervisor, a listener, or a second SIP leg. Their attributes travel verbatim: the caller's number is a fact of the room, not a field we invent.",
+      "properties": {
+        "identity": {"type": "string", "description": "The identity the room knows them by: sip_+34600123456 for a SIP caller, agent-AJ_5d2e8f for the agent, a visitor id for the widget."},
+        "kind": {"$ref": "defs.json#/$defs/ParticipantKind"},
+        "name": {"type": "string", "description": "Their display name, when the room carried one."},
+        "attributes": {"type": "object", "additionalProperties": true, "description": "livekit's participant attributes, string to string, exactly as the room holds them. For a SIP leg that is sip.callID, sip.callStatus, sip.trunkID, sip.trunkPhoneNumber, sip.phoneNumber, sip.ruleID and one sip.h.<header> per SIP header the trunk lets through; for the agent, lk.agent.state. Never renamed, never summarised; the public projection drops them whole."}
+      },
+      "required": ["identity", "kind", "attributes"],
+      "additionalProperties": false
+    },
+    "ParticipantLeft": {
+      "type": "object",
+      "description": "Somebody left the room. When it is the caller, call.ended follows.",
+      "properties": {
+        "identity": {"type": "string", "description": "The identity that left."},
+        "reason": {"type": "string", "description": "Why, as livekit's DisconnectReason names it, in lower case: client_initiated (they hung up or closed the tab), participant_removed (a participant.remove), room_closed, sip_trunk_failure, connection_timeout, and whatever the library adds next. Open on purpose: a reason the room reports is a fact even before this schema has heard of it."}
+      },
+      "required": ["identity", "reason"],
+      "additionalProperties": false
+    },
+    "ParticipantSpeaking": {
+      "type": "object",
+      "description": "The room's own voice activity for one participant flipped. Ephemeral: it is a light for the console, and the turns say who spoke.",
+      "properties": {
+        "identity": {"type": "string", "description": "Whose voice."},
+        "speaking": {"type": "boolean", "description": "True when they started, false when they stopped."}
+      },
+      "required": ["identity", "speaking"],
+      "additionalProperties": false
+    },
+    "TrackPublished": {
+      "type": "object",
+      "description": "A participant put a track on the room: their microphone, their camera, a screen.",
+      "properties": {
+        "identity": {"type": "string", "description": "Whose track."},
+        "kind": {"$ref": "defs.json#/$defs/TrackKind"},
+        "source": {"$ref": "defs.json#/$defs/TrackSource"}
+      },
+      "required": ["identity", "kind", "source"],
+      "additionalProperties": false
+    },
+    "TrackUnpublished": {
+      "type": "object",
+      "description": "A participant's track left the room: they stopped sharing, or a participant.mute took their audio away.",
+      "properties": {
+        "identity": {"type": "string", "description": "Whose track."},
+        "kind": {"$ref": "defs.json#/$defs/TrackKind"},
+        "source": {"$ref": "defs.json#/$defs/TrackSource"}
+      },
+      "required": ["identity", "kind", "source"],
+      "additionalProperties": false
+    },
+    "EventReceived": {
+      "type": "object",
+      "description": "A fact arrived from outside the conversation: the tenant's backend sent call.event, or a participant's browser sent pinecall.event. One event for both, told apart by source. It reached the log only because the agent declared the name in its events, from that source; anything else was refused before this.",
+      "properties": {
+        "name": {"type": "string", "description": "The event's name, dotted, as the agent declared it: slot.released, form.submitted."},
+        "data": {"type": "object", "additionalProperties": true, "description": "Whatever came with it, as JSON. The app reads it; the platform never does."},
+        "source": {"$ref": "defs.json#/$defs/EventSource"},
+        "identity": {"type": "string", "description": "The participant that sent it, for source participant. Absent when the app did."}
+      },
+      "required": ["name", "data", "source"],
+      "additionalProperties": false
+    },
+    "RoomSent": {
+      "type": "object",
+      "description": "The agent pushed a payload to a browser in the room, on the tenant's room.send. Ephemeral, and the payload stays out of the log: the tenant chose what to send and to whom.",
+      "properties": {
+        "topic": {"type": "string", "description": "The DataChannel topic it went out on: pinecall.ui for the widget, or a topic of the tenant's own."},
+        "to": {"type": "string", "description": "The identity it was addressed to. Absent: every participant in the room."},
+        "bytes": {"type": "integer", "description": "How many bytes the payload was."}
+      },
+      "required": ["topic", "bytes"],
+      "additionalProperties": false
+    }
+  }
+}

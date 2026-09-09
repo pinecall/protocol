@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/ping.json",
+  "title": "ping",
+  "description": "Is the socket alive? The gateway answers pong.",
+  "x-pinecall": {"kind": "command", "type": "ping", "scope": "agent", "produces": ["pong"]},
+  "$ref": "#/$defs/Ping",
+  "$defs": {
+    "Ping": {
+      "type": "object",
+      "description": "Is the socket alive? The gateway answers pong.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/log.gap.json",
+  "title": "log.gap",
+  "description": "This reader missed a stretch: it reconnected too late for the store, or fell behind and the fanout dropped ephemeral entries. When the platform has a snapshot, it is here so the reader can catch up in one step. Never stored; sent to the reader.",
+  "x-pinecall": {"kind": "event", "type": "log.gap", "scope": "call", "ephemeral": true},
+  "$ref": "#/$defs/LogGap",
+  "$defs": {
+    "LogGap": {
+      "type": "object",
+      "description": "This reader missed a stretch: it reconnected too late for the store, or fell behind and the fanout dropped ephemeral entries. When the platform has a snapshot, it is here so the reader can catch up in one step. Never stored; sent to the reader.",
+      "properties": {
+        "from_seq": {"type": "integer", "description": "The first seq the reader did not get."},
+        "to_seq": {"type": "integer", "description": "The last seq the reader did not get."},
+        "snapshot": {"anyOf": [{"$ref": "../state.json#/$defs/State"}, {"type": "null"}], "description": "The state at to_seq, when the platform could compute it. Null when only ephemeral entries were dropped."}
+      },
+      "required": ["from_seq", "to_seq", "snapshot"],
+      "additionalProperties": false
+    }
+  }
+}

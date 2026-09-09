@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/agent.reply.json",
+  "title": "agent.reply",
+  "description": "Make the model speak now, guided by an instruction it reads and the caller never hears: 'tell them a slot at 10:15 just opened'. On livekit's session.generate_reply; the sibling of agent.say, which speaks verbatim. The reply lands as turn.agent.",
+  "x-pinecall": {"kind": "command", "type": "agent.reply", "scope": "call", "produces": ["turn.agent"]},
+  "$ref": "#/$defs/AgentReply",
+  "$defs": {
+    "AgentReply": {
+      "type": "object",
+      "description": "Make the model speak now, guided by an instruction it reads and the caller never hears: 'tell them a slot at 10:15 just opened'. On livekit's session.generate_reply; the sibling of agent.say, which speaks verbatim. The reply lands as turn.agent.",
+      "properties": {
+        "instructions": {"type": "string", "description": "What the model is told before it speaks, in words the model reads. Not what it says."},
+        "allow_interruptions": {"type": "boolean", "description": "Whether the caller may cut it short. Default true."}
+      },
+      "required": ["instructions"],
+      "additionalProperties": false
+    }
+  }
+}

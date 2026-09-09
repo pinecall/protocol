@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/room.invite.json",
+  "title": "room.invite",
+  "description": "Bring somebody else into the call's room. A second SIP leg dialed to a number is the warm path: the agent stays on with the caller while the other side answers. Lands as participant.joined when they arrive, or error when they do not.",
+  "x-pinecall": {"kind": "command", "type": "room.invite", "scope": "call", "produces": ["participant.joined"]},
+  "$ref": "#/$defs/RoomInvite",
+  "$defs": {
+    "RoomInvite": {
+      "type": "object",
+      "description": "Bring somebody else into the call's room. A second SIP leg dialed to a number is the warm path: the agent stays on with the caller while the other side answers. Lands as participant.joined when they arrive, or error when they do not.",
+      "properties": {
+        "to": {"type": "string", "description": "A number in E.164 form for sip; an identity for participant."},
+        "kind": {"type": "string", "enum": ["sip", "participant"], "description": "sip: dial the number in to as a second leg of the same room; they join with kind sip. participant: admit the identity named in to, for a supervisor's or a listener's seat."}
+      },
+      "required": ["to", "kind"],
+      "additionalProperties": false
+    }
+  }
+}

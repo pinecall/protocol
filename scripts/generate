@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# schema/ -> python/pinecall_protocol (pydantic), typescript/src/generated (zod), docs/ (the
+# reference tables). Idempotent: a second run changes nothing.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+(cd python && uv run python ../generate && uv run ruff format pinecall_protocol)

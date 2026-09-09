@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/docs.sources.json",
+  "title": "docs.sources",
+  "description": "What retrieval put in front of the model for this turn. An answer can be traced back to its chunks.",
+  "x-pinecall": {"kind": "event", "type": "docs.sources", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/DocsSources",
+  "$defs": {
+    "DocsSources": {
+      "type": "object",
+      "description": "What retrieval put in front of the model for this turn. An answer can be traced back to its chunks.",
+      "properties": {
+        "query": {"type": "string", "description": "What was searched for."},
+        "sources": {"type": "array", "items": {"$ref": "../defs.json#/$defs/DocSource"}, "description": "The chunks, best first."},
+        "took_ms": {"type": "number", "description": "How long retrieval took, milliseconds."},
+        "speech_id": {"type": "string", "description": "The reply the chunks served."}
+      },
+      "required": ["query", "sources", "took_ms"],
+      "additionalProperties": false
+    }
+  }
+}

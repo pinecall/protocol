@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/log.caught_up.json",
+  "title": "log.caught_up",
+  "description": "The replay is done: everything up to seq has been sent and what follows is live. Never stored; sent to the reader.",
+  "x-pinecall": {"kind": "event", "type": "log.caught_up", "scope": "call", "ephemeral": true},
+  "$ref": "#/$defs/LogCaughtUp",
+  "$defs": {
+    "LogCaughtUp": {
+      "type": "object",
+      "description": "The replay is done: everything up to seq has been sent and what follows is live. Never stored; sent to the reader.",
+      "properties": {
+        "seq": {"type": "integer", "description": "The last seq the store held when the reader caught up."}
+      },
+      "required": ["seq"],
+      "additionalProperties": false
+    }
+  }
+}
