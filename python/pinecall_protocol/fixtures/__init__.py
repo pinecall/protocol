@@ -1,4 +1,4 @@
-"""The golden call log and the state it reduces to, shipped so every consumer proves the same thing."""
+"""The golden call log and the state it reduces to: every consumer proves the same thing."""
 
 from importlib.resources import files
 from pathlib import Path
