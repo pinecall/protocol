@@ -27,3 +27,13 @@ Edit the schema, run `scripts/generate`, commit what it wrote. Nothing under
 `python/pinecall_protocol/`, `typescript/src/generated/` or between the generated markers in
 `docs/` is ever edited by hand. `docs/README.md` explains the envelope and the one `seq`;
 `docs/decision.md` is why the vocabulary is the way it is.
+
+## License
+
+[Apache-2.0](LICENSE). Use it, change it, run it in production, sell what you build with it —
+commercially or not, on your own box or somebody else's. The licence carries an explicit patent
+grant, which is why it is the one this stack uses (LiveKit's is the same). There is no NOTICE
+file, so nothing has to be reproduced downstream beyond the licence itself, and there is no CLA:
+a patch is yours and stays under the same terms.
+
+Both packages carry a copy of it: `pinecall-protocol` on PyPI, `@pinecall/protocol` on npm.

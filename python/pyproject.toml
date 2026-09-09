@@ -5,6 +5,9 @@ name = "pinecall-protocol"
 description = "The Pinecall wire: pydantic models generated from the protocol schema"
 readme = "README.md"
 license = "Apache-2.0"
+# PEP 639: the text itself travels in the wheel and the sdist. LICENSE here is a copy of the
+# repository's, because a published package carries its own.
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dynamic = ["version"]
 authors = [{ name = "Bernardo Castro", email = "me@bernardocastro.dev" }]

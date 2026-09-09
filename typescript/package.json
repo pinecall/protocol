@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "description": "The Pinecall wire: zod schemas and types generated from the protocol schema, and the log reducer",
   "license": "Apache-2.0",
+  "author": "Pinecall <hello@pinecall.io>",
+  "repository": { "type": "git", "url": "git+https://github.com/pinecall/protocol.git", "directory": "typescript" },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
