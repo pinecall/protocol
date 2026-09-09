@@ -5,7 +5,7 @@ from __future__ import annotations
 import textwrap
 from pathlib import Path
 
-from schema import MODULES, Bundle, Definition, Message, Property, Shape
+from schema import MODULES, Bundle, Definition, Message, Property, Shape, dependencies
 
 HEADLINES = {
     "defs": "the shapes shared across the wire",
@@ -105,15 +105,7 @@ def _key(field: str) -> str:
 
 # A message whose data is a shape from another module needs no import in the models module.
 def _field_imports(bundle: Bundle, module: str) -> dict[str, list[str]]:
-    used: set[str] = set()
-    for definition in bundle.module(module):
-        used.update(member.name for member in definition.members)
-        for prop in definition.properties:
-            shape: Shape | None = prop.shape
-            while shape is not None:
-                if shape.ref is not None:
-                    used.add(shape.ref.name)
-                shape = shape.items
+    used = {ref.name for definition in bundle.module(module) for ref in dependencies(definition)}
     return {
         other: [name for name in names if name in used]
         for other, names in bundle.imports_of(module).items()
@@ -137,6 +129,9 @@ def _definition_source(definition: Definition) -> str:
     elif definition.kind == "union":
         members = ", ".join(f"{member.name}Schema" for member in definition.members)
         schema = f'z.discriminatedUnion("{definition.discriminator}", [{members}])'
+    elif definition.kind == "map":
+        assert definition.value is not None
+        schema = f"z.record(z.string(), {_schema(definition.value)})"
     elif not definition.properties:
         schema = "z.strictObject({})"
     else:
@@ -155,6 +150,8 @@ def _definition_source(definition: Definition) -> str:
 def _field_source(prop: Property) -> str:
     key = prop.name if prop.name.isidentifier() else f'"{prop.name}"'
     schema = _schema(prop.shape)
+    if prop.pattern is not None:
+        schema += f".regex(/{prop.pattern}/)"
     if not prop.required:
         schema += ".nullish()"
     return f"{key}: {schema}"
@@ -182,6 +179,9 @@ def _bare_schema(shape: Shape) -> str:
         case "list":
             assert shape.items is not None
             return f"z.array({_schema(shape.items)})"
+        case "map":
+            assert shape.items is not None
+            return f"z.record(z.string(), {_schema(shape.items)})"
         case "ref":
             assert shape.ref is not None
             return f"{shape.ref.name}Schema"
@@ -239,20 +239,27 @@ def _doc_comment(text: str) -> str:
     return "/**\n" + "\n".join(f" * {line}" for line in lines) + "\n */\n"
 
 
-# The keys whose values are the app's own JSON: the codec never renames anything under them.
+# The keys whose values are the app's own JSON, or a map keyed by names the app chose: the codec
+# never renames anything under them.
 def _codec_source(bundle: Bundle) -> str:
     opaque = sorted(
         {
             prop.name
             for definition in bundle.definitions.values()
             for prop in definition.properties
-            if prop.shape.kind in ("json", "any")
+            if _keyed_by_the_app(bundle, prop.shape)
         }
     )
     quoted = tuple(opaque)
     return CODEC_TEMPLATE.replace("__OPAQUE__", _strings(quoted)).replace(
         "__OPAQUE_TYPE__", " | ".join(f'"{key}"' for key in quoted)
     )
+
+
+def _keyed_by_the_app(bundle: Bundle, shape: Shape) -> bool:
+    if shape.kind in ("json", "any", "map"):
+        return True
+    return shape.ref is not None and bundle.definitions[shape.ref].kind == "map"
 
 
 CODEC_TEMPLATE = '''// The wire, decoded and typed. The only file that touches a key name: snake_case on the wire,
@@ -342,7 +349,7 @@ export type Snake<T> = T extends readonly (infer Item)[]
     ? { [K in keyof T as K extends string ? SnakeCase<K> : K]: K extends OpaqueKey ? T[K] : Snake<T[K]> }
     : T;
 
-/** The keys whose values belong to the app (its state, a tool's arguments): never renamed below them. */
+/** The keys whose values belong to the app (its state, a tool's arguments, a map it named): never renamed below them. */
 export const OPAQUE_KEYS = new Set<string>([__OPAQUE__]);
 export type OpaqueKey = __OPAQUE_TYPE__;
 

@@ -4,7 +4,6 @@ import { z } from "zod";
 import {
   AgentConfigSchema,
   ContactSchema,
-  PromptRegionSchema,
   RouteSchema,
   SupervisorSchema,
   ToolSpecSchema,
@@ -145,11 +144,11 @@ export const PingSchema = z.strictObject({});
 export type Ping = z.infer<typeof PingSchema>;
 
 /**
- * Rewrite one region of the prompt. The static prefix is cached by the provider and rarely
- * changes; the view is render(state) and changes with the state.
+ * Rewrite one block of the prompt, whole, by name. The name must be one of the agent's declared
+ * blocks, or one of the default four; anything else is refused with the name.
  */
 export const PromptSetSchema = z.strictObject({
-  region: PromptRegionSchema,
+  name: z.string(),
   text: z.string(),
 });
 export type PromptSet = z.infer<typeof PromptSetSchema>;

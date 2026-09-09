@@ -41,7 +41,7 @@ Every event the gateway writes, one line each, with the page that holds its data
 | `participant.left` | call | no | [events-room.md](events-room.md) | Somebody left the room. |
 | `participant.speaking` | call | yes | [events-room.md](events-room.md) | The room's own voice activity for one participant flipped. |
 | `pong` | agent | yes | [events-control.md](events-control.md) | The answer to ping. |
-| `prompt.changed` | call | no | [events-app.md](events-app.md) | A region of the prompt was rewritten. |
+| `prompt.changed` | call | no | [events-app.md](events-app.md) | A block of the prompt was rewritten. |
 | `room.opened` | call | no | [events-room.md](events-room.md) | The LiveKit room exists and the call lives in it. |
 | `room.sent` | call | yes | [events-room.md](events-room.md) | The agent pushed a payload to a browser in the room, on the tenant's room.send. |
 | `state.changed` | call | no | [events-app.md](events-app.md) | The app's declared state changed. |

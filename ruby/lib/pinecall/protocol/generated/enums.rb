@@ -25,10 +25,10 @@ module Pinecall
       # Cold: the caller is sent on and the agent leaves. Warm: the agent stays on the line until
       # the other side answers, then leaves.
       TRANSFER_MODE = %w[cold warm].freeze
-      # Which region of the prompt: the cached static prefix (instructions), or the dynamic view
-      # rendered from state at the end. The append-only history in between is never written by the
-      # app.
-      PROMPT_REGION = %w[static view].freeze
+      # Which region of the prompt a block lives in: static, before the history, cached by the
+      # provider; or dynamic, after the history, replaced every turn. The append-only history in
+      # between is never written by the app.
+      PROMPT_REGION = %w[static dynamic].freeze
       # What the platform believes the person on the line is doing right now. The states are the
       # session's own.
       USER_STATE = %w[listening speaking away].freeze

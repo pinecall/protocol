@@ -132,6 +132,9 @@ def _definition_section(bundle: Bundle, definition: Definition) -> str:
     elif definition.kind == "union":
         members = ", ".join(f"`{member.name}`" for member in definition.members)
         lines += [f"One of {members}, told apart by `{definition.discriminator}`.", ""]
+    elif definition.kind == "map":
+        assert definition.value is not None
+        lines += [f"A map by name: every value is a `{_type_name(definition.value)}`.", ""]
     else:
         lines += [_fields_table(bundle, definition), ""]
     return "\n".join(lines)
@@ -151,11 +154,12 @@ def _fields_table(bundle: Bundle, definition: Definition) -> str:
 
 # A field that is a bare reference says nothing of its own; the shape it points at does.
 def _meaning(bundle: Bundle, prop: Property) -> str:
-    if prop.description:
-        return prop.description
-    if prop.shape.ref is not None:
-        return _first_sentence(bundle.definitions[prop.shape.ref].description)
-    return ""
+    said = prop.description
+    if not said and prop.shape.ref is not None:
+        said = _first_sentence(bundle.definitions[prop.shape.ref].description)
+    if prop.pattern is not None:
+        said = f"{said} Matches `{prop.pattern}`."
+    return said
 
 
 def _metrics_table(bundle: Bundle) -> str:
@@ -192,6 +196,9 @@ def _type_name(shape: Shape) -> str:
         case "list":
             assert shape.items is not None
             base = f"{_type_name(shape.items)}[]"
+        case "map":
+            assert shape.items is not None
+            base = f"map<string, {_type_name(shape.items)}>"
         case "ref":
             assert shape.ref is not None
             base = shape.ref.name

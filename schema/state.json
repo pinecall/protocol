@@ -78,12 +78,12 @@
       "required": ["call_id", "name", "arguments", "status", "seq"],
       "additionalProperties": false
     },
-    "PromptRegionState": {
+    "PromptBlockState": {
       "type": "object",
-      "description": "What is known about one region of the prompt without storing its text.",
+      "description": "What is known about one block of the prompt without storing its text.",
       "properties": {
-        "hash": {"type": "string", "description": "sha256 of the region's text, so two states can be compared."},
-        "chars": {"type": "integer", "description": "The region's length in characters."},
+        "hash": {"type": "string", "description": "sha256 of the block's text, so two states can be compared."},
+        "chars": {"type": "integer", "description": "The block's length in characters."},
         "seq": {"type": "integer", "description": "The seq of the prompt.changed that set it."}
       },
       "required": ["hash", "chars", "seq"],
@@ -91,13 +91,8 @@
     },
     "PromptState": {
       "type": "object",
-      "description": "The two regions the app writes. The history in between is the turns.",
-      "properties": {
-        "static": {"anyOf": [{"$ref": "#/$defs/PromptRegionState"}, {"type": "null"}], "description": "The cached prefix, or null before it was set."},
-        "view": {"anyOf": [{"$ref": "#/$defs/PromptRegionState"}, {"type": "null"}], "description": "The rendered view at the end, or null before it was set."}
-      },
-      "required": ["static", "view"],
-      "additionalProperties": false
+      "description": "Every block the app has written, by name, without its text. The history between the static and the dynamic blocks is the turns.",
+      "additionalProperties": {"$ref": "#/$defs/PromptBlockState"}
     },
     "Confirm": {
       "type": "object",

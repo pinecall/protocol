@@ -67,13 +67,20 @@ def _shapes_source(bundle: Bundle) -> str:
         f"members: {_words([member.name for member in definition.members])} }}.freeze"
         for definition in _definitions(bundle, "union")
     ]
+    maps = [
+        f'        "{definition.ref.name}" => {_value_descriptor(definition.value)}.freeze'
+        for definition in _definitions(bundle, "map")
+        if definition.value is not None
+    ]
     body = (
         "      # Every object the wire carries: its fields, and what each field may be. A shape is\n"
         "      # closed — the schema says additionalProperties: false — so a key nobody declared is\n"
         "      # a message from a newer protocol and the reader is told so by name.\n"
         f"      SHAPES = {{\n{',\n'.join(rows)}\n      }}.freeze\n\n"
         "      # A union is told apart by one field, the way the schema's discriminator says.\n"
-        f"      UNIONS = {{\n{',\n'.join(unions)}\n      }}.freeze\n"
+        f"      UNIONS = {{\n{',\n'.join(unions)}\n      }}.freeze\n\n"
+        "      # A map is keyed by names the app chose; every value is the one shape given here.\n"
+        f"      MAPS = {{\n{',\n'.join(maps)}\n      }}.freeze\n"
     )
     return _module("Shapes", HEADLINES["shapes"], body)
 
@@ -122,7 +129,14 @@ def _descriptor(prop: Property) -> str:
         parts.append("required: true")
     if prop.default is not MISSING:
         parts.append(f"default: {_literal(prop.default)}")
+    if prop.pattern is not None:
+        parts.append(f"pattern: {_literal(prop.pattern)}")
     return "{ " + ", ".join(parts) + " }"
+
+
+# What a list holds, or what every value of a map is: a shape with no field around it.
+def _value_descriptor(shape: Shape) -> str:
+    return "{ " + ", ".join([f"kind: :{_kind(shape)}", *_shape_parts(shape)]) + " }"
 
 
 def _shape_parts(shape: Shape) -> list[str]:
@@ -136,13 +150,12 @@ def _shape_parts(shape: Shape) -> list[str]:
     if shape.const is not None:
         parts.append(f'const: "{shape.const}"')
     if shape.items is not None:
-        inner = ", ".join([f"kind: :{_kind(shape.items)}", *_shape_parts(shape.items)])
-        parts.append(f"items: {{ {inner} }}")
+        parts.append(f"items: {_value_descriptor(shape.items)}")
     return parts
 
 
-# str, float, int, bool, any, json, list, ref, enum and const are the ten kinds the schema loader
-# resolves everything to; the validator has one branch per kind and no eleventh.
+# str, float, int, bool, any, json, list, map, ref, enum and const are the eleven kinds the schema
+# loader resolves everything to; the validator has one branch per kind and no twelfth.
 def _kind(shape: Shape) -> str:
     return shape.kind
 
@@ -172,6 +185,9 @@ def _rbs_definition(definition: Definition) -> str:
         return " | ".join(f'"{value}"' for value in definition.values)
     if definition.kind == "union":
         return " | ".join(_snake(member.name) for member in definition.members)
+    if definition.kind == "map":
+        assert definition.value is not None
+        return f"Hash[Symbol, {_rbs_type(definition.value)}]"
     if not definition.properties:
         return "{ }"
     fields = ", ".join(_rbs_field(prop) for prop in definition.properties)
@@ -205,6 +221,9 @@ def _rbs_bare(shape: Shape) -> str:
         case "list":
             assert shape.items is not None
             return f"Array[{_rbs_type(shape.items)}]"
+        case "map":
+            assert shape.items is not None
+            return f"Hash[Symbol, {_rbs_type(shape.items)}]"
         case "ref":
             assert shape.ref is not None
             return _snake(shape.ref.name)

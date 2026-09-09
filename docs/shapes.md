@@ -67,9 +67,18 @@ One of: `cold`, `warm`.
 
 ### `PromptRegion`
 
-Which region of the prompt: the cached static prefix (instructions), or the dynamic view rendered from state at the end. The append-only history in between is never written by the app.
+Which region of the prompt a block lives in: static, before the history, cached by the provider; or dynamic, after the history, replaced every turn. The append-only history in between is never written by the app.
 
-One of: `static`, `view`.
+One of: `static`, `dynamic`.
+
+### `PromptBlockSpec`
+
+One named block of the prompt and the region it lives in. The default layout, when an agent declares none, is identity, knowledge and tools (static), then the history, then view (dynamic). A block's text is written per call with prompt.set.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `name` | `string` | yes | The block's name, the one prompt.set writes it by: lowercase, digits and underscores. Matches `^[a-z][a-z0-9_]*$`. |
+| `region` | `PromptRegion` | yes | Which region of the prompt a block lives in: static, before the history, cached by the provider; or dynamic, after the history, replaced every turn. |
 
 ### `UserState`
 
@@ -318,7 +327,7 @@ What an app declares about its agent: the voice, the models, the language, the g
 
 | field | type | required | meaning |
 |---|---|---|---|
-| `instructions` | `string` | no | The static prefix of the prompt: who the agent is and how it behaves. Cached by the provider. |
+| `prompt` | `PromptBlockSpec[]` | no | The blocks of the prompt in the one order they are sent: every static block, then the history, then every dynamic block. Absent, the layout is the default: identity · knowledge · tools, the history, view. |
 | `language` | `string` | no | The language the agent speaks and expects, as a BCP 47 tag: es-ES, es-UY. |
 | `greeting` | `string` | no | What the agent says first, verbatim, when a call starts. |
 | `voice` | `VoiceConfig` | no | Which voice speaks for the agent: the name it was asked for, or the id the provider knows it by. |

@@ -42,11 +42,23 @@ export const TransferModeSchema = z.enum(["cold", "warm"]);
 export type TransferMode = z.infer<typeof TransferModeSchema>;
 
 /**
- * Which region of the prompt: the cached static prefix (instructions), or the dynamic view
- * rendered from state at the end. The append-only history in between is never written by the app.
+ * Which region of the prompt a block lives in: static, before the history, cached by the provider;
+ * or dynamic, after the history, replaced every turn. The append-only history in between is never
+ * written by the app.
  */
-export const PromptRegionSchema = z.enum(["static", "view"]);
+export const PromptRegionSchema = z.enum(["static", "dynamic"]);
 export type PromptRegion = z.infer<typeof PromptRegionSchema>;
+
+/**
+ * One named block of the prompt and the region it lives in. The default layout, when an agent
+ * declares none, is identity, knowledge and tools (static), then the history, then view (dynamic).
+ * A block's text is written per call with prompt.set.
+ */
+export const PromptBlockSpecSchema = z.strictObject({
+  name: z.string().regex(/^[a-z][a-z0-9_]*$/),
+  region: PromptRegionSchema,
+});
+export type PromptBlockSpec = z.infer<typeof PromptBlockSpecSchema>;
 
 /**
  * What the platform believes the person on the line is doing right now. The states are the
@@ -290,7 +302,7 @@ export type EventSpec = z.infer<typeof EventSpecSchema>;
  * thing.
  */
 export const AgentConfigSchema = z.strictObject({
-  instructions: z.string().nullish(),
+  prompt: z.array(PromptBlockSpecSchema).nullish(),
   language: z.string().nullish(),
   greeting: z.string().nullish(),
   voice: VoiceConfigSchema.nullish(),

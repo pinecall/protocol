@@ -11,8 +11,8 @@ export const SayVerbSchema = z.strictObject({
 export type SayVerb = z.infer<typeof SayVerbSchema>;
 
 /**
- * Tell the agent something the caller never hears; it goes into the prompt's view region. Logged
- * as supervisor.whispered.
+ * Tell the agent something the caller never hears. It reaches the agent as an instruction for its
+ * next reply; logged as supervisor.whispered.
  */
 export const WhisperVerbSchema = z.strictObject({
   verb: z.literal("whisper"),

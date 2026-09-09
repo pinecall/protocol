@@ -22,7 +22,7 @@ What reaches the gateway: the commands an app sends over its socket, each with t
 | `participant.mute` | call | `track.unpublished` | Silence a participant for the rest of the call: their audio leaves the room, for everyone in it. |
 | `participant.remove` | call | `participant.left` | Put a participant out of the room. |
 | `ping` | agent | `pong` | Is the socket alive? The gateway answers pong. |
-| `prompt.set` | call | `prompt.changed` | Rewrite one region of the prompt. |
+| `prompt.set` | call | `prompt.changed` | Rewrite one block of the prompt, whole, by name. |
 | `room.invite` | call | `participant.joined` | Bring somebody else into the call's room. |
 | `room.send` | call | `room.sent` | Push a payload to a browser in the room over the DataChannel: a card to render, a form to open. |
 | `session.configure` | call | `state.changed`, `agent.configured` | Set up this one call before the first turn: the app's initial state, and any config that differs from the agent's defaults for this caller. |
@@ -201,14 +201,14 @@ No fields.
 
 ### `prompt.set`
 
-Rewrite one region of the prompt. The static prefix is cached by the provider and rarely changes; the view is render(state) and changes with the state.
+Rewrite one block of the prompt, whole, by name. The name must be one of the agent's declared blocks, or one of the default four; anything else is refused with the name.
 
 Lands in the log as: `prompt.changed`.
 
 | field | type | required | meaning |
 |---|---|---|---|
-| `region` | `PromptRegion` | yes | Which region of the prompt: the cached static prefix (instructions), or the dynamic view rendered from state at the end. |
-| `text` | `string` | yes | The region's new text, whole. |
+| `name` | `string` | yes | The block to rewrite, by the name its PromptBlockSpec declares. |
+| `text` | `string` | yes | The block's new text, whole. |
 
 ### `room.invite`
 
@@ -297,7 +297,7 @@ Make the agent say this, verbatim, to the caller. Logged as supervisor.said.
 
 ### `WhisperVerb`
 
-Tell the agent something the caller never hears; it goes into the prompt's view region. Logged as supervisor.whispered.
+Tell the agent something the caller never hears. It reaches the agent as an instruction for its next reply; logged as supervisor.whispered.
 
 | field | type | required | meaning |
 |---|---|---|---|

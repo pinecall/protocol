@@ -11,7 +11,6 @@ import {
   EndedBySchema,
   EndReasonSchema,
   MemoryOpSchema,
-  PromptRegionSchema,
   RouteSchema,
   ScoreVerdictSchema,
   SupervisorSchema,
@@ -304,11 +303,11 @@ export const PongSchema = z.strictObject({
 export type Pong = z.infer<typeof PongSchema>;
 
 /**
- * A region of the prompt was rewritten. The text stays out of the log; its hash and length let two
+ * A block of the prompt was rewritten. The text stays out of the log; its hash and length let two
  * states be compared.
  */
 export const PromptChangedSchema = z.strictObject({
-  region: PromptRegionSchema,
+  name: z.string(),
   hash: z.string(),
   chars: z.int(),
 });

@@ -39,7 +39,7 @@ export function initialState(): State {
     tools: [],
     app_state: {},
     events: [],
-    prompt: { static: null, view: null },
+    prompt: {},
     tools_visible: [],
     confirms: [],
     memory: [],
@@ -185,7 +185,7 @@ function applyEvent(state: State, entry: Entry, event: Event): void {
       state.app_state = { ...event.data.state };
       return;
     case "prompt.changed":
-      state.prompt[event.data.region] = { hash: event.data.hash, chars: event.data.chars, seq: entry.seq };
+      state.prompt[event.data.name] = { hash: event.data.hash, chars: event.data.chars, seq: entry.seq };
       return;
     case "tools.changed":
       state.tools_visible = [...event.data.visible];

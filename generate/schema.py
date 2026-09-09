@@ -33,10 +33,11 @@ class Ref:
 
 @dataclass
 class Shape:
-    """One type expression: a scalar, a list of shapes, a reference, an inline enum or a const."""
+    """One type expression: a scalar, a list or map of shapes, a reference, an enum or a const."""
 
     kind: str
     nullable: bool = False
+    # What a list holds, or what every value of a map is. One field, so one walk finds both.
     items: Shape | None = None
     ref: Ref | None = None
     values: tuple[str, ...] = ()
@@ -53,11 +54,12 @@ class Property:
     description: str
     default: Any = MISSING
     unit: str | None = None
+    pattern: str | None = None
 
 
 @dataclass
 class Definition:
-    """One named shape: an object with properties, a named enum, or a discriminated union."""
+    """One named shape: an object, a map keyed by a name, a named enum, or a discriminated union."""
 
     ref: Ref
     description: str
@@ -67,6 +69,8 @@ class Definition:
     members: list[Ref] = field(default_factory=list)
     discriminator: str | None = None
     measured_by: str | None = None
+    # A map's one shape: what every value is, whatever the key.
+    value: Shape | None = None
 
 
 @dataclass
@@ -99,8 +103,9 @@ class Bundle:
             if definition.ref in seen:
                 return
             seen.add(definition.ref)
-            for dependency in _local_dependencies(definition):
-                visit(self.definitions[dependency])
+            for dependency in dependencies(definition):
+                if dependency.module == name:
+                    visit(self.definitions[dependency])
             ordered.append(definition)
 
         for definition in self.definitions.values():
@@ -112,7 +117,7 @@ class Bundle:
         """Which names the module needs from earlier modules, grouped by module."""
         needed: dict[str, set[str]] = {}
         for definition in self.module(name):
-            for dependency in _dependencies(definition):
+            for dependency in dependencies(definition):
                 if dependency.module != name:
                     needed.setdefault(dependency.module, set()).add(dependency.name)
         for message in self.messages:
@@ -197,25 +202,39 @@ def _definition(ref: Ref, raw: dict[str, Any], path: Path) -> Definition:
         return Definition(ref, description, "union", members=members, discriminator=discriminator)
     if "enum" in raw:
         return Definition(ref, description, "enum", values=tuple(raw["enum"]))
+    if isinstance(raw.get("additionalProperties"), dict):
+        if "properties" in raw:
+            raise ValueError(f"{path}: {ref.name} is a map or an object, not both")
+        value = _shape(raw["additionalProperties"], path, schema_dir)
+        return Definition(ref, description, "map", value=value)
     if raw.get("additionalProperties") is not False:
         raise ValueError(f"{path}: {ref.name} must close with additionalProperties: false")
     required = set(raw.get("required", ()))
     properties = [
-        Property(
-            name=name,
-            shape=_shape(prop, path, schema_dir),
-            required=name in required,
-            description=prop.get("description", ""),
-            default=prop.get("default", MISSING),
-            unit=prop.get("x-unit"),
-        )
+        _property(ref, name, prop, name in required, path, schema_dir)
         for name, prop in raw.get("properties", {}).items()
     ]
-    for prop, raw_prop in zip(properties, raw.get("properties", {}).values(), strict=True):
-        if not prop.description and "$ref" not in raw_prop and "anyOf" not in raw_prop:
-            raise ValueError(f"{path}: {ref.name}.{prop.name} has no description")
     return Definition(
         ref, description, "object", properties=properties, measured_by=raw.get("x-measured-by")
+    )
+
+
+def _property(
+    ref: Ref, name: str, raw: dict[str, Any], required: bool, path: Path, schema_dir: Path
+) -> Property:
+    shape = _shape(raw, path, schema_dir)
+    if not raw.get("description") and "$ref" not in raw and "anyOf" not in raw:
+        raise ValueError(f"{path}: {ref.name}.{name} has no description")
+    if "pattern" in raw and shape.kind != "str":
+        raise ValueError(f"{path}: {ref.name}.{name}: only a string has a pattern")
+    return Property(
+        name=name,
+        shape=shape,
+        required=required,
+        description=raw.get("description", ""),
+        default=raw.get("default", MISSING),
+        unit=raw.get("x-unit"),
+        pattern=raw.get("pattern"),
     )
 
 
@@ -240,11 +259,20 @@ def _shape(raw: dict[str, Any], path: Path, schema_dir: Path) -> Shape:
     if kinds == "array":
         return Shape("list", items=_shape(raw["items"], path, schema_dir))
     if kinds == "object":
-        if raw.get("additionalProperties") is not True:
-            raise ValueError(f"{path}: inline objects are not allowed; name it in $defs")
-        return Shape("json")
+        return _inline_object(raw, path, schema_dir)
     scalar = {"string": "str", "number": "float", "integer": "int", "boolean": "bool"}
     return Shape(scalar[kinds])
+
+
+# An inline object is opaque JSON (additionalProperties: true) or a map of one shape keyed by
+# whatever names the app chooses (additionalProperties: {...}). One with fields is named in $defs.
+def _inline_object(raw: dict[str, Any], path: Path, schema_dir: Path) -> Shape:
+    values = raw.get("additionalProperties")
+    if values is True:
+        return Shape("json")
+    if isinstance(values, dict):
+        return Shape("map", items=_shape(values, path, schema_dir))
+    raise ValueError(f"{path}: inline objects are not allowed; name it in $defs")
 
 
 # The one anyOf we allow: a reference or null. It is how a nested object says "optional here".
@@ -268,14 +296,18 @@ def _schema_dir_of(path: Path) -> Path:
     return path.parent.parent if path.parent.name in ("events", "commands") else path.parent
 
 
-def _dependencies(definition: Definition) -> list[Ref]:
+def dependencies(definition: Definition) -> list[Ref]:
+    """Every definition this one names: its union members, its fields' shapes, a map's value."""
     found: list[Ref] = list(definition.members)
-    for prop in definition.properties:
-        shape: Shape | None = prop.shape
-        while shape is not None:
-            if shape.ref is not None:
-                found.append(shape.ref)
-            shape = shape.items
+    shapes = [prop.shape for prop in definition.properties]
+    if definition.value is not None:
+        shapes.append(definition.value)
+    for shape in shapes:
+        inner: Shape | None = shape
+        while inner is not None:
+            if inner.ref is not None:
+                found.append(inner.ref)
+            inner = inner.items
     return found
 
 
@@ -286,6 +318,3 @@ def _in_import_order(names: set[str]) -> list[str]:
     """The names of one import, in the order isort and eslint both put them."""
     return sorted(names, key=lambda name: (name.lower(), name))
 
-
-def _local_dependencies(definition: Definition) -> list[Ref]:
-    return [ref for ref in _dependencies(definition) if ref.module == definition.ref.module]

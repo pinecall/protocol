@@ -14,6 +14,7 @@ module Pinecall
       # declared is refused: it is a message from a newer protocol, and silence would drop it.
       def call!(name, value, where: name)
         return union!(name, value, where) if Shapes::UNIONS.key?(name)
+        return map!(Shapes::MAPS.fetch(name), value, where) if Shapes::MAPS.key?(name)
 
         shape = Shapes::SHAPES[name]
         raise ProtocolError, "#{where}: the protocol declares no shape called #{name}" if shape.nil?
@@ -45,13 +46,14 @@ module Pinecall
         end
 
         case spec[:kind]
-        when :str then expect(value, String, where, "a string")
+        when :str then string!(spec, value, where)
         when :int then expect(value, Integer, where, "a whole number")
         when :float then expect(value, Numeric, where, "a number")
         when :bool then expect_boolean(value, where)
         when :json then expect(value, Hash, where, "an object")
         when :any then value
         when :list then list!(spec, value, where)
+        when :map then map!(spec[:items], value, where)
         when :enum then one_of!(spec[:values], value, where)
         when :const then const!(spec[:const], value, where)
         when :ref then ref!(spec[:ref], value, where)
@@ -83,6 +85,22 @@ module Pinecall
       def list!(spec, value, where)
         expect(value, Array, where, "a list")
         value.each_with_index { |item, at| field!(spec[:items], item, "#{where}[#{at}]") }
+      end
+
+      # A map's keys are the app's own names; every value is the one shape the table gives.
+      def map!(spec, value, where)
+        expect(value, Hash, where, "an object")
+        value.each { |key, item| field!(spec, item, "#{where}.#{key}") }
+      end
+
+      # The schema's ^ and $ bind the ends of the string and Ruby's the ends of a line, so a value
+      # with a line break in it is refused before the pattern is asked.
+      def string!(spec, value, where)
+        expect(value, String, where, "a string")
+        pattern = spec[:pattern]
+        return value if pattern.nil? || (!value.include?("\n") && Regexp.new(pattern).match?(value))
+
+        raise ProtocolError, "#{where}: #{value.inspect} does not match #{pattern}"
       end
 
       def one_of!(values, value, where)

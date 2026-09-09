@@ -7,7 +7,7 @@ import re
 import textwrap
 from pathlib import Path
 
-from schema import MISSING, MODULES, Bundle, Definition, Message, Property, Shape
+from schema import MISSING, MODULES, Bundle, Definition, Message, Property, Shape, dependencies
 
 PACKAGE = "pinecall_protocol"
 
@@ -81,15 +81,9 @@ def _model_imports(bundle: Bundle, module: str) -> dict[str, list[str]]:
 # A message whose data is a shape from another module (metrics.llm is LLMMetrics) needs no import
 # in the models module; the registry imports it instead.
 def _root_only(bundle: Bundle, module: str) -> set[str]:
-    used_by_fields: set[str] = set()
-    for definition in bundle.module(module):
-        for prop in definition.properties:
-            shape: Shape | None = prop.shape
-            while shape is not None:
-                if shape.ref is not None:
-                    used_by_fields.add(shape.ref.name)
-                shape = shape.items
-        used_by_fields.update(member.name for member in definition.members)
+    used_by_fields = {
+        ref.name for definition in bundle.module(module) for ref in dependencies(definition)
+    }
     roots = {message.root.name for message in bundle.messages if f"{message.kind}s" == module}
     return roots - used_by_fields
 
@@ -118,6 +112,11 @@ def _definition_source(definition: Definition) -> str:
         return _commented(definition.description) + (
             f'type {name} = Annotated[{members}, Field(discriminator="{tag}")]'
         )
+    if definition.kind == "map":
+        assert definition.value is not None
+        return _commented(definition.description) + (
+            f"type {name} = dict[str, {_annotation(definition.value)}]"
+        )
     docstring, comment = _docstring_and_comment(definition.description, name)
     lines = [f"class {name}(WireModel):", f'    """{docstring}"""']
     if definition.properties:
@@ -131,41 +130,44 @@ def _field_source(prop: Property) -> str:
     if _absent_means_none(prop) and not prop.shape.nullable:
         annotation = "Any" if prop.shape.kind == "any" else f"{annotation} | None"
     name = prop.name
-    alias = ""
+    constraints: list[str] = []
     if keyword.iskeyword(name):
         name = f"{name}_"
-        alias = f'alias="{prop.name}"'
-    default = _default_source(prop, alias)
+        constraints.append(f'alias="{prop.name}"')
+    if prop.pattern is not None:
+        constraints.append(f"pattern={prop.pattern!r}")
+    default = _default_source(prop, ", ".join(constraints))
     return f"{name}: {annotation}{default}"
 
 
 # A required field has no default, except a const, which is its own only value. An optional field
 # is None when absent: the codec drops unset fields, so None never reaches the wire uninvited.
-def _default_source(prop: Property, alias: str) -> str:
+# The constraints are what Field() is told besides the value: an alias, a pattern.
+def _default_source(prop: Property, constraints: str) -> str:
     shape = prop.shape
     if prop.default is not MISSING:
-        return _explicit_default(prop.default, alias)
+        return _explicit_default(prop.default, constraints)
     if shape.kind == "const":
-        return _field_call(repr(shape.const), alias)
+        return _field_call(repr(shape.const), constraints)
     if prop.required:
-        return f" = Field({alias})" if alias else ""
-    return _field_call("None", alias)
+        return f" = Field({constraints})" if constraints else ""
+    return _field_call("None", constraints)
 
 
 def _absent_means_none(prop: Property) -> bool:
     return not prop.required and prop.default is MISSING and prop.shape.kind != "const"
 
 
-def _explicit_default(default: object, alias: str) -> str:
+def _explicit_default(default: object, constraints: str) -> str:
     if default == [] or default == {}:
         factory = "list" if default == [] else "dict"
-        parts = [f"default_factory={factory}"] + ([alias] if alias else [])
+        parts = [f"default_factory={factory}"] + ([constraints] if constraints else [])
         return f" = Field({', '.join(parts)})"
-    return _field_call(repr(default), alias)
+    return _field_call(repr(default), constraints)
 
 
-def _field_call(value: str, alias: str) -> str:
-    return f" = Field({value}, {alias})" if alias else f" = {value}"
+def _field_call(value: str, constraints: str) -> str:
+    return f" = Field({value}, {constraints})" if constraints else f" = {value}"
 
 
 def _annotation(shape: Shape) -> str:
@@ -186,6 +188,9 @@ def _bare_annotation(shape: Shape) -> str:
         case "list":
             assert shape.items is not None
             return f"list[{_annotation(shape.items)}]"
+        case "map":
+            assert shape.items is not None
+            return f"dict[str, {_annotation(shape.items)}]"
         case "ref":
             assert shape.ref is not None
             return shape.ref.name

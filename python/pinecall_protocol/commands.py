@@ -5,15 +5,7 @@ from typing import Any, Literal
 from pydantic import Field
 
 from pinecall_protocol._base import WireModel
-from pinecall_protocol.defs import (
-    AgentConfig,
-    Contact,
-    PromptRegion,
-    Route,
-    Supervisor,
-    ToolSpec,
-    TransferMode,
-)
+from pinecall_protocol.defs import AgentConfig, Contact, Route, Supervisor, ToolSpec, TransferMode
 from pinecall_protocol.verbs import Verb
 
 
@@ -138,12 +130,12 @@ class Ping(WireModel):
     """Is the socket alive? The gateway answers pong."""
 
 
-# The static prefix is cached by the provider and rarely changes; the view is render(state) and
-# changes with the state.
+# The name must be one of the agent's declared blocks, or one of the default four; anything else is
+# refused with the name.
 class PromptSet(WireModel):
-    """Rewrite one region of the prompt."""
+    """Rewrite one block of the prompt, whole, by name."""
 
-    region: PromptRegion
+    name: str
     text: str
 
 

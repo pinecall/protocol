@@ -10,6 +10,10 @@ module Pinecall
       # closed — the schema says additionalProperties: false — so a key nobody declared is
       # a message from a newer protocol and the reader is told so by name.
       SHAPES = {
+        "PromptBlockSpec" => {
+          name: { kind: :str, required: true, pattern: "^[a-z][a-z0-9_]*$" },
+          region: { kind: :ref, ref: "PromptRegion", required: true }
+        }.freeze,
         "Contact" => {
           id: { kind: :str },
           phone: { kind: :str },
@@ -114,7 +118,7 @@ module Pinecall
           from: { kind: :list, items: { kind: :ref, ref: "EventSource" }, required: true }
         }.freeze,
         "AgentConfig" => {
-          instructions: { kind: :str },
+          prompt: { kind: :list, items: { kind: :ref, ref: "PromptBlockSpec" } },
           language: { kind: :str },
           greeting: { kind: :str },
           voice: { kind: :ref, ref: "VoiceConfig" },
@@ -469,14 +473,10 @@ module Pinecall
           duration_s: { kind: :float },
           seq: { kind: :int, required: true }
         }.freeze,
-        "PromptRegionState" => {
+        "PromptBlockState" => {
           hash: { kind: :str, required: true },
           chars: { kind: :int, required: true },
           seq: { kind: :int, required: true }
-        }.freeze,
-        "PromptState" => {
-          static: { kind: :ref, null: true, ref: "PromptRegionState", required: true },
-          view: { kind: :ref, null: true, ref: "PromptRegionState", required: true }
         }.freeze,
         "Confirm" => {
           tool: { kind: :str, required: true },
@@ -649,7 +649,7 @@ module Pinecall
         }.freeze,
         "Ping" => {}.freeze,
         "PromptSet" => {
-          region: { kind: :ref, ref: "PromptRegion", required: true },
+          name: { kind: :str, required: true },
           text: { kind: :str, required: true }
         }.freeze,
         "RoomInvite" => {
@@ -822,7 +822,7 @@ module Pinecall
           ts: { kind: :float, required: true }
         }.freeze,
         "PromptChanged" => {
-          region: { kind: :ref, ref: "PromptRegion", required: true },
+          name: { kind: :str, required: true },
           hash: { kind: :str, required: true },
           chars: { kind: :int, required: true }
         }.freeze,
@@ -905,6 +905,11 @@ module Pinecall
         "Turn" => { on: :role, members: %w[UserTurn AgentTurn] }.freeze,
         "Verb" => { on: :verb, members: %w[SayVerb WhisperVerb TakeoverVerb ReleaseVerb TransferVerb EndVerb] }.freeze,
         "StateCause" => { on: :kind, members: %w[StateCauseTool StateCauseEvent] }.freeze
+      }.freeze
+
+      # A map is keyed by names the app chose; every value is the one shape given here.
+      MAPS = {
+        "PromptState" => { kind: :ref, ref: "PromptBlockState" }.freeze
       }.freeze
     end
   end

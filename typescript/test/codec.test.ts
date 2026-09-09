@@ -12,6 +12,11 @@ describe("the codec", () => {
     expect(OPAQUE_KEYS.has("state")).toBe(true);
   });
 
+  it("never renames the keys of a map the app named", () => {
+    const wire = { prompt: { my_block: { hash: "h", chars: 1, seq: 1 } } };
+    expect(toCamel(wire)).toEqual(wire);
+  });
+
   it("refuses an entry whose type nobody defined", () => {
     const entry = decodeEntry({ seq: 1, ts: 1, call: null, agent: "a", type: "bot.reply", ephemeral: false, data: {} });
     expect(() => eventOf(entry)).toThrow(ProtocolError);

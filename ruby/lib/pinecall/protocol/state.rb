@@ -32,7 +32,7 @@ module Pinecall
           tools: [],
           app_state: {},
           events: [],
-          prompt: { static: nil, view: nil },
+          prompt: {},
           tools_visible: [],
           confirms: [],
           memory: [],

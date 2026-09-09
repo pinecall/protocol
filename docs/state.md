@@ -75,24 +75,21 @@ One tool call and, once the app answered, its result.
 | `duration_s` | `number` | no | How long the app's method took, seconds. |
 | `seq` | `integer` | yes | The seq of the tool.call entry. |
 
-### `PromptRegionState`
+### `PromptBlockState`
 
-What is known about one region of the prompt without storing its text.
+What is known about one block of the prompt without storing its text.
 
 | field | type | required | meaning |
 |---|---|---|---|
-| `hash` | `string` | yes | sha256 of the region's text, so two states can be compared. |
-| `chars` | `integer` | yes | The region's length in characters. |
+| `hash` | `string` | yes | sha256 of the block's text, so two states can be compared. |
+| `chars` | `integer` | yes | The block's length in characters. |
 | `seq` | `integer` | yes | The seq of the prompt.changed that set it. |
 
 ### `PromptState`
 
-The two regions the app writes. The history in between is the turns.
+Every block the app has written, by name, without its text. The history between the static and the dynamic blocks is the turns.
 
-| field | type | required | meaning |
-|---|---|---|---|
-| `static` | `PromptRegionState | null` | yes | The cached prefix, or null before it was set. |
-| `view` | `PromptRegionState | null` | yes | The rendered view at the end, or null before it was set. |
+A map by name: every value is a `PromptBlockState`.
 
 ### `Confirm`
 
@@ -229,7 +226,7 @@ The whole of what a log says, at the seq it was read to.
 | `tools` | `ToolRun[]` | yes | Every tool call, in order, with its result once it came. |
 | `app_state` | `object` | yes | The app's declared state, as of the last state.changed. |
 | `events` | `ReceivedEvent[]` | yes | Every fact that arrived from outside, in order. |
-| `prompt` | `PromptState` | yes | The two regions the app writes. |
+| `prompt` | `PromptState` | yes | Every block the app has written, by name, without its text. |
 | `tools_visible` | `string[]` | yes | The tools the model can see right now, by name. |
 | `confirms` | `Confirm[]` | yes | Every confirmation asked, in order. |
 | `memory` | `MemoryOp[]` | yes | Every memory operation, in order. |

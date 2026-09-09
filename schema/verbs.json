@@ -17,7 +17,7 @@
     },
     "WhisperVerb": {
       "type": "object",
-      "description": "Tell the agent something the caller never hears; it goes into the prompt's view region. Logged as supervisor.whispered.",
+      "description": "Tell the agent something the caller never hears. It reaches the agent as an instruction for its next reply; logged as supervisor.whispered.",
       "properties": {
         "verb": {"type": "string", "const": "whisper", "description": "The verb."},
         "text": {"type": "string", "description": "The instruction for the agent, in words the model reads."}

@@ -161,7 +161,7 @@ module Pinecall
       end
 
       def on_prompt_changed(state, data, entry)
-        state[:prompt][data[:region].to_sym] = { hash: data[:hash], chars: data[:chars], seq: entry.seq }
+        state[:prompt][data[:name].to_sym] = { hash: data[:hash], chars: data[:chars], seq: entry.seq }
       end
 
       # joined_at is the entry's ts: the room said when, so the event did not have to repeat it.

@@ -15,7 +15,6 @@ from pinecall_protocol.defs import (
     EndedBy,
     EndReason,
     MemoryOp,
-    PromptRegion,
     Route,
     ScoreVerdict,
     Supervisor,
@@ -279,9 +278,9 @@ class Pong(WireModel):
 
 # The text stays out of the log; its hash and length let two states be compared.
 class PromptChanged(WireModel):
-    """A region of the prompt was rewritten."""
+    """A block of the prompt was rewritten."""
 
-    region: PromptRegion
+    name: str
     hash: str
     chars: int
 

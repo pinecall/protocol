@@ -82,6 +82,16 @@ describe("reduce", () => {
     expect(reduce([entry(1, "participant.joined", seat)]).room).toBeNull();
   });
 
+  it("a prompt block is kept by name with its hash, its length and the seq that set it", () => {
+    const identity = { name: "identity", hash: "a".repeat(64), chars: 1840 };
+    const availability = { name: "availability", hash: "b".repeat(64), chars: 120 };
+    const state = reduce([entry(1, "prompt.changed", identity), entry(2, "prompt.changed", availability)]);
+    expect(state.prompt).toEqual({
+      identity: { hash: "a".repeat(64), chars: 1840, seq: 1 },
+      availability: { hash: "b".repeat(64), chars: 120, seq: 2 },
+    });
+  });
+
   it("an outside fact is kept by name and origin and its cause names it", () => {
     const fact = { name: "slot.released", data: { at: "10:15" }, source: "app" };
     const cause = { kind: "event", name: "slot.released", seq: 1 };

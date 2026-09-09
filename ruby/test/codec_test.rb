@@ -63,6 +63,27 @@ class CodecTest < Minitest::Test
     assert_includes refusal.message, "turn.sideways"
   end
 
+  def test_a_map_is_checked_value_by_value_and_names_the_key_that_is_wrong
+    block = { hash: "h", chars: 1, seq: 1 }
+    Pinecall::Protocol::Validate.call!("PromptState", { identity: block, view: block })
+
+    refusal = assert_raises(Pinecall::Protocol::ProtocolError) do
+      Pinecall::Protocol::Validate.call!("PromptState", { identity: block, view: { hash: "h" } })
+    end
+
+    assert_includes refusal.message, "PromptState.view.chars"
+  end
+
+  def test_a_string_with_a_pattern_is_refused_when_it_does_not_match
+    Pinecall::Protocol::Validate.call!("PromptBlockSpec", { name: "free_slots", region: "dynamic" })
+
+    refusal = assert_raises(Pinecall::Protocol::ProtocolError) do
+      Pinecall::Protocol::Validate.call!("PromptBlockSpec", { name: "Free Slots", region: "dynamic" })
+    end
+
+    assert_includes refusal.message, "PromptBlockSpec.name"
+  end
+
   def test_a_supervise_verb_is_told_apart_by_the_field_the_schema_discriminates_on
     Pinecall::Protocol::Validate.call!("Verb", { verb: "transfer", to: "+34910000000", mode: "cold" })
 

@@ -10,7 +10,17 @@
     "EndedBy": {"type": "string", "enum": ["caller", "agent", "supervisor", "platform"], "description": "Whose action ended the call. platform covers timeouts, errors and a drained worker."},
     "ScoreVerdict": {"type": "string", "enum": ["held", "broken", "deferred", "skipped"], "description": "What one judge answered about a finished call. Held: the rule held. Broken: it did not, and the reason names the evidence. Deferred: the judge was asked and could not settle it. Skipped: nobody asked it — no model was reachable inside the call's judging budget."},
     "TransferMode": {"type": "string", "enum": ["cold", "warm"], "description": "Cold: the caller is sent on and the agent leaves. Warm: the agent stays on the line until the other side answers, then leaves."},
-    "PromptRegion": {"type": "string", "enum": ["static", "view"], "description": "Which region of the prompt: the cached static prefix (instructions), or the dynamic view rendered from state at the end. The append-only history in between is never written by the app."},
+    "PromptRegion": {"type": "string", "enum": ["static", "dynamic"], "description": "Which region of the prompt a block lives in: static, before the history, cached by the provider; or dynamic, after the history, replaced every turn. The append-only history in between is never written by the app."},
+    "PromptBlockSpec": {
+      "type": "object",
+      "description": "One named block of the prompt and the region it lives in. The default layout, when an agent declares none, is identity, knowledge and tools (static), then the history, then view (dynamic). A block's text is written per call with prompt.set.",
+      "properties": {
+        "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "The block's name, the one prompt.set writes it by: lowercase, digits and underscores."},
+        "region": {"$ref": "#/$defs/PromptRegion"}
+      },
+      "required": ["name", "region"],
+      "additionalProperties": false
+    },
     "UserState": {"type": "string", "enum": ["listening", "speaking", "away"], "description": "What the platform believes the person on the line is doing right now. The states are the session's own."},
     "AgentState": {"type": "string", "enum": ["initializing", "idle", "listening", "thinking", "speaking"], "description": "What the agent is doing right now, in the session's own words: warming up, waiting, hearing the caller, generating, or playing audio."},
     "ParticipantKind": {"type": "string", "enum": ["caller", "agent", "supervisor", "listener", "sip"], "description": "Who a participant is to the call: the person the agent serves (over SIP or the widget), the agent itself, a supervisor who took a seat in the room, a listener who only hears, or a second SIP leg that room.invite brought in."},
@@ -231,7 +241,7 @@
       "type": "object",
       "description": "What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what. Every field is optional so a configure can change one thing.",
       "properties": {
-        "instructions": {"type": "string", "description": "The static prefix of the prompt: who the agent is and how it behaves. Cached by the provider."},
+        "prompt": {"type": "array", "items": {"$ref": "#/$defs/PromptBlockSpec"}, "description": "The blocks of the prompt in the one order they are sent: every static block, then the history, then every dynamic block. Absent, the layout is the default: identity · knowledge · tools, the history, view."},
         "language": {"type": "string", "description": "The language the agent speaks and expects, as a BCP 47 tag: es-ES, es-UY."},
         "greeting": {"type": "string", "description": "What the agent says first, verbatim, when a call starts."},
         "voice": {"$ref": "#/$defs/VoiceConfig"},

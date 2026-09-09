@@ -43,7 +43,7 @@ three implementations are allowed to exist.
 - **No camelCase layer.** The wire is snake_case and so is Ruby, so the conversion the TypeScript
   client needs does not exist here: a field is called on both sides what the schema calls it.
 - **Symbol keys.** `JSON.parse(..., symbolize_names: true)`, so a payload matches with
-  `case data in { region: "static", chars: }` and a `Data` frame deconstructs the same way.
+  `case data in { name: "identity", chars: }` and a `Data` frame deconstructs the same way.
 - **No schema gem.** The generated table plus `Validate` is thirty lines and cannot drift from the
   other two languages; a third-party validator could.
 - **Types in RBS**, which is where a Ruby programme keeps them. `rake rbs` runs `rbs validate`.

@@ -98,19 +98,19 @@ export const ToolRunSchema = z.strictObject({
 });
 export type ToolRun = z.infer<typeof ToolRunSchema>;
 
-/** What is known about one region of the prompt without storing its text. */
-export const PromptRegionStateSchema = z.strictObject({
+/** What is known about one block of the prompt without storing its text. */
+export const PromptBlockStateSchema = z.strictObject({
   hash: z.string(),
   chars: z.int(),
   seq: z.int(),
 });
-export type PromptRegionState = z.infer<typeof PromptRegionStateSchema>;
+export type PromptBlockState = z.infer<typeof PromptBlockStateSchema>;
 
-/** The two regions the app writes. The history in between is the turns. */
-export const PromptStateSchema = z.strictObject({
-  static: PromptRegionStateSchema.nullable(),
-  view: PromptRegionStateSchema.nullable(),
-});
+/**
+ * Every block the app has written, by name, without its text. The history between the static and
+ * the dynamic blocks is the turns.
+ */
+export const PromptStateSchema = z.record(z.string(), PromptBlockStateSchema);
 export type PromptState = z.infer<typeof PromptStateSchema>;
 
 /** One confirmation the platform asked for, and how it went. */

@@ -98,20 +98,17 @@ class ToolRun(WireModel):
     seq: int
 
 
-class PromptRegionState(WireModel):
-    """What is known about one region of the prompt without storing its text."""
+class PromptBlockState(WireModel):
+    """What is known about one block of the prompt without storing its text."""
 
     hash: str
     chars: int
     seq: int
 
 
-# The history in between is the turns.
-class PromptState(WireModel):
-    """The two regions the app writes."""
-
-    static: PromptRegionState | None
-    view: PromptRegionState | None
+# Every block the app has written, by name, without its text. The history between the static and the
+# dynamic blocks is the turns.
+type PromptState = dict[str, PromptBlockState]
 
 
 class Confirm(WireModel):

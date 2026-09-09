@@ -17,8 +17,10 @@ module Pinecall
       type score_verdict = "held" | "broken" | "deferred" | "skipped"
       # Cold: the caller is sent on and the agent leaves.
       type transfer_mode = "cold" | "warm"
-      # Which region of the prompt: the cached static prefix (instructions), or the dynamic view rendered from state at the end.
-      type prompt_region = "static" | "view"
+      # Which region of the prompt a block lives in: static, before the history, cached by the provider; or dynamic, after the history, replaced every turn.
+      type prompt_region = "static" | "dynamic"
+      # One named block of the prompt and the region it lives in.
+      type prompt_block_spec = { name: String, region: prompt_region }
       # What the platform believes the person on the line is doing right now.
       type user_state = "listening" | "speaking" | "away"
       # What the agent is doing right now, in the session's own words: warming up, waiting, hearing the caller, generating, or playing audio.
@@ -72,7 +74,7 @@ module Pinecall
       # One outside event the agent accepts, and from whom.
       type event_spec = { name: String, from: Array[event_source] }
       # What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what.
-      type agent_config = { ?instructions: String, ?language: String, ?greeting: String, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?tools: Array[tool_spec], ?state_fields: Array[state_field_spec], ?events: Array[event_spec] }
+      type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: String, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?tools: Array[tool_spec], ?state_fields: Array[state_field_spec], ?events: Array[event_spec] }
       # One line of a call's log, or of an agent's log when call is null.
       type entry = { seq: Integer, ts: Float, call: String?, agent: String, type: String, ephemeral: bool, data: Hash[Symbol, untyped] }
       # One instruction from an app to the gateway over its WebSocket.
@@ -161,10 +163,10 @@ module Pinecall
       type collected_metrics = { llm: Array[llm_metrics], stt: Array[stt_metrics], tts: Array[tts_metrics], vad: Array[vad_metrics], eou: Array[eou_metrics], eot: Array[eot_inference_metrics], interruption: Array[interruption_metrics], realtime: Array[realtime_model_metrics], avatar: Array[avatar_metrics] }
       # One tool call and, once the app answered, its result.
       type tool_run = { call_id: String, name: String, arguments: Hash[Symbol, untyped], ?speech_id: String, status: "running" | "done" | "failed", ?output: untyped, ?error: String, ?summary: String, ?duration_s: Float, seq: Integer }
-      # What is known about one region of the prompt without storing its text.
-      type prompt_region_state = { hash: String, chars: Integer, seq: Integer }
-      # The two regions the app writes.
-      type prompt_state = { static: prompt_region_state?, view: prompt_region_state? }
+      # What is known about one block of the prompt without storing its text.
+      type prompt_block_state = { hash: String, chars: Integer, seq: Integer }
+      # Every block the app has written, by name, without its text.
+      type prompt_state = Hash[Symbol, prompt_block_state]
       # One confirmation the platform asked for, and how it went.
       type confirm = { tool: String, call_id: String, audience: String, phrase: String, status: "pending" | "granted" | "declined", ?said: String, ?reason: String }
       # Whether a supervisor holds the line right now.
@@ -189,7 +191,7 @@ module Pinecall
       type state = { seq: Integer, agent: String, call: String?, status: call_status, channel: channel?, direction: direction?, from: String?, to: String?, caller: contact?, room: room?, started_at: Float?, ended_at: Float?, end_reason: end_reason?, outcome: String?, user_state: user_state?, agent_state: agent_state?, live: live_transcript, turns: Array[turn], metrics: collected_metrics, tools: Array[tool_run], app_state: Hash[Symbol, untyped], events: Array[received_event], prompt: prompt_state, tools_visible: Array[String], confirms: Array[confirm], memory: Array[memory_op], sources: Array[doc_source], handoff: handoff, held: bool, muted: bool, transfer: transfer_state?, usage: Array[model_usage], cost: cost?, routes: Array[route], gaps: Array[gap], errors: Array[logged_error], custom: Array[custom_note] }
       # Make the agent say this, verbatim, to the caller.
       type say_verb = { verb: "say", text: String }
-      # Tell the agent something the caller never hears; it goes into the prompt's view region.
+      # Tell the agent something the caller never hears.
       type whisper_verb = { verb: "whisper", text: String }
       # The supervisor takes the line: the agent goes quiet and the supervisor's audio replaces it.
       type takeover_verb = { verb: "takeover" }
@@ -235,8 +237,8 @@ module Pinecall
       type participant_remove = { identity: String }
       # Is the socket alive? The gateway answers pong.
       type ping = { }
-      # Rewrite one region of the prompt.
-      type prompt_set = { region: prompt_region, text: String }
+      # Rewrite one block of the prompt, whole, by name.
+      type prompt_set = { name: String, text: String }
       # Bring somebody else into the call's room.
       type room_invite = { to: String, kind: "sip" | "participant" }
       # Push a payload to a browser in the room over the DataChannel: a card to render, a form to open.
@@ -299,8 +301,8 @@ module Pinecall
       type memory_ops = { ops: Array[memory_op], ?speech_id: String }
       # The answer to ping.
       type pong = { ts: Float }
-      # A region of the prompt was rewritten.
-      type prompt_changed = { region: prompt_region, hash: String, chars: Integer }
+      # A block of the prompt was rewritten.
+      type prompt_changed = { name: String, hash: String, chars: Integer }
       # The app's declared state changed.
       type state_changed = { state: Hash[Symbol, untyped], changed: Array[String], ?cause: state_cause }
       # What changed the state: a tool's result, or a fact from outside.

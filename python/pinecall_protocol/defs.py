@@ -49,9 +49,19 @@ type ScoreVerdict = Literal["held", "broken", "deferred", "skipped"]
 type TransferMode = Literal["cold", "warm"]
 
 
-# Which region of the prompt: the cached static prefix (instructions), or the dynamic view rendered
-# from state at the end. The append-only history in between is never written by the app.
-type PromptRegion = Literal["static", "view"]
+# Which region of the prompt a block lives in: static, before the history, cached by the provider;
+# or dynamic, after the history, replaced every turn. The append-only history in between is never
+# written by the app.
+type PromptRegion = Literal["static", "dynamic"]
+
+
+# The default layout, when an agent declares none, is identity, knowledge and tools (static), then
+# the history, then view (dynamic). A block's text is written per call with prompt.set.
+class PromptBlockSpec(WireModel):
+    """One named block of the prompt and the region it lives in."""
+
+    name: str = Field(pattern="^[a-z][a-z0-9_]*$")
+    region: PromptRegion
 
 
 # What the platform believes the person on the line is doing right now. The states are the session's
@@ -280,7 +290,7 @@ class EventSpec(WireModel):
 class AgentConfig(WireModel):
     """What an app declares about its agent."""
 
-    instructions: str | None = None
+    prompt: list[PromptBlockSpec] | None = None
     language: str | None = None
     greeting: str | None = None
     voice: VoiceConfig | None = None

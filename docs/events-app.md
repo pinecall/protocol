@@ -71,12 +71,12 @@ What memory did for this turn or at hangup: a recall before the reply, a remembe
 
 ### `prompt.changed`
 
-A region of the prompt was rewritten. The text stays out of the log; its hash and length let two states be compared.
+A block of the prompt was rewritten. The text stays out of the log; its hash and length let two states be compared.
 
 | field | type | required | meaning |
 |---|---|---|---|
-| `region` | `PromptRegion` | yes | Which region of the prompt: the cached static prefix (instructions), or the dynamic view rendered from state at the end. |
-| `hash` | `string` | yes | sha256 of the region's new text, hex. |
+| `name` | `string` | yes | The block that was rewritten, by name. |
+| `hash` | `string` | yes | sha256 of the block's new text, hex. |
 | `chars` | `integer` | yes | The new text's length in characters. |
 
 ### `state.changed`

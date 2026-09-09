@@ -16,9 +16,9 @@ class SayVerb(WireModel):
     text: str
 
 
-# Logged as supervisor.whispered.
+# It reaches the agent as an instruction for its next reply; logged as supervisor.whispered.
 class WhisperVerb(WireModel):
-    """Tell the agent something the caller never hears; it goes into the prompt's view region."""
+    """Tell the agent something the caller never hears."""
 
     verb: Literal["whisper"] = "whisper"
     text: str
