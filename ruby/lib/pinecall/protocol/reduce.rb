@@ -6,6 +6,9 @@ module Pinecall
     # TypeScript reducer and the runtime's Python one keep the same, and the golden fixture is
     # what says so — the same log has to leave all three in the same place, field for field.
     module Reduce
+      # What a reader says about an entry it cannot read, in the log's own errors list.
+      UNREADABLE = "unreadable"
+
       module_function
 
       # Fold every entry, in the order given, into the state an empty log starts from.
@@ -16,12 +19,36 @@ module Pinecall
       # One entry folded in. A gap that carries a snapshot replaces the state outright — that is
       # what the snapshot is for; every other entry changes it in place. Either way the seq moves.
       def apply(state, entry)
-        event = Codec.event_of(entry)
+        event = begin
+          Codec.event_of(entry)
+        rescue ProtocolError => why
+          return moved(unreadable(state, entry, why), entry)
+        end
         following = event.type == "log.gap" ? on_log_gap(state, event.data) : apply_event(state, entry, event)
-        following[:seq] = entry.seq
-        following[:agent] = entry.agent
-        following[:call] = entry.call unless entry.call.nil?
-        following
+        moved(following, entry)
+      end
+
+      # A log outlives the shape of the entries in it: a call recorded before a field was renamed
+      # is still in the table, and a reader that refuses it refuses the whole call with it. So an
+      # entry this reader cannot validate is one line of the errors list and nothing more — the
+      # fold goes on, and the state says out loud which seq it could not read. The Python and
+      # TypeScript reducers do the same: the three of them fold one golden log into one state.
+      def unreadable(state, entry, why)
+        said = why.message.to_s.lines.first.to_s.strip
+        state[:errors] << {
+          seq: entry.seq,
+          code: UNREADABLE,
+          message: "#{entry.type} at seq #{entry.seq} is not the shape this reader knows: #{said}"
+        }
+        state
+      end
+
+      # Whatever the entry was, the fold has now reached its seq.
+      def moved(state, entry)
+        state[:seq] = entry.seq
+        state[:agent] = entry.agent
+        state[:call] = entry.call unless entry.call.nil?
+        state
       end
 
       # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity

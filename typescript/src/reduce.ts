@@ -57,11 +57,42 @@ export function initialState(): State {
   };
 }
 
+/** What a reader says about an entry it cannot read, in the log's own errors list. */
+export const UNREADABLE = "unreadable";
+
+// A log outlives the shape of the entries in it: a call recorded before a field was renamed is
+// still in the table, and a reader that refuses it refuses the whole call with it. So an entry
+// this reader cannot validate is one line of the errors list and nothing more — the fold goes on,
+// and the state says out loud which seq it could not read. The Python and Ruby reducers do the
+// same, because the three of them fold one golden log into one state.
+function unreadable(state: State, entry: Entry, why: unknown): State {
+  const said = why instanceof Error ? why.message : String(why);
+  state.errors.push({
+    seq: entry.seq,
+    code: UNREADABLE,
+    message: `${entry.type} at seq ${entry.seq} is not the shape this reader knows: ${
+      said.split("\n")[0]?.trim() ?? said
+    }`,
+  });
+  return state;
+}
+
 // A gap that carries a snapshot replaces the state outright: that is what the snapshot is for.
 // Every other entry mutates in place. Either way the seq moves to the entry's.
 /** One entry folded in. Returns the state to keep going with. */
 export function apply(state: State, entry: Entry): State {
-  const event = eventOf(entry);
+  let event: Event;
+  try {
+    event = eventOf(entry);
+  } catch (why) {
+    const said = unreadable(state, entry, why);
+    said.seq = entry.seq;
+    said.agent = entry.agent;
+    if (entry.call !== null) {
+      said.call = entry.call;
+    }
+    return said;
+  }
   let next = state;
   if (event.type === "log.gap") {
     next = onLogGap(state, event);
