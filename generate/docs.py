@@ -199,6 +199,8 @@ def _type_name(shape: Shape) -> str:
         case "map":
             assert shape.items is not None
             base = f"map<string, {_type_name(shape.items)}>"
+        case "tuple":
+            base = f"[{', '.join(_type_name(one) for one in shape.members)}]"
         case "ref":
             assert shape.ref is not None
             base = shape.ref.name

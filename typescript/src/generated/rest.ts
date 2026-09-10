@@ -232,6 +232,80 @@ export const MemoryScoreSchema = z.strictObject({
 export type MemoryScore = z.infer<typeof MemoryScoreSchema>;
 
 /**
+ * What must come of one call's hang-up: each field is one of the four ways a hang-up costs a
+ * business. Nothing here compares one sentence to another — a category is the class's own word, a
+ * value is a literal the caller said out loud, and a supersession is an id — because two ways of
+ * writing one fact are one fact.
+ */
+export const ExtractionExpectedSchema = z.strictObject({
+  writes: z.array(z.string()).nullish(),
+  never: z.array(z.string()).nullish(),
+  never_says: z.array(z.string()).nullish(),
+  invalidates: z.array(z.string()).nullish(),
+});
+export type ExtractionExpected = z.infer<typeof ExtractionExpectedSchema>;
+
+/**
+ * One call written down and what memory must make of it: the write side of the table, judged by
+ * code. The read side is MemoryGolden and neither answers for the other — a call may extract the
+ * perfect fact and never see it again, because six is what a turn is handed and the seventh is
+ * cut.
+ */
+export const ExtractionGoldenSchema = z.strictObject({
+  name: z.string(),
+  said: z.array(z.tuple([z.string(), z.string()])),
+  holds: z.array(z.string()).nullish(),
+  plants: z.array(z.string()).nullish(),
+  channel: ChannelSchema.nullish(),
+  expect: ExtractionExpectedSchema.nullish(),
+});
+export type ExtractionGolden = z.infer<typeof ExtractionGoldenSchema>;
+
+/**
+ * POST /v1/agents/{slug}/memory/extraction, the body: the goldens whole, as the tenant wrote them
+ * down. Each costs ONE model call — the very one a hang-up makes — run on the org's own model and
+ * keys against the class the caller is holding.
+ */
+export const ExtractionCasesSchema = z.strictObject({
+  cases: z.array(ExtractionGoldenSchema),
+});
+export type ExtractionCases = z.infer<typeof ExtractionCasesSchema>;
+
+/**
+ * One thing that did not hold about a case: which of the questions, and the evidence in a sentence
+ * a person can act on.
+ */
+export const ExtractionBrokeSchema = z.strictObject({
+  check: z.string(),
+  detail: z.string(),
+});
+export type ExtractionBroke = z.infer<typeof ExtractionBrokeSchema>;
+
+/** One case, run: what memory would have kept, what admission refused, and what did not hold. */
+export const ExtractionJudgedSchema = z.strictObject({
+  name: z.string(),
+  held: z.boolean(),
+  wrote: z.array(z.string()).nullish(),
+  refused: z.array(z.string()).nullish(),
+  broke: z.array(ExtractionBrokeSchema).nullish(),
+});
+export type ExtractionJudged = z.infer<typeof ExtractionJudgedSchema>;
+
+/**
+ * POST /v1/agents/{slug}/memory/extraction, the answer: which model answered, how many cases held,
+ * and every one of them. A verb prints this and a pipeline exits on it.
+ */
+export const ExtractionRunSchema = z.strictObject({
+  agent: z.string(),
+  model: z.string(),
+  cases: z.int(),
+  held: z.int(),
+  took_ms: z.number(),
+  results: z.array(ExtractionJudgedSchema),
+});
+export type ExtractionRun = z.infer<typeof ExtractionRunSchema>;
+
+/**
  * POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to
  * run it with. Worker-only; the gateway runs it against its own stores and writes memory.ops or
  * docs.sources on the call's log itself.

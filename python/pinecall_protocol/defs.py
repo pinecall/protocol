@@ -320,8 +320,8 @@ class DocsConfig(WireModel):
 class MemoryConfig(WireModel):
     """What memory keeps about a contact across calls, and what it must never keep."""
 
-    remember: list[str] = Field(default_factory=list)
-    forget: list[str] = Field(default_factory=list)
+    remember: list[str] = Field(default_factory=list[str])
+    forget: list[str] = Field(default_factory=list[str])
 
 
 # What an app declares about its agent: the voice, the models, the language, the greeting, the

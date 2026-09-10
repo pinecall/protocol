@@ -220,6 +220,74 @@ class MemoryScore(WireModel):
     misses: list[MemoryMiss]
 
 
+# What must come of one call's hang-up: each field is one of the four ways a hang-up costs a
+# business. Nothing here compares one sentence to another — a category is the class's own word, a
+# value is a literal the caller said out loud, and a supersession is an id — because two ways of
+# writing one fact are one fact.
+class ExtractionExpected(WireModel):
+    """What must come of one call's hang-up."""
+
+    writes: list[str] = Field(default_factory=list[str])
+    never: list[str] = Field(default_factory=list[str])
+    never_says: list[str] = Field(default_factory=list[str])
+    invalidates: list[str] = Field(default_factory=list[str])
+
+
+# One call written down and what memory must make of it: the write side of the table, judged by
+# code. The read side is MemoryGolden and neither answers for the other — a call may extract the
+# perfect fact and never see it again, because six is what a turn is handed and the seventh is cut.
+class ExtractionGolden(WireModel):
+    """One call written down and what memory must make of it."""
+
+    name: str
+    said: list[tuple[str, str]]
+    holds: list[str] = Field(default_factory=list[str])
+    plants: list[str] = Field(default_factory=list[str])
+    channel: Channel = "phone"
+    expect: ExtractionExpected = Field(default_factory=ExtractionExpected)
+
+
+# POST /v1/agents/{slug}/memory/extraction, the body: the goldens whole, as the tenant wrote them
+# down. Each costs ONE model call — the very one a hang-up makes — run on the org's own model and
+# keys against the class the caller is holding.
+class ExtractionCases(WireModel):
+    """POST /v1/agents/{slug}/memory/extraction, the body."""
+
+    cases: list[ExtractionGolden]
+
+
+# One thing that did not hold about a case: which of the questions, and the evidence in a sentence a
+# person can act on.
+class ExtractionBroke(WireModel):
+    """One thing that did not hold about a case."""
+
+    check: str
+    detail: str
+
+
+class ExtractionJudged(WireModel):
+    """One case, run: what memory would have kept, what admission refused, and what did not hold."""
+
+    name: str
+    held: bool
+    wrote: list[str] = Field(default_factory=list[str])
+    refused: list[str] = Field(default_factory=list[str])
+    broke: list[ExtractionBroke] = Field(default_factory=list[ExtractionBroke])
+
+
+# POST /v1/agents/{slug}/memory/extraction, the answer: which model answered, how many cases held,
+# and every one of them. A verb prints this and a pipeline exits on it.
+class ExtractionRun(WireModel):
+    """POST /v1/agents/{slug}/memory/extraction, the answer."""
+
+    agent: str
+    model: str
+    cases: int
+    held: int
+    took_ms: float
+    results: list[ExtractionJudged]
+
+
 # POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to run
 # it with. Worker-only; the gateway runs it against its own stores and writes memory.ops or
 # docs.sources on the call's log itself.

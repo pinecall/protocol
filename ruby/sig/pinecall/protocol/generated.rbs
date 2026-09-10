@@ -175,6 +175,18 @@ module Pinecall
       type memory_miss = { asks: String, missing: Array[String], found: Array[String] }
       # POST /v1/contacts/memory/eval, the answer: how memory ranked the facts its own golden asked for.
       type memory_score = { model: String, questions: Integer, k: Integer, recall_at_k: Float, ndcg_at_10: Float, took_ms: Float, misses: Array[memory_miss] }
+      # What must come of one call's hang-up: each field is one of the four ways a hang-up costs a business.
+      type extraction_expected = { ?writes: Array[String], ?never: Array[String], ?never_says: Array[String], ?invalidates: Array[String] }
+      # One call written down and what memory must make of it: the write side of the table, judged by code.
+      type extraction_golden = { name: String, said: Array[[String, String]], ?holds: Array[String], ?plants: Array[String], ?channel: channel, ?expect: extraction_expected }
+      # POST /v1/agents/{slug}/memory/extraction, the body: the goldens whole, as the tenant wrote them down.
+      type extraction_cases = { cases: Array[extraction_golden] }
+      # One thing that did not hold about a case: which of the questions, and the evidence in a sentence a person can act on.
+      type extraction_broke = { check: String, detail: String }
+      # One case, run: what memory would have kept, what admission refused, and what did not hold.
+      type extraction_judged = { name: String, held: bool, ?wrote: Array[String], ?refused: Array[String], ?broke: Array[extraction_broke] }
+      # POST /v1/agents/{slug}/memory/extraction, the answer: which model answered, how many cases held, and every one of them.
+      type extraction_run = { agent: String, model: String, cases: Integer, held: Integer, took_ms: Float, results: Array[extraction_judged] }
       # POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to run it with.
       type lookup_request = { tool: platform_tool, input: Hash[Symbol, untyped], ?speech_id: String }
       # POST /v1/calls/{call}/lookup, the answer: what the tool found, and how long finding it took.

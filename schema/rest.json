@@ -244,6 +244,77 @@
         "misses": {"type": "array", "items": {"$ref": "#/$defs/MemoryMiss"}, "description": "Every question memory did not answer whole, so the person who wrote the golden can read what came back instead."}
       }
     },
+    "ExtractionExpected": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What must come of one call's hang-up: each field is one of the four ways a hang-up costs a business. Nothing here compares one sentence to another — a category is the class's own word, a value is a literal the caller said out loud, and a supersession is an id — because two ways of writing one fact are one fact.",
+      "properties": {
+        "writes": {"type": "array", "items": {"type": "string"}, "default": [], "description": "Every category named got at least one fact. The class's own memory.remember words."},
+        "never": {"type": "array", "items": {"type": "string"}, "default": [], "description": "No fact was written under any of these. The class's own memory.forget words."},
+        "never_says": {"type": "array", "items": {"type": "string"}, "default": [], "description": "The sharper half of never: no fact CARRIES one of these values, under whatever category. A card number the caller read out is what this exists for, and it matches on the folded words and on the bare digits alike."},
+        "invalidates": {"type": "array", "items": {"type": "string"}, "default": [], "description": "Every held fact named here was superseded, and — the mirror, which catches the model that supersedes whatever it touches — no other held fact was. A fact is named by its own text."}
+      }
+    },
+    "ExtractionGolden": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One call written down and what memory must make of it: the write side of the table, judged by code. The read side is MemoryGolden and neither answers for the other — a call may extract the perfect fact and never see it again, because six is what a turn is handed and the seventh is cut.",
+      "required": ["name", "said"],
+      "properties": {
+        "name": {"type": "string", "description": "What this case is called, in a report and in --grep. A file that names none is called after its own basename."},
+        "said": {"type": "array", "items": {"type": "array", "prefixItems": [{"type": "string"}, {"type": "string"}], "items": false, "minItems": 2, "maxItems": 2}, "description": "The call as it happened, one [who, what] per line: `caller` is the person and anything else is the agent. Both speakers, because nothing here is re-run — a golden about extraction is a conversation ALREADY held, handed to the hang-up's one model call."},
+        "holds": {"type": "array", "items": {"type": "string"}, "default": [], "description": "What memory already holds about this contact, in the words a fact is written in. They are shown to the model with ids, and an expect.invalidates names one of them by its own text."},
+        "plants": {"type": "array", "items": {"type": "string"}, "default": [], "description": "Sentences somebody tried to get into memory. Planting one IS the assertion: admission must refuse every one of them, whatever the model did with the conversation itself."},
+        "channel": {"$ref": "defs.json#/$defs/Channel", "default": "phone"},
+        "expect": {"$ref": "#/$defs/ExtractionExpected", "default": {}}
+      }
+    },
+    "ExtractionCases": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/agents/{slug}/memory/extraction, the body: the goldens whole, as the tenant wrote them down. Each costs ONE model call — the very one a hang-up makes — run on the org's own model and keys against the class the caller is holding.",
+      "required": ["cases"],
+      "properties": {
+        "cases": {"type": "array", "items": {"$ref": "#/$defs/ExtractionGolden"}, "description": "The cases, in any order. They are run one at a time: a suite is run when somebody changed the prompt or the model, never on a caller's clock."}
+      }
+    },
+    "ExtractionBroke": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One thing that did not hold about a case: which of the questions, and the evidence in a sentence a person can act on.",
+      "required": ["check", "detail"],
+      "properties": {
+        "check": {"type": "string", "description": "The field that did not hold: writes, never, never_says, invalidates or plants."},
+        "detail": {"type": "string", "description": "What was found instead, naming the fact or the category, so the person who wrote the golden reads why."}
+      }
+    },
+    "ExtractionJudged": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One case, run: what memory would have kept, what admission refused, and what did not hold.",
+      "required": ["name", "held"],
+      "properties": {
+        "name": {"type": "string", "description": "The case."},
+        "held": {"type": "boolean", "description": "Whether every check passed. False when broke carries anything."},
+        "wrote": {"type": "array", "items": {"type": "string"}, "default": [], "description": "What memory would have kept, one op per line: the verb, the category and the sentence."},
+        "refused": {"type": "array", "items": {"type": "string"}, "default": [], "description": "What the model asked for and admission dropped before the table. A planted sentence belongs here."},
+        "broke": {"type": "array", "items": {"$ref": "#/$defs/ExtractionBroke"}, "default": [], "description": "Everything that did not hold. Empty when held is true."}
+      }
+    },
+    "ExtractionRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/agents/{slug}/memory/extraction, the answer: which model answered, how many cases held, and every one of them. A verb prints this and a pipeline exits on it.",
+      "required": ["agent", "model", "cases", "held", "took_ms", "results"],
+      "properties": {
+        "agent": {"type": "string", "description": "The slug the cases were judged against, whose declaration is the vocabulary they may name."},
+        "model": {"type": "string", "description": "The model that made each extraction, as vendor/model. Two runs are comparable only under one model."},
+        "cases": {"type": "integer", "description": "How many cases were run."},
+        "held": {"type": "integer", "description": "How many of them held. A verb exits 0 when this equals cases and 1 otherwise."},
+        "took_ms": {"type": "number", "description": "How long the whole run took, every model call included, in milliseconds."},
+        "results": {"type": "array", "items": {"$ref": "#/$defs/ExtractionJudged"}, "description": "Every case, in the order it was run."}
+      }
+    },
     "LookupRequest": {
       "type": "object",
       "additionalProperties": false,

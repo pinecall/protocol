@@ -151,11 +151,14 @@ def _shape_parts(shape: Shape) -> list[str]:
         parts.append(f'const: "{shape.const}"')
     if shape.items is not None:
         parts.append(f"items: {_value_descriptor(shape.items)}")
+    if shape.members:
+        places = ", ".join(_value_descriptor(one) for one in shape.members)
+        parts.append(f"members: [{places}]")
     return parts
 
 
-# str, float, int, bool, any, json, list, map, ref, enum and const are the eleven kinds the schema
-# loader resolves everything to; the validator has one branch per kind and no twelfth.
+# str, float, int, bool, any, json, list, tuple, map, ref, enum and const are the twelve kinds the
+# schema loader resolves everything to; the validator has one branch per kind and no thirteenth.
 def _kind(shape: Shape) -> str:
     return shape.kind
 
@@ -224,6 +227,8 @@ def _rbs_bare(shape: Shape) -> str:
         case "map":
             assert shape.items is not None
             return f"Hash[Symbol, {_rbs_type(shape.items)}]"
+        case "tuple":
+            return f"[{', '.join(_rbs_type(one) for one in shape.members)}]"
         case "ref":
             assert shape.ref is not None
             return _snake(shape.ref.name)

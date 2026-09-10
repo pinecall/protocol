@@ -182,6 +182,8 @@ def _bare_schema(shape: Shape) -> str:
         case "map":
             assert shape.items is not None
             return f"z.record(z.string(), {_schema(shape.items)})"
+        case "tuple":
+            return f"z.tuple([{', '.join(_schema(one) for one in shape.members)}])"
         case "ref":
             assert shape.ref is not None
             return f"{shape.ref.name}Schema"

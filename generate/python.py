@@ -146,7 +146,7 @@ def _field_source(prop: Property) -> str:
 def _default_source(prop: Property, constraints: str) -> str:
     shape = prop.shape
     if prop.default is not MISSING:
-        return _explicit_default(prop.default, constraints)
+        return _explicit_default(prop.default, constraints, shape)
     if shape.kind == "const":
         return _field_call(repr(shape.const), constraints)
     if prop.required:
@@ -158,12 +158,21 @@ def _absent_means_none(prop: Property) -> bool:
     return not prop.required and prop.default is MISSING and prop.shape.kind != "const"
 
 
-def _explicit_default(default: object, constraints: str) -> str:
+def _explicit_default(default: object, constraints: str, shape: Shape) -> str:
     if default == [] or default == {}:
-        factory = "list" if default == [] else "dict"
-        parts = [f"default_factory={factory}"] + ([constraints] if constraints else [])
+        parts = [f"default_factory={_factory(default, shape)}"] + ([constraints] if constraints else [])
         return f" = Field({', '.join(parts)})"
     return _field_call(repr(default), constraints)
+
+
+# `{}` on a field that IS another model does not mean an empty dict: it means that model built
+# from its own defaults, which is the only reading under which the field still has its type. A
+# list says what it holds for the same reason — a bare `list` is a list of nothing anybody named,
+# and a type checker reading the generated file says so.
+def _factory(default: object, shape: Shape) -> str:
+    if default == []:
+        return "list" if shape.items is None else f"list[{_annotation(shape.items)}]"
+    return shape.ref.name if shape.kind == "ref" and shape.ref is not None else "dict"
 
 
 def _field_call(value: str, constraints: str) -> str:
@@ -191,6 +200,8 @@ def _bare_annotation(shape: Shape) -> str:
         case "map":
             assert shape.items is not None
             return f"dict[str, {_annotation(shape.items)}]"
+        case "tuple":
+            return f"tuple[{', '.join(_annotation(one) for one in shape.members)}]"
         case "ref":
             assert shape.ref is not None
             return shape.ref.name

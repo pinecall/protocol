@@ -488,6 +488,42 @@ module Pinecall
           took_ms: { kind: :float, required: true },
           misses: { kind: :list, items: { kind: :ref, ref: "MemoryMiss" }, required: true }
         }.freeze,
+        "ExtractionExpected" => {
+          writes: { kind: :list, items: { kind: :str }, default: [] },
+          never: { kind: :list, items: { kind: :str }, default: [] },
+          never_says: { kind: :list, items: { kind: :str }, default: [] },
+          invalidates: { kind: :list, items: { kind: :str }, default: [] }
+        }.freeze,
+        "ExtractionGolden" => {
+          name: { kind: :str, required: true },
+          said: { kind: :list, items: { kind: :tuple, members: [{ kind: :str }, { kind: :str }] }, required: true },
+          holds: { kind: :list, items: { kind: :str }, default: [] },
+          plants: { kind: :list, items: { kind: :str }, default: [] },
+          channel: { kind: :ref, ref: "Channel", default: "phone" },
+          expect: { kind: :ref, ref: "ExtractionExpected", default: {} }
+        }.freeze,
+        "ExtractionCases" => {
+          cases: { kind: :list, items: { kind: :ref, ref: "ExtractionGolden" }, required: true }
+        }.freeze,
+        "ExtractionBroke" => {
+          check: { kind: :str, required: true },
+          detail: { kind: :str, required: true }
+        }.freeze,
+        "ExtractionJudged" => {
+          name: { kind: :str, required: true },
+          held: { kind: :bool, required: true },
+          wrote: { kind: :list, items: { kind: :str }, default: [] },
+          refused: { kind: :list, items: { kind: :str }, default: [] },
+          broke: { kind: :list, items: { kind: :ref, ref: "ExtractionBroke" }, default: [] }
+        }.freeze,
+        "ExtractionRun" => {
+          agent: { kind: :str, required: true },
+          model: { kind: :str, required: true },
+          cases: { kind: :int, required: true },
+          held: { kind: :int, required: true },
+          took_ms: { kind: :float, required: true },
+          results: { kind: :list, items: { kind: :ref, ref: "ExtractionJudged" }, required: true }
+        }.freeze,
         "LookupRequest" => {
           tool: { kind: :ref, ref: "PlatformTool", required: true },
           input: { kind: :json, required: true },

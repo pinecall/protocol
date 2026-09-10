@@ -53,6 +53,7 @@ module Pinecall
         when :json then expect(value, Hash, where, "an object")
         when :any then value
         when :list then list!(spec, value, where)
+        when :tuple then tuple!(spec, value, where)
         when :map then map!(spec[:items], value, where)
         when :enum then one_of!(spec[:values], value, where)
         when :const then const!(spec[:const], value, where)
@@ -85,6 +86,18 @@ module Pinecall
       def list!(spec, value, where)
         expect(value, Array, where, "a list")
         value.each_with_index { |item, at| field!(spec[:items], item, "#{where}[#{at}]") }
+      end
+
+      # A tuple is exactly as long as it has places and every place is its own shape: a line of a
+      # transcript is [who, what] and never one of the two alone.
+      def tuple!(spec, value, where)
+        expect(value, Array, where, "a list")
+        places = spec[:members]
+        unless value.length == places.length
+          raise ProtocolError, "#{where}: a list of #{places.length} things, not #{value.length}"
+        end
+
+        places.each_with_index { |place, at| field!(place, value[at], "#{where}[#{at}]") }
       end
 
       # A map's keys are the app's own names; every value is the one shape the table gives.

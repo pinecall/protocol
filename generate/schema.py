@@ -39,6 +39,8 @@ class Shape:
     nullable: bool = False
     # What a list holds, or what every value of a map is. One field, so one walk finds both.
     items: Shape | None = None
+    # What a tuple holds, in the order it holds them: a fixed-length array whose places differ.
+    members: tuple[Shape, ...] = ()
     ref: Ref | None = None
     values: tuple[str, ...] = ()
     const: str | None = None
@@ -257,11 +259,25 @@ def _shape(raw: dict[str, Any], path: Path, schema_dir: Path) -> Shape:
     if "enum" in raw:
         return Shape("enum", values=tuple(raw["enum"]))
     if kinds == "array":
-        return Shape("list", items=_shape(raw["items"], path, schema_dir))
+        return _array(raw, path, schema_dir)
     if kinds == "object":
         return _inline_object(raw, path, schema_dir)
     scalar = {"string": "str", "number": "float", "integer": "int", "boolean": "bool"}
     return Shape(scalar[kinds])
+
+
+# A list holds one shape however long it is; a tuple holds a shape per place and is exactly as
+# long as it has places. `prefixItems` is JSON Schema's own word for the second, and a schema that
+# writes it must close the length itself so no reader has to guess whether a third place may come.
+def _array(raw: dict[str, Any], path: Path, schema_dir: Path) -> Shape:
+    places = raw.get("prefixItems")
+    if places is None:
+        return Shape("list", items=_shape(raw["items"], path, schema_dir))
+    if raw.get("items") is not False:
+        raise ValueError(f"{path}: a tuple closes with items: false, so its length is its places")
+    if raw.get("minItems") != len(places) or raw.get("maxItems") != len(places):
+        raise ValueError(f"{path}: a tuple of {len(places)} says minItems and maxItems {len(places)}")
+    return Shape("tuple", members=tuple(_shape(one, path, schema_dir) for one in places))
 
 
 # An inline object is opaque JSON (additionalProperties: true) or a map of one shape keyed by
@@ -303,12 +319,20 @@ def dependencies(definition: Definition) -> list[Ref]:
     if definition.value is not None:
         shapes.append(definition.value)
     for shape in shapes:
-        inner: Shape | None = shape
-        while inner is not None:
-            if inner.ref is not None:
-                found.append(inner.ref)
-            inner = inner.items
+        _named_by(shape, found)
     return found
+
+
+# Depth first and in the order written, because the order a module's definitions are emitted in
+# follows this walk: a reader and a compiler meet every name once, dependencies first.
+def _named_by(shape: Shape, found: list[Ref]) -> None:
+    """Every definition one shape names: itself, what a list holds, and a tuple's every place."""
+    if shape.ref is not None:
+        found.append(shape.ref)
+    if shape.items is not None:
+        _named_by(shape.items, found)
+    for member in shape.members:
+        _named_by(member, found)
 
 
 # Both languages lint their own generated files, and both linters sort imports case-insensitively:
