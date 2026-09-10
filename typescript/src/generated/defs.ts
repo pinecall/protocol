@@ -50,20 +50,21 @@ export const PromptRegionSchema = z.enum(["static", "dynamic"]);
 export type PromptRegion = z.infer<typeof PromptRegionSchema>;
 
 /**
- * How the knowledge base reaches the model: retrieved, the runtime searches it every turn and
- * fills the retrieved marker before the model is asked; or tool, the model searches it itself
- * through a tool the runtime declares.
+ * How the knowledge base reaches the model: retrieved, the platform runs search itself when the
+ * caller's turn ends; or tool, the model calls search when it decides to. Either way the chunks
+ * arrive as a tool result.
  */
 export const DocsModeSchema = z.enum(["retrieved", "tool"]);
 export type DocsMode = z.infer<typeof DocsModeSchema>;
 
 /**
- * The three markers a view may write in a block and never resolves: memory (the contact's facts,
- * per turn), retrieved (chunks of the knowledge base, per turn), knowledge (the one file, once per
- * call). The runtime reads the line, does the work, and replaces it.
+ * The two tools the platform runs on the app's behalf: recall reads the contact's facts out of
+ * memory, search reads chunks out of the knowledge base. The app declares memory and docs and
+ * writes neither method; the platform runs the lookup, and the answer reaches the model as a tool
+ * result rather than as part of the prompt.
  */
-export const MarkerNameSchema = z.enum(["memory", "retrieved", "knowledge"]);
-export type MarkerName = z.infer<typeof MarkerNameSchema>;
+export const PlatformToolSchema = z.enum(["recall", "search"]);
+export type PlatformTool = z.infer<typeof PlatformToolSchema>;
 
 /**
  * One named block of the prompt and the region it lives in. The default layout, when an agent

@@ -19,10 +19,10 @@ module Pinecall
       type transfer_mode = "cold" | "warm"
       # Which region of the prompt a block lives in: static, before the history, cached by the provider; or dynamic, after the history, replaced every turn.
       type prompt_region = "static" | "dynamic"
-      # How the knowledge base reaches the model: retrieved, the runtime searches it every turn and fills the retrieved marker before the model is asked; or tool, the model searches it itself through a tool the runtime declares.
+      # How the knowledge base reaches the model: retrieved, the platform runs search itself when the caller's turn ends; or tool, the model calls search when it decides to.
       type docs_mode = "retrieved" | "tool"
-      # The three markers a view may write in a block and never resolves: memory (the contact's facts, per turn), retrieved (chunks of the knowledge base, per turn), knowledge (the one file, once per call).
-      type marker_name = "memory" | "retrieved" | "knowledge"
+      # The two tools the platform runs on the app's behalf: recall reads the contact's facts out of memory, search reads chunks out of the knowledge base.
+      type platform_tool = "recall" | "search"
       # One named block of the prompt and the region it lives in.
       type prompt_block_spec = { name: String, region: prompt_region }
       # What the platform believes the person on the line is doing right now.
@@ -159,14 +159,10 @@ module Pinecall
       type contact_memory = { facts: Array[contact_fact] }
       # DELETE /v1/contacts/{contact}/memory, the answer: how many facts the right to be forgotten erased.
       type forgotten = { forgotten: Integer }
-      # One marker the worker found in a dynamic block, as the gateway is asked to fill it.
-      type fill_marker = { name: marker_name, payload: String }
-      # POST /v1/calls/{call}/fill, the body: what the caller just said and the markers to fill before the model is asked.
-      type fill_request = { query: String, markers: Array[fill_marker], ?speech_id: String }
-      # One marker filled: the marker as it was asked, and the text that takes its line.
-      type fill = { name: marker_name, payload: String, text: String }
-      # POST /v1/calls/{call}/fill, the answer: every marker filled, and how long the whole fill took.
-      type fills = { fills: Array[fill], took_ms: Float }
+      # POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to run it with.
+      type lookup_request = { tool: platform_tool, input: Hash[Symbol, untyped], ?speech_id: String }
+      # POST /v1/calls/{call}/lookup, the answer: what the tool found, and how long finding it took.
+      type lookup_result = { output: Hash[Symbol, untyped], took_ms: Float }
       # POST /v1/calls/{call}/remember, the answer: what the call taught about the contact, counted.
       type remembered = { ops: Integer, took_ms: Float }
       # The LiveKit room exists and the call lives in it.

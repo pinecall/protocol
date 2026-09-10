@@ -149,46 +149,25 @@
         "forgotten": {"type": "integer", "description": "How many facts were erased, every version counted."}
       }
     },
-    "FillMarker": {
+    "LookupRequest": {
       "type": "object",
       "additionalProperties": false,
-      "description": "One marker the worker found in a dynamic block, as the gateway is asked to fill it. The view wrote it and never resolves it.",
-      "required": ["name", "payload"],
+      "description": "POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to run it with. Worker-only; the gateway runs it against its own stores and writes memory.ops or docs.sources on the call's log itself.",
+      "required": ["tool", "input"],
       "properties": {
-        "name": {"$ref": "defs.json#/$defs/MarkerName"},
-        "payload": {"type": "string", "description": "What the marker carried after its name, verbatim: the JSON of a memory or retrieved marker, the path of a knowledge marker."}
+        "tool": {"$ref": "defs.json#/$defs/PlatformTool"},
+        "input": {"type": "object", "additionalProperties": true, "description": "The tool's arguments, whole and unread: the wire carries the object and never looks inside it, because what recall and search take is the runtime's shape and is documented in the runtime's own docs, not here."},
+        "speech_id": {"type": "string", "description": "The turn's speech_id, so the entries the lookup writes join the turn's metrics."}
       }
     },
-    "FillRequest": {
+    "LookupResult": {
       "type": "object",
       "additionalProperties": false,
-      "description": "POST /v1/calls/{call}/fill, the body: what the caller just said and the markers to fill before the model is asked. Worker-only; the gateway writes memory.ops and docs.sources on the call's log itself.",
-      "required": ["query", "markers"],
+      "description": "POST /v1/calls/{call}/lookup, the answer: what the tool found, and how long finding it took. The output is JSON-encoded into a tool_result block, which is where everything from outside the conversation goes and the only place it goes.",
+      "required": ["output", "took_ms"],
       "properties": {
-        "query": {"type": "string", "description": "The caller's finished turn, the text memory and retrieval are searched with."},
-        "markers": {"type": "array", "items": {"$ref": "#/$defs/FillMarker"}, "description": "Every marker of the dynamic blocks, in the order they appear."},
-        "speech_id": {"type": "string", "description": "The turn's speech_id, so the entries the fill writes join the turn's metrics."}
-      }
-    },
-    "Fill": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "One marker filled: the marker as it was asked, and the text that takes its line.",
-      "required": ["name", "payload", "text"],
-      "properties": {
-        "name": {"$ref": "defs.json#/$defs/MarkerName"},
-        "payload": {"type": "string", "description": "The marker's payload, repeated so a fill finds its marker."},
-        "text": {"type": "string", "description": "The text that replaces the marker's line. Empty means the line goes, and the blank line after it with it."}
-      }
-    },
-    "Fills": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "POST /v1/calls/{call}/fill, the answer: every marker filled, and how long the whole fill took.",
-      "required": ["fills", "took_ms"],
-      "properties": {
-        "fills": {"type": "array", "items": {"$ref": "#/$defs/Fill"}, "description": "One fill per marker asked, in the same order."},
-        "took_ms": {"type": "number", "description": "How long the whole fill took, recall and retrieval included, in milliseconds. The worker's budget is 250."}
+        "output": {"type": "object", "additionalProperties": true, "description": "What the tool answered, whole and unread: the wire carries the object and never looks inside it, because the shapes recall and search answer in are the runtime's and are documented in the runtime's own docs, not here."},
+        "took_ms": {"type": "number", "description": "How long the lookup took, the search and the embedding included, in milliseconds. The worker's budget is 250."}
       }
     },
     "Remembered": {

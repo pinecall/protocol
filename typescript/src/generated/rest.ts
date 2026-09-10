@@ -8,7 +8,7 @@ import {
   DirectionSchema,
   EndReasonSchema,
   KnowledgeFileSchema,
-  MarkerNameSchema,
+  PlatformToolSchema,
 } from "./defs.js";
 import { EntrySchema } from "./envelope.js";
 import { CallStatusSchema, StateSchema } from "./state.js";
@@ -134,41 +134,27 @@ export const ForgottenSchema = z.strictObject({
 export type Forgotten = z.infer<typeof ForgottenSchema>;
 
 /**
- * One marker the worker found in a dynamic block, as the gateway is asked to fill it. The view
- * wrote it and never resolves it.
+ * POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to
+ * run it with. Worker-only; the gateway runs it against its own stores and writes memory.ops or
+ * docs.sources on the call's log itself.
  */
-export const FillMarkerSchema = z.strictObject({
-  name: MarkerNameSchema,
-  payload: z.string(),
-});
-export type FillMarker = z.infer<typeof FillMarkerSchema>;
-
-/**
- * POST /v1/calls/{call}/fill, the body: what the caller just said and the markers to fill before
- * the model is asked. Worker-only; the gateway writes memory.ops and docs.sources on the call's
- * log itself.
- */
-export const FillRequestSchema = z.strictObject({
-  query: z.string(),
-  markers: z.array(FillMarkerSchema),
+export const LookupRequestSchema = z.strictObject({
+  tool: PlatformToolSchema,
+  input: z.record(z.string(), z.unknown()),
   speech_id: z.string().nullish(),
 });
-export type FillRequest = z.infer<typeof FillRequestSchema>;
+export type LookupRequest = z.infer<typeof LookupRequestSchema>;
 
-/** One marker filled: the marker as it was asked, and the text that takes its line. */
-export const FillSchema = z.strictObject({
-  name: MarkerNameSchema,
-  payload: z.string(),
-  text: z.string(),
-});
-export type Fill = z.infer<typeof FillSchema>;
-
-/** POST /v1/calls/{call}/fill, the answer: every marker filled, and how long the whole fill took. */
-export const FillsSchema = z.strictObject({
-  fills: z.array(FillSchema),
+/**
+ * POST /v1/calls/{call}/lookup, the answer: what the tool found, and how long finding it took. The
+ * output is JSON-encoded into a tool_result block, which is where everything from outside the
+ * conversation goes and the only place it goes.
+ */
+export const LookupResultSchema = z.strictObject({
+  output: z.record(z.string(), z.unknown()),
   took_ms: z.number(),
 });
-export type Fills = z.infer<typeof FillsSchema>;
+export type LookupResult = z.infer<typeof LookupResultSchema>;
 
 /**
  * POST /v1/calls/{call}/remember, the answer: what the call taught about the contact, counted.

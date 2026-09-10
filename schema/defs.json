@@ -11,8 +11,8 @@
     "ScoreVerdict": {"type": "string", "enum": ["held", "broken", "deferred", "skipped"], "description": "What one judge answered about a finished call. Held: the rule held. Broken: it did not, and the reason names the evidence. Deferred: the judge was asked and could not settle it. Skipped: nobody asked it — no model was reachable inside the call's judging budget."},
     "TransferMode": {"type": "string", "enum": ["cold", "warm"], "description": "Cold: the caller is sent on and the agent leaves. Warm: the agent stays on the line until the other side answers, then leaves."},
     "PromptRegion": {"type": "string", "enum": ["static", "dynamic"], "description": "Which region of the prompt a block lives in: static, before the history, cached by the provider; or dynamic, after the history, replaced every turn. The append-only history in between is never written by the app."},
-    "DocsMode": {"type": "string", "enum": ["retrieved", "tool"], "description": "How the knowledge base reaches the model: retrieved, the runtime searches it every turn and fills the retrieved marker before the model is asked; or tool, the model searches it itself through a tool the runtime declares."},
-    "MarkerName": {"type": "string", "enum": ["memory", "retrieved", "knowledge"], "description": "The three markers a view may write in a block and never resolves: memory (the contact's facts, per turn), retrieved (chunks of the knowledge base, per turn), knowledge (the one file, once per call). The runtime reads the line, does the work, and replaces it."},
+    "DocsMode": {"type": "string", "enum": ["retrieved", "tool"], "description": "How the knowledge base reaches the model: retrieved, the platform runs search itself when the caller's turn ends; or tool, the model calls search when it decides to. Either way the chunks arrive as a tool result."},
+    "PlatformTool": {"type": "string", "enum": ["recall", "search"], "description": "The two tools the platform runs on the app's behalf: recall reads the contact's facts out of memory, search reads chunks out of the knowledge base. The app declares memory and docs and writes neither method; the platform runs the lookup, and the answer reaches the model as a tool result rather than as part of the prompt."},
     "PromptBlockSpec": {
       "type": "object",
       "description": "One named block of the prompt and the region it lives in. The default layout, when an agent declares none, is identity, knowledge and tools (static), then the history, then view (dynamic). A block's text is written per call with prompt.set.",
@@ -127,7 +127,7 @@
         "path": {"type": "string", "description": "The document the chunk came from, as the tenant pushed it: 'faq/horarios.md'."},
         "heading": {"type": "string", "description": "The heading the chunk sits under, since chunks are cut by heading."},
         "score": {"type": "number", "description": "The fused rank score (vector and BM25 through RRF), higher is better."},
-        "excerpt": {"type": "string", "description": "The first line or so of the chunk, for the console."}
+        "excerpt": {"type": "string", "description": "The chunk's text as the model read it, the body under its heading: the log carries the evidence an answer had to come from, so a judge reading it afterwards can find it."}
       },
       "required": ["id", "path", "score"],
       "additionalProperties": false
@@ -256,7 +256,7 @@
       "properties": {
         "base": {"type": "string", "description": "The base's name, the one it was pushed to with PUT /v1/knowledge/{base}: 'clinica-norte'."},
         "mode": {"$ref": "#/$defs/DocsMode", "default": "retrieved"},
-        "k": {"type": "integer", "minimum": 1, "default": 8, "description": "How many chunks a turn's retrieval puts in front of the model at most. A retrieved marker's own k overrides it."},
+        "k": {"type": "integer", "minimum": 1, "default": 8, "description": "How many chunks a turn's retrieval puts in front of the model at most."},
         "min_score": {"type": "number", "minimum": 0, "description": "The fused rank score a chunk must reach to be put in front of the model. Absent, nothing is dropped from the top k."}
       },
       "required": ["base"],
@@ -266,7 +266,7 @@
       "type": "object",
       "description": "What memory keeps about a contact across calls, and what it must never keep. Both lists are in the tenant's own words.",
       "properties": {
-        "remember": {"type": "array", "items": {"type": "string"}, "default": [], "description": "The kinds of fact worth keeping, as the tenant names them: 'alergias', 'preference', 'pets'. They become the categories remember extracts and a memory marker may ask for."},
+        "remember": {"type": "array", "items": {"type": "string"}, "default": [], "description": "The kinds of fact worth keeping, as the tenant names them: 'alergias', 'preference', 'pets'. They become the categories remember extracts and recall reads back."},
         "forget": {"type": "array", "items": {"type": "string"}, "default": [], "description": "The kinds of fact that are never written, whatever the call said: 'card_numbers', 'diagnosis'. Dropped before they touch the store."}
       },
       "additionalProperties": false
@@ -284,7 +284,7 @@
         "turn": {"$ref": "#/$defs/TurnConfig"},
         "says": {"type": "array", "items": {"$ref": "#/$defs/Pronunciation"}, "description": "How the voice says the words it would otherwise get wrong. Applied to the reply on its way to the TTS."},
         "hears": {"type": "array", "items": {"type": "string"}, "description": "The words the ears must know: the agent's own name, the doctors', the streets. Given to the STT as keyterms."},
-        "knowledge": {"$ref": "#/$defs/KnowledgeFile", "description": "The one file the agent knows by heart, sent whole: the bridge reads it beside the class and the runtime puts its text where the knowledge marker is, in the static block, once per call."},
+        "knowledge": {"$ref": "#/$defs/KnowledgeFile", "description": "The one file the agent knows by heart, sent whole: the bridge reads it beside the class and the runtime puts its text in the static block, once per call."},
         "docs": {"$ref": "#/$defs/DocsConfig", "description": "The knowledge base the agent answers from, by the name it was pushed under, and how its chunks reach the model."},
         "memory": {"$ref": "#/$defs/MemoryConfig", "description": "What memory keeps about a contact across calls, in the tenant's words, and what it must never keep."},
         "tools": {"type": "array", "items": {"$ref": "#/$defs/ToolSpec"}, "description": "Every tool the agent may ever see. Which ones are visible now is tools.set."},

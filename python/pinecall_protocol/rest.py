@@ -1,5 +1,7 @@
 """Generated from schema/rest.json: the envelopes the read doors answer in."""
 
+from typing import Any
+
 from pydantic import Field
 
 from pinecall_protocol._base import WireModel
@@ -10,7 +12,7 @@ from pinecall_protocol.defs import (
     Direction,
     EndReason,
     KnowledgeFile,
-    MarkerName,
+    PlatformTool,
 )
 from pinecall_protocol.envelope import Entry
 from pinecall_protocol.state import CallStatus, State
@@ -128,38 +130,24 @@ class Forgotten(WireModel):
     forgotten: int
 
 
-# The view wrote it and never resolves it.
-class FillMarker(WireModel):
-    """One marker the worker found in a dynamic block, as the gateway is asked to fill it."""
+# POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to run
+# it with. Worker-only; the gateway runs it against its own stores and writes memory.ops or
+# docs.sources on the call's log itself.
+class LookupRequest(WireModel):
+    """POST /v1/calls/{call}/lookup, the body."""
 
-    name: MarkerName
-    payload: str
-
-
-# POST /v1/calls/{call}/fill, the body: what the caller just said and the markers to fill before the
-# model is asked. Worker-only; the gateway writes memory.ops and docs.sources on the call's log
-# itself.
-class FillRequest(WireModel):
-    """POST /v1/calls/{call}/fill, the body."""
-
-    query: str
-    markers: list[FillMarker]
+    tool: PlatformTool
+    input: dict[str, Any]
     speech_id: str | None = None
 
 
-class Fill(WireModel):
-    """One marker filled: the marker as it was asked, and the text that takes its line."""
+# POST /v1/calls/{call}/lookup, the answer: what the tool found, and how long finding it took. The
+# output is JSON-encoded into a tool_result block, which is where everything from outside the
+# conversation goes and the only place it goes.
+class LookupResult(WireModel):
+    """POST /v1/calls/{call}/lookup, the answer."""
 
-    name: MarkerName
-    payload: str
-    text: str
-
-
-# POST /v1/calls/{call}/fill, the answer: every marker filled, and how long the whole fill took.
-class Fills(WireModel):
-    """POST /v1/calls/{call}/fill, the answer."""
-
-    fills: list[Fill]
+    output: dict[str, Any]
     took_ms: float
 
 

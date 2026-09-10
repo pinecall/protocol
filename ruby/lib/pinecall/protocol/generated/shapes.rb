@@ -441,22 +441,13 @@ module Pinecall
         "Forgotten" => {
           forgotten: { kind: :int, required: true }
         }.freeze,
-        "FillMarker" => {
-          name: { kind: :ref, ref: "MarkerName", required: true },
-          payload: { kind: :str, required: true }
-        }.freeze,
-        "FillRequest" => {
-          query: { kind: :str, required: true },
-          markers: { kind: :list, items: { kind: :ref, ref: "FillMarker" }, required: true },
+        "LookupRequest" => {
+          tool: { kind: :ref, ref: "PlatformTool", required: true },
+          input: { kind: :json, required: true },
           speech_id: { kind: :str }
         }.freeze,
-        "Fill" => {
-          name: { kind: :ref, ref: "MarkerName", required: true },
-          payload: { kind: :str, required: true },
-          text: { kind: :str, required: true }
-        }.freeze,
-        "Fills" => {
-          fills: { kind: :list, items: { kind: :ref, ref: "Fill" }, required: true },
+        "LookupResult" => {
+          output: { kind: :json, required: true },
           took_ms: { kind: :float, required: true }
         }.freeze,
         "Remembered" => {

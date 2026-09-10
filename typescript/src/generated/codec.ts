@@ -86,8 +86,8 @@ export type Snake<T> = T extends readonly (infer Item)[]
     : T;
 
 /** The keys whose values belong to the app (its state, a tool's arguments, a map it named): never renamed below them. */
-export const OPAQUE_KEYS = new Set<string>(["app_state", "arguments", "attributes", "data", "metadata", "output", "parameters", "prompt", "state"]);
-export type OpaqueKey = "app_state" | "arguments" | "attributes" | "data" | "metadata" | "output" | "parameters" | "prompt" | "state";
+export const OPAQUE_KEYS = new Set<string>(["app_state", "arguments", "attributes", "data", "input", "metadata", "output", "parameters", "prompt", "state"]);
+export type OpaqueKey = "app_state" | "arguments" | "attributes" | "data" | "input" | "metadata" | "output" | "parameters" | "prompt" | "state";
 
 /** Rename every key from snake_case to camelCase, deep. Values are never touched. */
 export function toCamel<T>(value: T): Camel<T> {

@@ -29,14 +29,15 @@ module Pinecall
       # provider; or dynamic, after the history, replaced every turn. The append-only history in
       # between is never written by the app.
       PROMPT_REGION = %w[static dynamic].freeze
-      # How the knowledge base reaches the model: retrieved, the runtime searches it every turn
-      # and fills the retrieved marker before the model is asked; or tool, the model searches it
-      # itself through a tool the runtime declares.
+      # How the knowledge base reaches the model: retrieved, the platform runs search itself when
+      # the caller's turn ends; or tool, the model calls search when it decides to. Either way the
+      # chunks arrive as a tool result.
       DOCS_MODE = %w[retrieved tool].freeze
-      # The three markers a view may write in a block and never resolves: memory (the contact's
-      # facts, per turn), retrieved (chunks of the knowledge base, per turn), knowledge (the one
-      # file, once per call). The runtime reads the line, does the work, and replaces it.
-      MARKER_NAME = %w[memory retrieved knowledge].freeze
+      # The two tools the platform runs on the app's behalf: recall reads the contact's facts out
+      # of memory, search reads chunks out of the knowledge base. The app declares memory and docs
+      # and writes neither method; the platform runs the lookup, and the answer reaches the model
+      # as a tool result rather than as part of the prompt.
+      PLATFORM_TOOL = %w[recall search].freeze
       # What the platform believes the person on the line is doing right now. The states are the
       # session's own.
       USER_STATE = %w[listening speaking away].freeze
@@ -74,7 +75,7 @@ module Pinecall
         "TransferMode" => TRANSFER_MODE,
         "PromptRegion" => PROMPT_REGION,
         "DocsMode" => DOCS_MODE,
-        "MarkerName" => MARKER_NAME,
+        "PlatformTool" => PLATFORM_TOOL,
         "UserState" => USER_STATE,
         "AgentState" => AGENT_STATE,
         "ParticipantKind" => PARTICIPANT_KIND,

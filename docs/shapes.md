@@ -73,15 +73,15 @@ One of: `static`, `dynamic`.
 
 ### `DocsMode`
 
-How the knowledge base reaches the model: retrieved, the runtime searches it every turn and fills the retrieved marker before the model is asked; or tool, the model searches it itself through a tool the runtime declares.
+How the knowledge base reaches the model: retrieved, the platform runs search itself when the caller's turn ends; or tool, the model calls search when it decides to. Either way the chunks arrive as a tool result.
 
 One of: `retrieved`, `tool`.
 
-### `MarkerName`
+### `PlatformTool`
 
-The three markers a view may write in a block and never resolves: memory (the contact's facts, per turn), retrieved (chunks of the knowledge base, per turn), knowledge (the one file, once per call). The runtime reads the line, does the work, and replaces it.
+The two tools the platform runs on the app's behalf: recall reads the contact's facts out of memory, search reads chunks out of the knowledge base. The app declares memory and docs and writes neither method; the platform runs the lookup, and the answer reaches the model as a tool result rather than as part of the prompt.
 
-One of: `memory`, `retrieved`, `knowledge`.
+One of: `recall`, `search`.
 
 ### `PromptBlockSpec`
 
@@ -232,7 +232,7 @@ One chunk of the knowledge base that retrieval put in front of the model for thi
 | `path` | `string` | yes | The document the chunk came from, as the tenant pushed it: 'faq/horarios.md'. |
 | `heading` | `string` | no | The heading the chunk sits under, since chunks are cut by heading. |
 | `score` | `number` | yes | The fused rank score (vector and BM25 through RRF), higher is better. |
-| `excerpt` | `string` | no | The first line or so of the chunk, for the console. |
+| `excerpt` | `string` | no | The chunk's text as the model read it, the body under its heading: the log carries the evidence an answer had to come from, so a judge reading it afterwards can find it. |
 
 ### `CostRate`
 
@@ -350,8 +350,8 @@ The knowledge base the agent answers from, and how its chunks reach the model. I
 | field | type | required | meaning |
 |---|---|---|---|
 | `base` | `string` | yes | The base's name, the one it was pushed to with PUT /v1/knowledge/{base}: 'clinica-norte'. |
-| `mode` | `DocsMode` | no | How the knowledge base reaches the model: retrieved, the runtime searches it every turn and fills the retrieved marker before the model is asked; or tool, the model searches it itself through a tool the runtime declares. |
-| `k` | `integer` | no | How many chunks a turn's retrieval puts in front of the model at most. A retrieved marker's own k overrides it. |
+| `mode` | `DocsMode` | no | How the knowledge base reaches the model: retrieved, the platform runs search itself when the caller's turn ends; or tool, the model calls search when it decides to. |
+| `k` | `integer` | no | How many chunks a turn's retrieval puts in front of the model at most. |
 | `min_score` | `number` | no | The fused rank score a chunk must reach to be put in front of the model. Absent, nothing is dropped from the top k. |
 
 ### `MemoryConfig`
@@ -360,7 +360,7 @@ What memory keeps about a contact across calls, and what it must never keep. Bot
 
 | field | type | required | meaning |
 |---|---|---|---|
-| `remember` | `string[]` | no | The kinds of fact worth keeping, as the tenant names them: 'alergias', 'preference', 'pets'. They become the categories remember extracts and a memory marker may ask for. |
+| `remember` | `string[]` | no | The kinds of fact worth keeping, as the tenant names them: 'alergias', 'preference', 'pets'. They become the categories remember extracts and recall reads back. |
 | `forget` | `string[]` | no | The kinds of fact that are never written, whatever the call said: 'card_numbers', 'diagnosis'. Dropped before they touch the store. |
 
 ### `AgentConfig`
@@ -378,7 +378,7 @@ What an app declares about its agent: the voice, the models, the language, the g
 | `turn` | `TurnConfig` | no | How the session decides that the caller has finished, and when the caller may interrupt. |
 | `says` | `Pronunciation[]` | no | How the voice says the words it would otherwise get wrong. Applied to the reply on its way to the TTS. |
 | `hears` | `string[]` | no | The words the ears must know: the agent's own name, the doctors', the streets. Given to the STT as keyterms. |
-| `knowledge` | `KnowledgeFile` | no | The one file the agent knows by heart, sent whole: the bridge reads it beside the class and the runtime puts its text where the knowledge marker is, in the static block, once per call. |
+| `knowledge` | `KnowledgeFile` | no | The one file the agent knows by heart, sent whole: the bridge reads it beside the class and the runtime puts its text in the static block, once per call. |
 | `docs` | `DocsConfig` | no | The knowledge base the agent answers from, by the name it was pushed under, and how its chunks reach the model. |
 | `memory` | `MemoryConfig` | no | What memory keeps about a contact across calls, in the tenant's words, and what it must never keep. |
 | `tools` | `ToolSpec[]` | no | Every tool the agent may ever see. Which ones are visible now is tools.set. |
