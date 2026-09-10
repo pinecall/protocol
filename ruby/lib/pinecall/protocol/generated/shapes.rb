@@ -128,6 +128,9 @@ module Pinecall
           k: { kind: :int, default: 8 },
           min_score: { kind: :float }
         }.freeze,
+        "HangupConfig" => {
+          when: { kind: :str, default: "" }
+        }.freeze,
         "MemoryConfig" => {
           remember: { kind: :list, items: { kind: :str }, default: [] },
           forget: { kind: :list, items: { kind: :str }, default: [] }
@@ -145,6 +148,7 @@ module Pinecall
           knowledge: { kind: :ref, ref: "KnowledgeFile" },
           docs: { kind: :ref, ref: "DocsConfig" },
           memory: { kind: :ref, ref: "MemoryConfig" },
+          hangup: { kind: :ref, ref: "HangupConfig" },
           tools: { kind: :list, items: { kind: :ref, ref: "ToolSpec" } },
           state_fields: { kind: :list, items: { kind: :ref, ref: "StateFieldSpec" } },
           events: { kind: :list, items: { kind: :ref, ref: "EventSpec" } }

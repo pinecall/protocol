@@ -316,6 +316,16 @@ class DocsConfig(WireModel):
     min_score: float | None = None
 
 
+# Declaring this is what puts livekit's own end_call tool in front of the model; a class that says
+# nothing here cannot hang up, and the call ends when the caller does or when a supervisor says so.
+# The tool is hidden while the agent is greeting, because a model that can hang up on its first turn
+# eventually does.
+class HangupConfig(WireModel):
+    """Whether the model may end the call itself."""
+
+    when: str = ""
+
+
 # Both lists are in the tenant's own words.
 class MemoryConfig(WireModel):
     """What memory keeps about a contact across calls, and what it must never keep."""
@@ -341,6 +351,7 @@ class AgentConfig(WireModel):
     knowledge: KnowledgeFile | None = None
     docs: DocsConfig | None = None
     memory: MemoryConfig | None = None
+    hangup: HangupConfig | None = None
     tools: list[ToolSpec] | None = None
     state_fields: list[StateFieldSpec] | None = None
     events: list[EventSpec] | None = None

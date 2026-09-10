@@ -262,6 +262,14 @@
       "required": ["base"],
       "additionalProperties": false
     },
+    "HangupConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Whether the model may end the call itself. Declaring this is what puts livekit's own end_call tool in front of the model; a class that says nothing here cannot hang up, and the call ends when the caller does or when a supervisor says so. The tool is hidden while the agent is greeting, because a model that can hang up on its first turn eventually does.",
+      "properties": {
+        "when": {"type": "string", "default": "", "description": "When the agent should end the call, in the tenant's own words and their own language. It is appended to the tool's description, which already says to end it when the caller is clearly done and never when the intent is unclear."}
+      }
+    },
     "MemoryConfig": {
       "type": "object",
       "description": "What memory keeps about a contact across calls, and what it must never keep. Both lists are in the tenant's own words.",
@@ -287,6 +295,7 @@
         "knowledge": {"$ref": "#/$defs/KnowledgeFile", "description": "The one file the agent knows by heart, sent whole: the bridge reads it beside the class and the runtime puts its text in the static block, once per call."},
         "docs": {"$ref": "#/$defs/DocsConfig", "description": "The knowledge base the agent answers from, by the name it was pushed under, and how its chunks reach the model."},
         "memory": {"$ref": "#/$defs/MemoryConfig", "description": "What memory keeps about a contact across calls, in the tenant's words, and what it must never keep."},
+    "hangup": {"$ref": "#/$defs/HangupConfig", "description": "Whether the model may end the call itself, and when. Absent: it may not, and only the caller or a supervisor ends a call."},
         "tools": {"type": "array", "items": {"$ref": "#/$defs/ToolSpec"}, "description": "Every tool the agent may ever see. Which ones are visible now is tools.set."},
         "state_fields": {"type": "array", "items": {"$ref": "#/$defs/StateFieldSpec"}, "description": "Who may see each field of the app's state. A field not listed is tenant: seen by the tenant's readers, never by the public."},
         "events": {"type": "array", "items": {"$ref": "#/$defs/EventSpec"}, "description": "The outside events this agent accepts and from whom. Anything else is refused before it touches the log."}

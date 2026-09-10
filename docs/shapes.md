@@ -354,6 +354,14 @@ The knowledge base the agent answers from, and how its chunks reach the model. I
 | `k` | `integer` | no | How many chunks a turn's retrieval puts in front of the model at most. |
 | `min_score` | `number` | no | The fused rank score a chunk must reach to be put in front of the model. Absent, nothing is dropped from the top k. |
 
+### `HangupConfig`
+
+Whether the model may end the call itself. Declaring this is what puts livekit's own end_call tool in front of the model; a class that says nothing here cannot hang up, and the call ends when the caller does or when a supervisor says so. The tool is hidden while the agent is greeting, because a model that can hang up on its first turn eventually does.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `when` | `string` | no | When the agent should end the call, in the tenant's own words and their own language. It is appended to the tool's description, which already says to end it when the caller is clearly done and never when the intent is unclear. |
+
 ### `MemoryConfig`
 
 What memory keeps about a contact across calls, and what it must never keep. Both lists are in the tenant's own words.
@@ -381,6 +389,7 @@ What an app declares about its agent: the voice, the models, the language, the g
 | `knowledge` | `KnowledgeFile` | no | The one file the agent knows by heart, sent whole: the bridge reads it beside the class and the runtime puts its text in the static block, once per call. |
 | `docs` | `DocsConfig` | no | The knowledge base the agent answers from, by the name it was pushed under, and how its chunks reach the model. |
 | `memory` | `MemoryConfig` | no | What memory keeps about a contact across calls, in the tenant's words, and what it must never keep. |
+| `hangup` | `HangupConfig` | no | Whether the model may end the call itself, and when. Absent: it may not, and only the caller or a supervisor ends a call. |
 | `tools` | `ToolSpec[]` | no | Every tool the agent may ever see. Which ones are visible now is tools.set. |
 | `state_fields` | `StateFieldSpec[]` | no | Who may see each field of the app's state. A field not listed is tenant: seen by the tenant's readers, never by the public. |
 | `events` | `EventSpec[]` | no | The outside events this agent accepts and from whom. Anything else is refused before it touches the log. |
