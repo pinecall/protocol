@@ -316,6 +316,19 @@ class DocsConfig(WireModel):
     min_score: float | None = None
 
 
+# Exactly one of the two, because there are only two ways to open one: `say` are the words
+# themselves and `reply` is what the model is told before it finds its own. They are agent.say and
+# agent.reply declared instead of called, so a class that opens every call the same way needs no
+# onCall hook to do it, and an operator can turn the opening at the pipeline door without a deploy.
+# Absent: nobody speaks until the caller does.
+class GreetingConfig(WireModel):
+    """How the agent opens a call, before the caller has said anything."""
+
+    say: str | None = None
+    reply: str | None = None
+    allow_interruptions: bool | None = None
+
+
 # Declaring this is what puts livekit's own end_call tool in front of the model; a class that says
 # nothing here cannot hang up, and the call ends when the caller does or when a supervisor says so.
 # The tool is hidden while the agent is greeting, because a model that can hang up on its first turn
@@ -341,7 +354,7 @@ class AgentConfig(WireModel):
 
     prompt: list[PromptBlockSpec] | None = None
     language: str | None = None
-    greeting: str | None = None
+    greeting: GreetingConfig | None = None
     voice: VoiceConfig | None = None
     llm: ModelConfig | None = None
     stt: ModelConfig | None = None

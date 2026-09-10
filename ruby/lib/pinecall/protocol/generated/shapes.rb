@@ -128,6 +128,11 @@ module Pinecall
           k: { kind: :int, default: 8 },
           min_score: { kind: :float }
         }.freeze,
+        "GreetingConfig" => {
+          say: { kind: :str },
+          reply: { kind: :str },
+          allow_interruptions: { kind: :bool }
+        }.freeze,
         "HangupConfig" => {
           when: { kind: :str, default: "" }
         }.freeze,
@@ -138,7 +143,7 @@ module Pinecall
         "AgentConfig" => {
           prompt: { kind: :list, items: { kind: :ref, ref: "PromptBlockSpec" } },
           language: { kind: :str },
-          greeting: { kind: :str },
+          greeting: { kind: :ref, ref: "GreetingConfig" },
           voice: { kind: :ref, ref: "VoiceConfig" },
           llm: { kind: :ref, ref: "ModelConfig" },
           stt: { kind: :ref, ref: "ModelConfig" },

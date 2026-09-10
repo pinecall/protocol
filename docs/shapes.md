@@ -354,6 +354,16 @@ The knowledge base the agent answers from, and how its chunks reach the model. I
 | `k` | `integer` | no | How many chunks a turn's retrieval puts in front of the model at most. |
 | `min_score` | `number` | no | The fused rank score a chunk must reach to be put in front of the model. Absent, nothing is dropped from the top k. |
 
+### `GreetingConfig`
+
+How the agent opens a call, before the caller has said anything. Exactly one of the two, because there are only two ways to open one: `say` are the words themselves and `reply` is what the model is told before it finds its own. They are agent.say and agent.reply declared instead of called, so a class that opens every call the same way needs no onCall hook to do it, and an operator can turn the opening at the pipeline door without a deploy. Absent: nobody speaks until the caller does.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `say` | `string` | no | The opening words, read out as written: 'Clínica Norte, buenos días.' No model runs. |
+| `reply` | `string` | no | What the model reads before it speaks its own opening — 'saluda, di que eres la recepción y pregunta en qué puedes ayudar' — and the caller never hears. Not what it says. |
+| `allow_interruptions` | `boolean` | no | Whether the caller may cut the opening short. Default true; a legal notice sets false. |
+
 ### `HangupConfig`
 
 Whether the model may end the call itself. Declaring this is what puts livekit's own end_call tool in front of the model; a class that says nothing here cannot hang up, and the call ends when the caller does or when a supervisor says so. The tool is hidden while the agent is greeting, because a model that can hang up on its first turn eventually does.
@@ -379,7 +389,7 @@ What an app declares about its agent: the voice, the models, the language, the g
 |---|---|---|---|
 | `prompt` | `PromptBlockSpec[]` | no | The blocks of the prompt in the one order they are sent: every static block, then the history, then every dynamic block. Absent, the layout is the default: identity · knowledge · tools, the history, view. |
 | `language` | `string` | no | The language the agent speaks and expects, as a BCP 47 tag: es-ES, es-UY. |
-| `greeting` | `string` | no | What the agent says first, verbatim, when a call starts. |
+| `greeting` | `GreetingConfig` | no | How the agent opens a call: the words themselves, or what the model is told before it finds its own. Absent: nobody speaks until the caller does. |
 | `voice` | `VoiceConfig` | no | Which voice speaks for the agent: the name it was asked for, or the id the provider knows it by. |
 | `llm` | `ModelConfig` | no | Which model does a job (the LLM, or the STT), and the one or two knobs worth turning. |
 | `stt` | `ModelConfig` | no | Which model does a job (the LLM, or the STT), and the one or two knobs worth turning. |

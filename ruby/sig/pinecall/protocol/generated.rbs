@@ -81,12 +81,14 @@ module Pinecall
       type knowledge_file = { path: String, text: String }
       # The knowledge base the agent answers from, and how its chunks reach the model.
       type docs_config = { base: String, ?mode: docs_mode, ?k: Integer, ?min_score: Float }
+      # How the agent opens a call, before the caller has said anything.
+      type greeting_config = { ?say: String, ?reply: String, ?allow_interruptions: bool }
       # Whether the model may end the call itself.
       type hangup_config = { ?when: String }
       # What memory keeps about a contact across calls, and what it must never keep.
       type memory_config = { ?remember: Array[String], ?forget: Array[String] }
       # What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what.
-      type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: String, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?knowledge: knowledge_file, ?docs: docs_config, ?memory: memory_config, ?hangup: hangup_config, ?tools: Array[tool_spec], ?state_fields: Array[state_field_spec], ?events: Array[event_spec] }
+      type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: greeting_config, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?knowledge: knowledge_file, ?docs: docs_config, ?memory: memory_config, ?hangup: hangup_config, ?tools: Array[tool_spec], ?state_fields: Array[state_field_spec], ?events: Array[event_spec] }
       # One line of a call's log, or of an agent's log when call is null.
       type entry = { seq: Integer, ts: Float, call: String?, agent: String, type: String, ephemeral: bool, data: Hash[Symbol, untyped] }
       # One instruction from an app to the gateway over its WebSocket.

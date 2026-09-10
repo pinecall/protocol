@@ -334,6 +334,21 @@ export const DocsConfigSchema = z.strictObject({
 export type DocsConfig = z.infer<typeof DocsConfigSchema>;
 
 /**
+ * How the agent opens a call, before the caller has said anything. Exactly one of the two, because
+ * there are only two ways to open one: `say` are the words themselves and `reply` is what the
+ * model is told before it finds its own. They are agent.say and agent.reply declared instead of
+ * called, so a class that opens every call the same way needs no onCall hook to do it, and an
+ * operator can turn the opening at the pipeline door without a deploy. Absent: nobody speaks until
+ * the caller does.
+ */
+export const GreetingConfigSchema = z.strictObject({
+  say: z.string().nullish(),
+  reply: z.string().nullish(),
+  allow_interruptions: z.boolean().nullish(),
+});
+export type GreetingConfig = z.infer<typeof GreetingConfigSchema>;
+
+/**
  * Whether the model may end the call itself. Declaring this is what puts livekit's own end_call
  * tool in front of the model; a class that says nothing here cannot hang up, and the call ends
  * when the caller does or when a supervisor says so. The tool is hidden while the agent is
@@ -362,7 +377,7 @@ export type MemoryConfig = z.infer<typeof MemoryConfigSchema>;
 export const AgentConfigSchema = z.strictObject({
   prompt: z.array(PromptBlockSpecSchema).nullish(),
   language: z.string().nullish(),
-  greeting: z.string().nullish(),
+  greeting: GreetingConfigSchema.nullish(),
   voice: VoiceConfigSchema.nullish(),
   llm: ModelConfigSchema.nullish(),
   stt: ModelConfigSchema.nullish(),
