@@ -173,6 +173,53 @@ class Forgotten(WireModel):
     forgotten: int
 
 
+# One question of a memory golden: what memory holds about the contact who asks it, the words they
+# just said, and the fact or facts that should come back. The facts are the question's own, so a
+# golden needs no contact in any table.
+class MemoryQuestion(WireModel):
+    """One question of a memory golden."""
+
+    holds: list[str]
+    asks: str
+    expects: list[str]
+
+
+# Each question brings its own facts, which are written to a scratch contact of this org, asked, and
+# deleted. A golden is fixed and the ranking is the variable; a question is never softened so a
+# change can pass.
+class MemoryGolden(WireModel):
+    """POST /v1/contacts/memory/eval, the body: the questions memory is held to."""
+
+    questions: list[MemoryQuestion]
+    k: int | None = None
+
+
+# One question memory did not answer whole: what it wanted and did not get, and what came back
+# instead. GoldenMiss is the knowledge base's and names the one chunk that should have won; a memory
+# question may expect several facts and miss some of them.
+class MemoryMiss(WireModel):
+    """One question memory did not answer whole."""
+
+    asks: str
+    missing: list[str]
+    found: list[str]
+
+
+# POST /v1/contacts/memory/eval, the answer: how memory ranked the facts its own golden asked for.
+# Both figures are computed by code, with no model in the loop, so two runs of one golden answer the
+# same numbers.
+class MemoryScore(WireModel):
+    """POST /v1/contacts/memory/eval, the answer."""
+
+    model: str
+    questions: int
+    k: int
+    recall_at_k: float
+    ndcg_at_10: float
+    took_ms: float
+    misses: list[MemoryMiss]
+
+
 # POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to run
 # it with. Worker-only; the gateway runs it against its own stores and writes memory.ops or
 # docs.sources on the call's log itself.

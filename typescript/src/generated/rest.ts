@@ -181,6 +181,57 @@ export const ForgottenSchema = z.strictObject({
 export type Forgotten = z.infer<typeof ForgottenSchema>;
 
 /**
+ * One question of a memory golden: what memory holds about the contact who asks it, the words they
+ * just said, and the fact or facts that should come back. The facts are the question's own, so a
+ * golden needs no contact in any table.
+ */
+export const MemoryQuestionSchema = z.strictObject({
+  holds: z.array(z.string()),
+  asks: z.string(),
+  expects: z.array(z.string()),
+});
+export type MemoryQuestion = z.infer<typeof MemoryQuestionSchema>;
+
+/**
+ * POST /v1/contacts/memory/eval, the body: the questions memory is held to. Each question brings
+ * its own facts, which are written to a scratch contact of this org, asked, and deleted. A golden
+ * is fixed and the ranking is the variable; a question is never softened so a change can pass.
+ */
+export const MemoryGoldenSchema = z.strictObject({
+  questions: z.array(MemoryQuestionSchema),
+  k: z.int().nullish(),
+});
+export type MemoryGolden = z.infer<typeof MemoryGoldenSchema>;
+
+/**
+ * One question memory did not answer whole: what it wanted and did not get, and what came back
+ * instead. GoldenMiss is the knowledge base's and names the one chunk that should have won; a
+ * memory question may expect several facts and miss some of them.
+ */
+export const MemoryMissSchema = z.strictObject({
+  asks: z.string(),
+  missing: z.array(z.string()),
+  found: z.array(z.string()),
+});
+export type MemoryMiss = z.infer<typeof MemoryMissSchema>;
+
+/**
+ * POST /v1/contacts/memory/eval, the answer: how memory ranked the facts its own golden asked for.
+ * Both figures are computed by code, with no model in the loop, so two runs of one golden answer
+ * the same numbers.
+ */
+export const MemoryScoreSchema = z.strictObject({
+  model: z.string(),
+  questions: z.int(),
+  k: z.int(),
+  recall_at_k: z.number(),
+  ndcg_at_10: z.number(),
+  took_ms: z.number(),
+  misses: z.array(MemoryMissSchema),
+});
+export type MemoryScore = z.infer<typeof MemoryScoreSchema>;
+
+/**
  * POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to
  * run it with. Worker-only; the gateway runs it against its own stores and writes memory.ops or
  * docs.sources on the call's log itself.

@@ -167,6 +167,14 @@ module Pinecall
       type contact_memory = { facts: Array[contact_fact] }
       # DELETE /v1/contacts/{contact}/memory, the answer: how many facts the right to be forgotten erased.
       type forgotten = { forgotten: Integer }
+      # One question of a memory golden: what memory holds about the contact who asks it, the words they just said, and the fact or facts that should come back.
+      type memory_question = { holds: Array[String], asks: String, expects: Array[String] }
+      # POST /v1/contacts/memory/eval, the body: the questions memory is held to.
+      type memory_golden = { questions: Array[memory_question], ?k: Integer }
+      # One question memory did not answer whole: what it wanted and did not get, and what came back instead.
+      type memory_miss = { asks: String, missing: Array[String], found: Array[String] }
+      # POST /v1/contacts/memory/eval, the answer: how memory ranked the facts its own golden asked for.
+      type memory_score = { model: String, questions: Integer, k: Integer, recall_at_k: Float, ndcg_at_10: Float, took_ms: Float, misses: Array[memory_miss] }
       # POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to run it with.
       type lookup_request = { tool: platform_tool, input: Hash[Symbol, untyped], ?speech_id: String }
       # POST /v1/calls/{call}/lookup, the answer: what the tool found, and how long finding it took.

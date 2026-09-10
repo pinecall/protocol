@@ -197,6 +197,53 @@
         "forgotten": {"type": "integer", "description": "How many facts were erased, every version counted."}
       }
     },
+    "MemoryQuestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One question of a memory golden: what memory holds about the contact who asks it, the words they just said, and the fact or facts that should come back. The facts are the question's own, so a golden needs no contact in any table.",
+      "required": ["holds", "asks", "expects"],
+      "properties": {
+        "holds": {"type": "array", "items": {"type": "string"}, "description": "Every fact memory holds about this question's contact, in the words a fact is written in. More facts than a turn asks for is what makes a question discriminate: with fewer, everything comes back and recall@k is 1.00 whatever the ranking did."},
+        "asks": {"type": "string", "description": "What the caller just said, in their own words."},
+        "expects": {"type": "array", "items": {"type": "string"}, "description": "The fact or facts that should come back. One answers when what came back CONTAINS it, folded for case and accents, so a golden names the substance and never the wording."}
+      }
+    },
+    "MemoryGolden": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/contacts/memory/eval, the body: the questions memory is held to. Each question brings its own facts, which are written to a scratch contact of this org, asked, and deleted. A golden is fixed and the ranking is the variable; a question is never softened so a change can pass.",
+      "required": ["questions"],
+      "properties": {
+        "questions": {"type": "array", "items": {"$ref": "#/$defs/MemoryQuestion"}, "description": "The questions, in any order."},
+        "k": {"type": "integer", "description": "How many facts a recall may return, as a turn asks for them. Absent: the runtime's own default."}
+      }
+    },
+    "MemoryMiss": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One question memory did not answer whole: what it wanted and did not get, and what came back instead. GoldenMiss is the knowledge base's and names the one chunk that should have won; a memory question may expect several facts and miss some of them.",
+      "required": ["asks", "missing", "found"],
+      "properties": {
+        "asks": {"type": "string", "description": "The question."},
+        "missing": {"type": "array", "items": {"type": "string"}, "description": "Every fact the question expected and did not get back."},
+        "found": {"type": "array", "items": {"type": "string"}, "description": "The facts that came back, best first."}
+      }
+    },
+    "MemoryScore": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/contacts/memory/eval, the answer: how memory ranked the facts its own golden asked for. Both figures are computed by code, with no model in the loop, so two runs of one golden answer the same numbers.",
+      "required": ["model", "questions", "k", "recall_at_k", "ndcg_at_10", "took_ms", "misses"],
+      "properties": {
+        "model": {"type": "string", "description": "The embedder that wrote the vectors on both sides of the recall; two scores are comparable only under one model."},
+        "questions": {"type": "integer", "description": "How many questions were asked."},
+        "k": {"type": "integer", "description": "How many facts a recall returned for each."},
+        "recall_at_k": {"type": "number", "description": "The share of the facts asked for that came back at all, 0 to 1. The figure that matters: a fact the model never sees cannot be used, whatever its rank."},
+        "ndcg_at_10": {"type": "number", "description": "How high those facts ranked, discounted logarithmically and normalised, 0 to 1. A turn asks for six facts, so a question whose contact holds few of them is answered whole by any ranking and this is the figure that still moves."},
+        "took_ms": {"type": "number", "description": "How long the whole golden took, the writes and the deletes included, in milliseconds."},
+        "misses": {"type": "array", "items": {"$ref": "#/$defs/MemoryMiss"}, "description": "Every question memory did not answer whole, so the person who wrote the golden can read what came back instead."}
+      }
+    },
     "LookupRequest": {
       "type": "object",
       "additionalProperties": false,

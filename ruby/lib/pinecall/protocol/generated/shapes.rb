@@ -465,6 +465,29 @@ module Pinecall
         "Forgotten" => {
           forgotten: { kind: :int, required: true }
         }.freeze,
+        "MemoryQuestion" => {
+          holds: { kind: :list, items: { kind: :str }, required: true },
+          asks: { kind: :str, required: true },
+          expects: { kind: :list, items: { kind: :str }, required: true }
+        }.freeze,
+        "MemoryGolden" => {
+          questions: { kind: :list, items: { kind: :ref, ref: "MemoryQuestion" }, required: true },
+          k: { kind: :int }
+        }.freeze,
+        "MemoryMiss" => {
+          asks: { kind: :str, required: true },
+          missing: { kind: :list, items: { kind: :str }, required: true },
+          found: { kind: :list, items: { kind: :str }, required: true }
+        }.freeze,
+        "MemoryScore" => {
+          model: { kind: :str, required: true },
+          questions: { kind: :int, required: true },
+          k: { kind: :int, required: true },
+          recall_at_k: { kind: :float, required: true },
+          ndcg_at_10: { kind: :float, required: true },
+          took_ms: { kind: :float, required: true },
+          misses: { kind: :list, items: { kind: :ref, ref: "MemoryMiss" }, required: true }
+        }.freeze,
         "LookupRequest" => {
           tool: { kind: :ref, ref: "PlatformTool", required: true },
           input: { kind: :json, required: true },
