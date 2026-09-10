@@ -28,7 +28,7 @@ The gateway refused a call or a register because one of the org's quotas ran out
 | field | type | required | meaning |
 |---|---|---|---|
 | `org` | `string` | yes | The org whose quota ran out. |
-| `quota` | `"minutes" | "messages" | "agents" | "concurrent_calls"` | yes | Which quota: minutes of call, messages, agents held, calls at once. |
+| `quota` | `"minutes" | "messages" | "agents" | "concurrent_calls" | "memory_facts" | "knowledge_chunks"` | yes | Which quota: minutes of call, messages, agents held, calls at once, facts memory keeps, chunks the knowledge bases keep. |
 | `used` | `number` | yes | How much the org had consumed when the door refused. |
 | `limit` | `integer` | yes | The quota the operator set. |
 

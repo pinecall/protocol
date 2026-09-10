@@ -208,7 +208,9 @@ class CreditsExhausted(WireModel):
     """The gateway refused a call or a register because one of the org's quotas ran out."""
 
     org: str
-    quota: Literal["minutes", "messages", "agents", "concurrent_calls"]
+    quota: Literal[
+        "minutes", "messages", "agents", "concurrent_calls", "memory_facts", "knowledge_chunks"
+    ]
     used: float
     limit: int
 

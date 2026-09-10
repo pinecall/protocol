@@ -855,7 +855,7 @@ module Pinecall
         }.freeze,
         "CreditsExhausted" => {
           org: { kind: :str, required: true },
-          quota: { kind: :enum, values: %w[minutes messages agents concurrent_calls], required: true },
+          quota: { kind: :enum, values: %w[minutes messages agents concurrent_calls memory_facts knowledge_chunks], required: true },
           used: { kind: :float, required: true },
           limit: { kind: :int, required: true }
         }.freeze,
