@@ -158,7 +158,7 @@ module Pinecall
       # PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that took.
       type knowledge_pushed = { base: String, chunks: Integer, took_ms: Float }
       # One knowledge base as the list draws it: its name, its size, and when it was last pushed.
-      type knowledge_base = { base: String, chunks: Integer, pushed_at: Float }
+      type knowledge_base = { base: String, chunks: Integer, model: String, pushed_at: Float }
       # GET /v1/knowledge: every base this org has pushed.
       type knowledge_list = { bases: Array[knowledge_base] }
       # One fact of a contact's history: a MemoryFact with the two dates that bound it.

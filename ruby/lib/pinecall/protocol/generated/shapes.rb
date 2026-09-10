@@ -445,6 +445,7 @@ module Pinecall
         "KnowledgeBase" => {
           base: { kind: :str, required: true },
           chunks: { kind: :int, required: true },
+          model: { kind: :str, required: true },
           pushed_at: { kind: :float, required: true }
         }.freeze,
         "KnowledgeList" => {

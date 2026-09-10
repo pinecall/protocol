@@ -136,6 +136,7 @@ class KnowledgeBase(WireModel):
 
     base: str
     chunks: int
+    model: str
     pushed_at: float
 
 

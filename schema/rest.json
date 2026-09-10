@@ -148,10 +148,11 @@
       "type": "object",
       "additionalProperties": false,
       "description": "One knowledge base as the list draws it: its name, its size, and when it was last pushed.",
-      "required": ["base", "chunks", "pushed_at"],
+      "required": ["base", "chunks", "model", "pushed_at"],
       "properties": {
         "base": {"type": "string", "description": "The base's name."},
         "chunks": {"type": "integer", "description": "How many chunks it holds."},
+        "model": {"type": "string", "description": "The embedder that wrote its vectors. Two bases are only comparable, and a base is only searchable, under the model it was pushed with."},
         "pushed_at": {"type": "number", "description": "When it was last pushed, unix seconds."}
       }
     },

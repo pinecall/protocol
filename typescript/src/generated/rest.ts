@@ -137,6 +137,7 @@ export type KnowledgePushed = z.infer<typeof KnowledgePushedSchema>;
 export const KnowledgeBaseSchema = z.strictObject({
   base: z.string(),
   chunks: z.int(),
+  model: z.string(),
   pushed_at: z.number(),
 });
 export type KnowledgeBase = z.infer<typeof KnowledgeBaseSchema>;
