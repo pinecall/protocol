@@ -77,6 +77,52 @@ export const KnowledgePushSchema = z.strictObject({
 export type KnowledgePush = z.infer<typeof KnowledgePushSchema>;
 
 /**
+ * One question of a base's golden: what somebody asks, and the chunk that should answer it. A
+ * chunk answers when its file and heading path start with `expects`, so naming a file alone
+ * accepts any chunk of it and naming a heading accepts that section.
+ */
+export const GoldenQuestionSchema = z.strictObject({
+  asks: z.string(),
+  expects: z.string(),
+});
+export type GoldenQuestion = z.infer<typeof GoldenQuestionSchema>;
+
+/**
+ * POST /v1/knowledge/{base}/eval, the body: the questions a base is held to. A golden is fixed and
+ * the index is the variable; a question is never softened so a change can pass.
+ */
+export const KnowledgeGoldenSchema = z.strictObject({
+  questions: z.array(GoldenQuestionSchema),
+  k: z.int().nullish(),
+});
+export type KnowledgeGolden = z.infer<typeof KnowledgeGoldenSchema>;
+
+/** One question whose expected chunk was not among the k returned, and what came back instead. */
+export const GoldenMissSchema = z.strictObject({
+  asks: z.string(),
+  expects: z.string(),
+  found: z.array(z.string()),
+});
+export type GoldenMiss = z.infer<typeof GoldenMissSchema>;
+
+/**
+ * POST /v1/knowledge/{base}/eval, the answer: how the index did on its own golden. Both figures
+ * are computed by code, with no model, so two runs of the same golden over the same base answer
+ * the same numbers.
+ */
+export const KnowledgeScoreSchema = z.strictObject({
+  base: z.string(),
+  model: z.string(),
+  questions: z.int(),
+  k: z.int(),
+  recall_at_k: z.number(),
+  ndcg_at_10: z.number(),
+  took_ms: z.number(),
+  misses: z.array(GoldenMissSchema),
+});
+export type KnowledgeScore = z.infer<typeof KnowledgeScoreSchema>;
+
+/**
  * PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that
  * took.
  */

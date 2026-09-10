@@ -147,6 +147,14 @@ module Pinecall
       type agent_list = { agents: Array[held_agent] }
       # PUT /v1/knowledge/{base}, the body: the tenant's folder as of now, sent whole.
       type knowledge_push = { files: Array[knowledge_file] }
+      # One question of a base's golden: what somebody asks, and the chunk that should answer it.
+      type golden_question = { asks: String, expects: String }
+      # POST /v1/knowledge/{base}/eval, the body: the questions a base is held to.
+      type knowledge_golden = { questions: Array[golden_question], ?k: Integer }
+      # One question whose expected chunk was not among the k returned, and what came back instead.
+      type golden_miss = { asks: String, expects: String, found: Array[String] }
+      # POST /v1/knowledge/{base}/eval, the answer: how the index did on its own golden.
+      type knowledge_score = { base: String, model: String, questions: Integer, k: Integer, recall_at_k: Float, ndcg_at_10: Float, took_ms: Float, misses: Array[golden_miss] }
       # PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that took.
       type knowledge_pushed = { base: String, chunks: Integer, took_ms: Float }
       # One knowledge base as the list draws it: its name, its size, and when it was last pushed.

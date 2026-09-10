@@ -79,6 +79,48 @@ class KnowledgePush(WireModel):
     files: list[KnowledgeFile]
 
 
+# A chunk answers when its file and heading path start with `expects`, so naming a file alone
+# accepts any chunk of it and naming a heading accepts that section.
+class GoldenQuestion(WireModel):
+    """One question of a base's golden: what somebody asks, and the chunk that should answer it."""
+
+    asks: str
+    expects: str
+
+
+# A golden is fixed and the index is the variable; a question is never softened so a change can
+# pass.
+class KnowledgeGolden(WireModel):
+    """POST /v1/knowledge/{base}/eval, the body: the questions a base is held to."""
+
+    questions: list[GoldenQuestion]
+    k: int | None = None
+
+
+# One question whose expected chunk was not among the k returned, and what came back instead.
+class GoldenMiss(WireModel):
+    """GoldenMiss, as protocol/schema declares it."""
+
+    asks: str
+    expects: str
+    found: list[str]
+
+
+# Both figures are computed by code, with no model, so two runs of the same golden over the same
+# base answer the same numbers.
+class KnowledgeScore(WireModel):
+    """POST /v1/knowledge/{base}/eval, the answer: how the index did on its own golden."""
+
+    base: str
+    model: str
+    questions: int
+    k: int
+    recall_at_k: float
+    ndcg_at_10: float
+    took_ms: float
+    misses: list[GoldenMiss]
+
+
 # PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that
 # took.
 class KnowledgePushed(WireModel):

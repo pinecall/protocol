@@ -414,6 +414,29 @@ module Pinecall
         "KnowledgePush" => {
           files: { kind: :list, items: { kind: :ref, ref: "KnowledgeFile" }, required: true }
         }.freeze,
+        "GoldenQuestion" => {
+          asks: { kind: :str, required: true },
+          expects: { kind: :str, required: true }
+        }.freeze,
+        "KnowledgeGolden" => {
+          questions: { kind: :list, items: { kind: :ref, ref: "GoldenQuestion" }, required: true },
+          k: { kind: :int }
+        }.freeze,
+        "GoldenMiss" => {
+          asks: { kind: :str, required: true },
+          expects: { kind: :str, required: true },
+          found: { kind: :list, items: { kind: :str }, required: true }
+        }.freeze,
+        "KnowledgeScore" => {
+          base: { kind: :str, required: true },
+          model: { kind: :str, required: true },
+          questions: { kind: :int, required: true },
+          k: { kind: :int, required: true },
+          recall_at_k: { kind: :float, required: true },
+          ndcg_at_10: { kind: :float, required: true },
+          took_ms: { kind: :float, required: true },
+          misses: { kind: :list, items: { kind: :ref, ref: "GoldenMiss" }, required: true }
+        }.freeze,
         "KnowledgePushed" => {
           base: { kind: :str, required: true },
           chunks: { kind: :int, required: true },

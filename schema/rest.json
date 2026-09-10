@@ -86,6 +86,53 @@
         "files": {"type": "array", "items": {"$ref": "defs.json#/$defs/KnowledgeFile"}, "description": "Every file of the base, path and text. A file not in the list is gone from the base."}
       }
     },
+    "GoldenQuestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One question of a base's golden: what somebody asks, and the chunk that should answer it. A chunk answers when its file and heading path start with `expects`, so naming a file alone accepts any chunk of it and naming a heading accepts that section.",
+      "required": ["asks", "expects"],
+      "properties": {
+        "asks": {"type": "string", "description": "The question, in the words a caller would use."},
+        "expects": {"type": "string", "description": "The chunk that should win, as its heading path: 'tarifas.md \u203a Tarifas \u203a Revisi\u00f3n', or 'tarifas.md' for any chunk of the file."}
+      }
+    },
+    "KnowledgeGolden": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/knowledge/{base}/eval, the body: the questions a base is held to. A golden is fixed and the index is the variable; a question is never softened so a change can pass.",
+      "required": ["questions"],
+      "properties": {
+        "questions": {"type": "array", "items": {"$ref": "#/$defs/GoldenQuestion"}, "description": "The questions, in any order."},
+        "k": {"type": "integer", "description": "How many chunks a search may return, as the agent asks for them. Absent: the base's own default."}
+      }
+    },
+    "GoldenMiss": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One question whose expected chunk was not among the k returned, and what came back instead.",
+      "required": ["asks", "expects", "found"],
+      "properties": {
+        "asks": {"type": "string", "description": "The question."},
+        "expects": {"type": "string", "description": "The chunk that should have won."},
+        "found": {"type": "array", "items": {"type": "string"}, "description": "The heading paths that came back, best first."}
+      }
+    },
+    "KnowledgeScore": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/knowledge/{base}/eval, the answer: how the index did on its own golden. Both figures are computed by code, with no model, so two runs of the same golden over the same base answer the same numbers.",
+      "required": ["base", "model", "questions", "k", "recall_at_k", "ndcg_at_10", "took_ms", "misses"],
+      "properties": {
+        "base": {"type": "string", "description": "The base asked."},
+        "model": {"type": "string", "description": "The embedder the base was pushed with; two scores are comparable only under one model."},
+        "questions": {"type": "integer", "description": "How many questions were asked."},
+        "k": {"type": "integer", "description": "How many chunks a search returned for each."},
+        "recall_at_k": {"type": "number", "description": "The share of questions whose expected chunk was among the k returned, 0 to 1. The figure that matters: a chunk the model never sees cannot be used, whatever its rank."},
+        "ndcg_at_10": {"type": "number", "description": "How high the expected chunk ranked, discounted logarithmically and normalised, 0 to 1. Two indexes that both find a passage are not equal if one puts it first and the other seventh."},
+        "took_ms": {"type": "number", "description": "How long the whole golden took, in milliseconds."},
+        "misses": {"type": "array", "items": {"$ref": "#/$defs/GoldenMiss"}, "description": "Every question the base missed, so the person who wrote the documents can read what came back instead."}
+      }
+    },
     "KnowledgePushed": {
       "type": "object",
       "additionalProperties": false,
