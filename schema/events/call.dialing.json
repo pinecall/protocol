@@ -13,6 +13,7 @@
         "channel": {"$ref": "../defs.json#/$defs/Channel"},
         "from": {"type": "string", "description": "The number the call shows as coming from, E.164."},
         "to": {"type": "string", "description": "The number being dialed, E.164."},
+        "run": {"type": ["string", "null"], "description": "The eval run that placed this call, when one did. Absent or null for a call the platform placed for a person."},
         "caller": {"anyOf": [{"$ref": "../defs.json#/$defs/Contact"}, {"type": "null"}], "description": "Who is being called, when the app said."},
         "external_id": {"type": "string", "description": "The carrier or SIP call id, once assigned."}
       },

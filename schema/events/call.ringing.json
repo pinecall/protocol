@@ -14,6 +14,7 @@
         "from": {"type": "string", "description": "The calling number in E.164 form, or the web visitor id."},
         "to": {"type": "string", "description": "The number or route that was called."},
         "route": {"$ref": "../defs.json#/$defs/Route"},
+        "run": {"type": ["string", "null"], "description": "The eval run that opened this call, when one did: such a call starts mid-conversation, in the golden's state. Absent or null for a person."},
         "caller": {"anyOf": [{"$ref": "../defs.json#/$defs/Contact"}, {"type": "null"}], "description": "Who this seems to be, from the number alone. Null when nobody is known."},
         "external_id": {"type": "string", "description": "The carrier or SIP call id, for tracing outside Pinecall."}
       },

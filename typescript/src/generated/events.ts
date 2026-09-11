@@ -68,6 +68,7 @@ export const CallDialingSchema = z.strictObject({
   channel: ChannelSchema,
   from: z.string(),
   to: z.string(),
+  run: z.string().nullable().nullish(),
   caller: ContactSchema.nullable(),
   external_id: z.string().nullish(),
 });
@@ -101,6 +102,7 @@ export const CallRingingSchema = z.strictObject({
   from: z.string(),
   to: z.string(),
   route: RouteSchema,
+  run: z.string().nullable().nullish(),
   caller: ContactSchema.nullable(),
   external_id: z.string().nullish(),
 });
@@ -152,6 +154,7 @@ export const CallStartedSchema = z.strictObject({
   direction: DirectionSchema,
   from: z.string(),
   to: z.string(),
+  run: z.string().nullable().nullish(),
   caller: ContactSchema.nullable(),
   started_at: z.number(),
 });

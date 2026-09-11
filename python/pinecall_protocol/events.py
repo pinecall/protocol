@@ -67,6 +67,7 @@ class CallDialing(WireModel):
     channel: Channel
     from_: str = Field(alias="from")
     to: str
+    run: str | None = None
     caller: Contact | None
     external_id: str | None = None
 
@@ -97,6 +98,7 @@ class CallRinging(WireModel):
     from_: str = Field(alias="from")
     to: str
     route: Route
+    run: str | None = None
     caller: Contact | None
     external_id: str | None = None
 
@@ -141,6 +143,7 @@ class CallStarted(WireModel):
     direction: Direction
     from_: str = Field(alias="from")
     to: str
+    run: str | None = None
     caller: Contact | None
     started_at: float
 

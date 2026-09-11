@@ -851,6 +851,7 @@ module Pinecall
           channel: { kind: :ref, ref: "Channel", required: true },
           from: { kind: :str, required: true },
           to: { kind: :str, required: true },
+          run: { kind: :str, null: true },
           caller: { kind: :ref, null: true, ref: "Contact", required: true },
           external_id: { kind: :str }
         }.freeze,
@@ -869,6 +870,7 @@ module Pinecall
           from: { kind: :str, required: true },
           to: { kind: :str, required: true },
           route: { kind: :ref, ref: "Route", required: true },
+          run: { kind: :str, null: true },
           caller: { kind: :ref, null: true, ref: "Contact", required: true },
           external_id: { kind: :str }
         }.freeze,
@@ -896,6 +898,7 @@ module Pinecall
           direction: { kind: :ref, ref: "Direction", required: true },
           from: { kind: :str, required: true },
           to: { kind: :str, required: true },
+          run: { kind: :str, null: true },
           caller: { kind: :ref, null: true, ref: "Contact", required: true },
           started_at: { kind: :float, required: true }
         }.freeze,

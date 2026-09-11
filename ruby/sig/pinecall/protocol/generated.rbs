@@ -322,13 +322,13 @@ module Pinecall
       # Words from the agent as they are played, synced to the audio.
       type agent_transcript = { speech_id: String, text: String, final: bool, ?start: Float, ?end: Float }
       # The platform is placing an outbound call and the far end has not answered yet.
-      type call_dialing = { channel: channel, from: String, to: String, caller: contact?, ?external_id: String }
+      type call_dialing = { channel: channel, from: String, to: String, ?run: String?, caller: contact?, ?external_id: String }
       # The call is over.
       type call_ended = { reason: end_reason, ended_by: ended_by, ended_at: Float, duration_s: Float }
       # The line's hold and mute flags after one of them changed.
       type call_line = { held: bool, muted: bool }
       # An inbound call is offered to this agent and has not been answered yet.
-      type call_ringing = { channel: channel, from: String, to: String, route: route, caller: contact?, ?external_id: String }
+      type call_ringing = { channel: channel, from: String, to: String, route: route, ?run: String?, caller: contact?, ?external_id: String }
       # The last entry of a call: what the judges said about it at hang-up, one row per judge.
       type call_score = { ?passed: bool, ?not_judged: String, judges: Array[judgment], ?panel: Array[String], judge_calls: Integer, ?judge_cost_eur: Float }
       # One judge's answer about one call: the question it was asked, the word it answered and the sentence that says why.
@@ -336,7 +336,7 @@ module Pinecall
       # Where in the call's own log a judgment is about.
       type judgment_evidence = { seqs: Array[Integer], ?said: String }
       # Media is up: the caller and the agent can hear each other, or the text session is open.
-      type call_started = { channel: channel, direction: direction, from: String, to: String, caller: contact?, started_at: Float }
+      type call_started = { channel: channel, direction: direction, from: String, to: String, ?run: String?, caller: contact?, started_at: Float }
       # What the call was about, how it went, what it consumed and what that cost.
       type call_summary = { reason: end_reason, outcome: String, duration_s: Float, turns: Integer, usage: Array[model_usage], cost: cost, ?recording: String }
       # A transfer asked for by the agent or a supervisor finished, one way or the other.

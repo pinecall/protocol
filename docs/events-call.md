@@ -32,6 +32,7 @@ The platform is placing an outbound call and the far end has not answered yet. T
 | `channel` | `Channel` | yes | The door the public came through: a phone call over SIP, the browser widget over WebRTC, or WhatsApp text. |
 | `from` | `string` | yes | The number the call shows as coming from, E.164. |
 | `to` | `string` | yes | The number being dialed, E.164. |
+| `run` | `string | null` | no | The eval run that placed this call, when one did. Absent or null for a call the platform placed for a person. |
 | `caller` | `Contact | null` | yes | Who is being called, when the app said. |
 | `external_id` | `string` | no | The carrier or SIP call id, once assigned. |
 
@@ -65,6 +66,7 @@ An inbound call is offered to this agent and has not been answered yet. The firs
 | `from` | `string` | yes | The calling number in E.164 form, or the web visitor id. |
 | `to` | `string` | yes | The number or route that was called. |
 | `route` | `Route` | yes | One door to an agent: a channel and, for phone and WhatsApp, the number that answers. |
+| `run` | `string | null` | no | The eval run that opened this call, when one did: such a call starts mid-conversation, in the golden's state. Absent or null for a person. |
 | `caller` | `Contact | null` | yes | Who this seems to be, from the number alone. Null when nobody is known. |
 | `external_id` | `string` | no | The carrier or SIP call id, for tracing outside Pinecall. |
 
@@ -91,6 +93,7 @@ Media is up: the caller and the agent can hear each other, or the text session i
 | `direction` | `Direction` | yes | Inbound: the public reached the agent. |
 | `from` | `string` | yes | The calling side, E.164 or a visitor id. |
 | `to` | `string` | yes | The called side. |
+| `run` | `string | null` | no | The eval run that opened this call, when one did: such a call starts mid-conversation, in the golden's state. Absent or null for a person. |
 | `caller` | `Contact | null` | yes | Who is on the line, as far as the platform knows now. |
 | `started_at` | `number` | yes | When media came up, unix seconds. |
 
