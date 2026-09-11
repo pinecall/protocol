@@ -17,6 +17,7 @@ Every event the gateway writes, one line each, with the page that holds its data
 | `call.started` | call | no | [events-call.md](events-call.md) | Media is up: the caller and the agent can hear each other, or the text session is open. |
 | `call.summary` | call | no | [events-call.md](events-call.md) | What the call was about, how it went, what it consumed and what that cost. |
 | `call.transferred` | call | no | [events-call.md](events-call.md) | A transfer asked for by the agent or a supervisor finished, one way or the other. |
+| `callback.requested` | agent | no | [events-control.md](events-control.md) | Somebody asked to be called back because no seat was free: a phone caller the overflow agent answered, or a web visitor who left a number at the widget. |
 | `confirm.declined` | call | no | [events-app.md](events-app.md) | The caller did not say yes, or the request lapsed. |
 | `confirm.granted` | call | no | [events-app.md](events-app.md) | The caller said yes. |
 | `confirm.request` | call | no | [events-app.md](events-app.md) | A tool with confirm set is about to run and the platform is asking the caller. |
@@ -25,6 +26,7 @@ Every event the gateway writes, one line each, with the page that holds its data
 | `docs.sources` | call | no | [events-app.md](events-app.md) | What retrieval put in front of the model for this turn. |
 | `error` | agent | no | [events-control.md](events-control.md) | Something went wrong. |
 | `event.received` | call | no | [events-room.md](events-room.md) | A fact arrived from outside the conversation: the tenant's backend sent call.event, or a participant's browser sent pinecall.event. |
+| `fleet.full` | agent | no | [events-control.md](events-control.md) | The gateway refused to open a call because every worker of the fleet was full. |
 | `log.caught_up` | call | yes | [events-control.md](events-control.md) | The replay is done: everything up to seq has been sent and what follows is live. |
 | `log.gap` | call | yes | [events-control.md](events-control.md) | This reader missed a stretch: it reconnected too late for the store, or fell behind and the fanout dropped ephemeral entries. |
 | `memory.ops` | call | no | [events-app.md](events-app.md) | What memory did for this turn or at hangup: a recall before the reply, a remember after the call, a forget on request. |

@@ -184,6 +184,20 @@ export const CallTransferredSchema = z.strictObject({
 });
 export type CallTransferred = z.infer<typeof CallTransferredSchema>;
 
+/**
+ * Somebody asked to be called back because no seat was free: a phone caller the overflow agent
+ * answered, or a web visitor who left a number at the widget. Written into the agent's own log;
+ * the tenant's app reads it and places the call.
+ */
+export const CallbackRequestedSchema = z.strictObject({
+  channel: ChannelSchema,
+  number: z.string(),
+  via: z.enum(["overflow", "widget"]),
+  call: z.string().nullable(),
+  contact: ContactSchema.nullable(),
+});
+export type CallbackRequested = z.infer<typeof CallbackRequestedSchema>;
+
 /** The caller did not say yes, or the request lapsed. The tool does not run; the model is told. */
 export const ConfirmDeclinedSchema = z.strictObject({
   tool: z.string(),
@@ -267,6 +281,18 @@ export const ErrorEventSchema = z.strictObject({
   recoverable: z.boolean(),
 });
 export type ErrorEvent = z.infer<typeof ErrorEventSchema>;
+
+/**
+ * The gateway refused to open a call because every worker of the fleet was full. Written into the
+ * agent's own log, which is the org's, before the door says no — the caller was offered a call
+ * back instead of a room.
+ */
+export const FleetFullSchema = z.strictObject({
+  channel: ChannelSchema,
+  workers: z.int(),
+  active: z.int(),
+});
+export type FleetFull = z.infer<typeof FleetFullSchema>;
 
 /**
  * The replay is done: everything up to seq has been sent and what follows is live. Never stored;

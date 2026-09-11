@@ -341,6 +341,8 @@ module Pinecall
       type call_summary = { reason: end_reason, outcome: String, duration_s: Float, turns: Integer, usage: Array[model_usage], cost: cost, ?recording: String }
       # A transfer asked for by the agent or a supervisor finished, one way or the other.
       type call_transferred = { to: String, mode: transfer_mode, ok: bool, ?error: String }
+      # Somebody asked to be called back because no seat was free: a phone caller the overflow agent answered, or a web visitor who left a number at the widget.
+      type callback_requested = { channel: channel, number: String, via: "overflow" | "widget", call: String?, contact: contact? }
       # The caller did not say yes, or the request lapsed.
       type confirm_declined = { tool: String, call_id: String, audience: String, ?said: String, reason: "no" | "timeout" | "changed" | "cancelled" }
       # The caller said yes.
@@ -355,6 +357,8 @@ module Pinecall
       type docs_sources = { query: String, sources: Array[doc_source], took_ms: Float, ?speech_id: String }
       # Something went wrong.
       type error_event = { code: String, message: String, ?command: String, ?id: String, recoverable: bool }
+      # The gateway refused to open a call because every worker of the fleet was full.
+      type fleet_full = { channel: channel, workers: Integer, active: Integer }
       # The replay is done: everything up to seq has been sent and what follows is live.
       type log_caught_up = { seq: Integer }
       # This reader missed a stretch: it reconnected too late for the store, or fell behind and the fanout dropped ephemeral entries.

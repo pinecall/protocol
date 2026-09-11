@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/fleet.full.json",
+  "title": "fleet.full",
+  "description": "The gateway refused to open a call because every worker of the fleet was full. Written into the agent's own log, which is the org's, before the door says no — the caller was offered a call back instead of a room.",
+  "x-pinecall": {"kind": "event", "type": "fleet.full", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/FleetFull",
+  "$defs": {
+    "FleetFull": {
+      "type": "object",
+      "description": "The gateway refused to open a call because every worker of the fleet was full. Written into the agent's own log, which is the org's, before the door says no — the caller was offered a call back instead of a room.",
+      "properties": {
+        "channel": {"$ref": "../defs.json#/$defs/Channel"},
+        "workers": {"type": "integer", "description": "How many workers the fleet had at that moment, every one of them full."},
+        "active": {"type": "integer", "description": "How many calls those workers were holding between them."}
+      },
+      "required": ["channel", "workers", "active"],
+      "additionalProperties": false
+    }
+  }
+}

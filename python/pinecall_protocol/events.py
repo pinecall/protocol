@@ -171,6 +171,19 @@ class CallTransferred(WireModel):
     error: str | None = None
 
 
+# Somebody asked to be called back because no seat was free: a phone caller the overflow agent
+# answered, or a web visitor who left a number at the widget. Written into the agent's own log; the
+# tenant's app reads it and places the call.
+class CallbackRequested(WireModel):
+    """Somebody asked to be called back because no seat was free."""
+
+    channel: Channel
+    number: str
+    via: Literal["overflow", "widget"]
+    call: str | None
+    contact: Contact | None
+
+
 # The tool does not run; the model is told.
 class ConfirmDeclined(WireModel):
     """The caller did not say yes, or the request lapsed."""
@@ -245,6 +258,16 @@ class ErrorEvent(WireModel):
     command: str | None = None
     id: str | None = None
     recoverable: bool
+
+
+# Written into the agent's own log, which is the org's, before the door says no — the caller was
+# offered a call back instead of a room.
+class FleetFull(WireModel):
+    """The gateway refused to open a call because every worker of the fleet was full."""
+
+    channel: Channel
+    workers: int
+    active: int
 
 
 # Never stored; sent to the reader.

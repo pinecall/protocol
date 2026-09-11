@@ -917,6 +917,13 @@ module Pinecall
           ok: { kind: :bool, required: true },
           error: { kind: :str }
         }.freeze,
+        "CallbackRequested" => {
+          channel: { kind: :ref, ref: "Channel", required: true },
+          number: { kind: :str, required: true },
+          via: { kind: :enum, values: %w[overflow widget], required: true },
+          call: { kind: :str, null: true, required: true },
+          contact: { kind: :ref, null: true, ref: "Contact", required: true }
+        }.freeze,
         "ConfirmDeclined" => {
           tool: { kind: :str, required: true },
           call_id: { kind: :str, required: true },
@@ -961,6 +968,11 @@ module Pinecall
           command: { kind: :str },
           id: { kind: :str },
           recoverable: { kind: :bool, required: true }
+        }.freeze,
+        "FleetFull" => {
+          channel: { kind: :ref, ref: "Channel", required: true },
+          workers: { kind: :int, required: true },
+          active: { kind: :int, required: true }
         }.freeze,
         "LogCaughtUp" => {
           seq: { kind: :int, required: true }

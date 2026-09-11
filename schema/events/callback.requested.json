@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/callback.requested.json",
+  "title": "callback.requested",
+  "description": "Somebody asked to be called back because no seat was free: a phone caller the overflow agent answered, or a web visitor who left a number at the widget. Written into the agent's own log; the tenant's app reads it and places the call.",
+  "x-pinecall": {"kind": "event", "type": "callback.requested", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/CallbackRequested",
+  "$defs": {
+    "CallbackRequested": {
+      "type": "object",
+      "description": "Somebody asked to be called back because no seat was free: a phone caller the overflow agent answered, or a web visitor who left a number at the widget. Written into the agent's own log; the tenant's app reads it and places the call.",
+      "properties": {
+        "channel": {"$ref": "../defs.json#/$defs/Channel"},
+        "number": {"type": "string", "description": "The number to call back, E.164."},
+        "via": {"type": "string", "enum": ["overflow", "widget"], "description": "Who took the request: the overflow agent that answered a phone call the fleet could not, or the widget, before any room was made."},
+        "call": {"type": ["string", "null"], "description": "The call the overflow agent answered, when there was one. Null for a widget visitor who never had a room."},
+        "contact": {"anyOf": [{"$ref": "../defs.json#/$defs/Contact"}, {"type": "null"}], "description": "Who asked, when the app said."}
+      },
+      "required": ["channel", "number", "via", "call", "contact"],
+      "additionalProperties": false
+    }
+  }
+}

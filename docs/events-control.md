@@ -21,6 +21,18 @@ The gateway accepted an agent.register: this socket now speaks for the agent and
 | `app` | `string` | yes | This socket, opaque and minted by the gateway: `?app=<id>` on the chat door asks to be served by it. |
 | `sdk` | `string` | no | The SDK and version the app runs, as it reported them. |
 
+### `callback.requested`
+
+Somebody asked to be called back because no seat was free: a phone caller the overflow agent answered, or a web visitor who left a number at the widget. Written into the agent's own log; the tenant's app reads it and places the call.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `channel` | `Channel` | yes | The door the public came through: a phone call over SIP, the browser widget over WebRTC, or WhatsApp text. |
+| `number` | `string` | yes | The number to call back, E.164. |
+| `via` | `"overflow" | "widget"` | yes | Who took the request: the overflow agent that answered a phone call the fleet could not, or the widget, before any room was made. |
+| `call` | `string | null` | yes | The call the overflow agent answered, when there was one. Null for a widget visitor who never had a room. |
+| `contact` | `Contact | null` | yes | Who asked, when the app said. |
+
 ### `credits.exhausted`
 
 The gateway refused a call or a register because one of the org's quotas ran out. Written into the agent's own log, which is the org's, before the door says no.
@@ -43,6 +55,16 @@ Something went wrong. Inside a call it says what failed; outside a call it says 
 | `command` | `string` | no | The type of the command that failed, when one did. |
 | `id` | `string` | no | The app's id for that command, when it sent one. |
 | `recoverable` | `boolean` | yes | True when the call goes on; false when this is why it ended. |
+
+### `fleet.full`
+
+The gateway refused to open a call because every worker of the fleet was full. Written into the agent's own log, which is the org's, before the door says no — the caller was offered a call back instead of a room.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `channel` | `Channel` | yes | The door the public came through: a phone call over SIP, the browser widget over WebRTC, or WhatsApp text. |
+| `workers` | `integer` | yes | How many workers the fleet had at that moment, every one of them full. |
+| `active` | `integer` | yes | How many calls those workers were holding between them. |
 
 ### `log.caught_up`
 
