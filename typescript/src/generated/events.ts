@@ -10,6 +10,7 @@ import {
   DocSourceSchema,
   EndedBySchema,
   EndReasonSchema,
+  EnvSchema,
   MemoryOpSchema,
   RouteSchema,
   ScoreVerdictSchema,
@@ -38,6 +39,7 @@ export const AgentRegisteredSchema = z.strictObject({
   routes: z.array(RouteSchema),
   app: z.string(),
   sdk: z.string().nullish(),
+  env: EnvSchema.nullish(),
 });
 export type AgentRegistered = z.infer<typeof AgentRegisteredSchema>;
 
@@ -157,6 +159,7 @@ export const CallStartedSchema = z.strictObject({
   run: z.string().nullable().nullish(),
   caller: ContactSchema.nullable(),
   started_at: z.number(),
+  env: EnvSchema.nullish(),
 });
 export type CallStarted = z.infer<typeof CallStartedSchema>;
 

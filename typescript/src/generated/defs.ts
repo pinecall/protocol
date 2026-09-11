@@ -14,6 +14,15 @@ export const DirectionSchema = z.enum(["inbound", "outbound"]);
 export type Direction = z.infer<typeof DirectionSchema>;
 
 /**
+ * Which of the two worlds a key opens, and so which world an agent is held in and a call ran in. A
+ * key is issued into one; an agent registered on it and every call it takes carry that one; a door
+ * claimed in one is refused to a key of the other. Every key issued before the field existed is
+ * production.
+ */
+export const EnvSchema = z.enum(["production", "development"]);
+export type Env = z.infer<typeof EnvSchema>;
+
+/**
  * Why the call is over. Who hung up, what failed before anybody could, drained: the platform took
  * the worker down (a deploy, a stop) with the call still on it, or app_detached: the app holding
  * the agent closed its socket mid-call, so nothing was rendering the prompt or answering a tool —

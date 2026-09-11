@@ -96,6 +96,7 @@ Media is up: the caller and the agent can hear each other, or the text session i
 | `run` | `string | null` | no | The eval run that opened this call, when one did: such a call starts mid-conversation, in the golden's state. Absent or null for a person. |
 | `caller` | `Contact | null` | yes | Who is on the line, as far as the platform knows now. |
 | `started_at` | `number` | yes | When media came up, unix seconds. |
+| `env` | `Env` | no | The world this call ran in: the one the key that holds its agent opens. Absent on entries written before keys knew where they were, which read as production. |
 
 ### `call.summary`
 

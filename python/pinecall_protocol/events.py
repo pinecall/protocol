@@ -14,6 +14,7 @@ from pinecall_protocol.defs import (
     DocSource,
     EndedBy,
     EndReason,
+    Env,
     MemoryOp,
     Route,
     ScoreVerdict,
@@ -41,6 +42,7 @@ class AgentRegistered(WireModel):
     routes: list[Route]
     app: str
     sdk: str | None = None
+    env: Env | None = None
 
 
 class AgentStateChanged(WireModel):
@@ -146,6 +148,7 @@ class CallStarted(WireModel):
     run: str | None = None
     caller: Contact | None
     started_at: float
+    env: Env | None = None
 
 
 # Written after call.ended, once memory and pricing are done; call.score follows it and seals the

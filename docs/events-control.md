@@ -20,6 +20,7 @@ The gateway accepted an agent.register: this socket now speaks for the agent and
 | `routes` | `Route[]` | yes | The doors the agent now answers. |
 | `app` | `string` | yes | This socket, opaque and minted by the gateway: `?app=<id>` on the chat door asks to be served by it. |
 | `sdk` | `string` | no | The SDK and version the app runs, as it reported them. |
+| `env` | `Env` | no | The world the key that registered it opens: production, or development. Absent on entries written before keys knew where they were, which read as production. |
 
 ### `callback.requested`
 

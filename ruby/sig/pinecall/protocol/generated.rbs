@@ -9,6 +9,8 @@ module Pinecall
       type channel = "phone" | "web" | "whatsapp"
       # Inbound: the public reached the agent.
       type direction = "inbound" | "outbound"
+      # Which of the two worlds a key opens, and so which world an agent is held in and a call ran in.
+      type env = "production" | "development"
       # Why the call is over.
       type end_reason = "caller_hung_up" | "agent_hung_up" | "supervisor_ended" | "transferred" | "no_answer" | "busy" | "dial_failed" | "timeout" | "drained" | "app_detached" | "error"
       # Whose action ended the call.
@@ -316,7 +318,7 @@ module Pinecall
       # The gateway applied an agent.configure.
       type agent_configured = { changed: Array[String] }
       # The gateway accepted an agent.register: this socket now speaks for the agent and answers its routes.
-      type agent_registered = { routes: Array[route], app: String, ?sdk: String }
+      type agent_registered = { routes: Array[route], app: String, ?sdk: String, ?env: env }
       # The agent's state changed, in the session's own words.
       type agent_state_changed = { state: agent_state }
       # Words from the agent as they are played, synced to the audio.
@@ -336,7 +338,7 @@ module Pinecall
       # Where in the call's own log a judgment is about.
       type judgment_evidence = { seqs: Array[Integer], ?said: String }
       # Media is up: the caller and the agent can hear each other, or the text session is open.
-      type call_started = { channel: channel, direction: direction, from: String, to: String, ?run: String?, caller: contact?, started_at: Float }
+      type call_started = { channel: channel, direction: direction, from: String, to: String, ?run: String?, caller: contact?, started_at: Float, ?env: env }
       # What the call was about, how it went, what it consumed and what that cost.
       type call_summary = { reason: end_reason, outcome: String, duration_s: Float, turns: Integer, usage: Array[model_usage], cost: cost, ?recording: String }
       # A transfer asked for by the agent or a supervisor finished, one way or the other.

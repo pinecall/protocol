@@ -835,7 +835,8 @@ module Pinecall
         "AgentRegistered" => {
           routes: { kind: :list, items: { kind: :ref, ref: "Route" }, required: true },
           app: { kind: :str, required: true },
-          sdk: { kind: :str }
+          sdk: { kind: :str },
+          env: { kind: :ref, ref: "Env" }
         }.freeze,
         "AgentStateChanged" => {
           state: { kind: :ref, ref: "AgentState", required: true }
@@ -900,7 +901,8 @@ module Pinecall
           to: { kind: :str, required: true },
           run: { kind: :str, null: true },
           caller: { kind: :ref, null: true, ref: "Contact", required: true },
-          started_at: { kind: :float, required: true }
+          started_at: { kind: :float, required: true },
+          env: { kind: :ref, ref: "Env" }
         }.freeze,
         "CallSummary" => {
           reason: { kind: :ref, ref: "EndReason", required: true },

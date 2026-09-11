@@ -16,7 +16,8 @@
         "to": {"type": "string", "description": "The called side."},
         "run": {"type": ["string", "null"], "description": "The eval run that opened this call, when one did: such a call starts mid-conversation, in the golden's state. Absent or null for a person."},
         "caller": {"anyOf": [{"$ref": "../defs.json#/$defs/Contact"}, {"type": "null"}], "description": "Who is on the line, as far as the platform knows now."},
-        "started_at": {"type": "number", "description": "When media came up, unix seconds."}
+        "started_at": {"type": "number", "description": "When media came up, unix seconds."},
+        "env": {"$ref": "../defs.json#/$defs/Env", "description": "The world this call ran in: the one the key that holds its agent opens. Absent on entries written before keys knew where they were, which read as production."}
       },
       "required": ["channel", "direction", "from", "to", "caller", "started_at"],
       "additionalProperties": false

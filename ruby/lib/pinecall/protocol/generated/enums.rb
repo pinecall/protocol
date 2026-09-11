@@ -11,6 +11,11 @@ module Pinecall
       CHANNEL = %w[phone web whatsapp].freeze
       # Inbound: the public reached the agent. Outbound: the agent reached out (a dial).
       DIRECTION = %w[inbound outbound].freeze
+      # Which of the two worlds a key opens, and so which world an agent is held in and a call ran
+      # in. A key is issued into one; an agent registered on it and every call it takes carry that
+      # one; a door claimed in one is refused to a key of the other. Every key issued before the
+      # field existed is production.
+      ENV = %w[production development].freeze
       # Why the call is over. Who hung up, what failed before anybody could, drained: the platform
       # took the worker down (a deploy, a stop) with the call still on it, or app_detached: the
       # app holding the agent closed its socket mid-call, so nothing was rendering the prompt or
@@ -69,6 +74,7 @@ module Pinecall
       ALL = {
         "Channel" => CHANNEL,
         "Direction" => DIRECTION,
+        "Env" => ENV,
         "EndReason" => END_REASON,
         "EndedBy" => ENDED_BY,
         "ScoreVerdict" => SCORE_VERDICT,
