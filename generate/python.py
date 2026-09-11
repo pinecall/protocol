@@ -66,7 +66,9 @@ def _registry_module_source(bundle: Bundle) -> str:
     needed: dict[str, list[str]] = {}
     for kind in ("event", "command"):
         for other, names in bundle.roots_of(kind).items():
-            needed[other] = sorted(set(needed.get(other, [])) | set(names))
+            # ruff's isort orders names case-insensitively (CallbackRequested before CallDialing);
+            # a plain sort puts every capital before every lowercase and the check refuses it.
+            needed[other] = sorted(set(needed.get(other, [])) | set(names), key=str.lower)
     imports = _imports_source(body, dict(sorted(needed.items())))
     return f'"""{HEADLINES["registry"]}"""\n\n{imports}\n\n{body}\n'
 
