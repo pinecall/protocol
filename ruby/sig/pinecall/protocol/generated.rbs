@@ -360,7 +360,7 @@ module Pinecall
       # A tool with confirm set is about to run and the platform is asking the caller.
       type confirm_request = { tool: String, call_id: String, arguments: Hash[Symbol, untyped], audience: String, phrase: String, ttl_s: Integer }
       # The gateway refused a call or a register because one of the org's quotas ran out.
-      type credits_exhausted = { org: String, quota: "minutes" | "messages" | "agents" | "concurrent_calls" | "memory_facts" | "knowledge_chunks", used: Float, limit: Integer }
+      type credits_exhausted = { org: String, quota: "minutes" | "messages" | "agents" | "concurrent_calls" | "memory_facts" | "knowledge_chunks" | "numbers", used: Float, limit: Integer }
       # A line the app wrote into the log with call.log.
       type custom = { name: String, data: Hash[Symbol, untyped] }
       # One ask of the process in the agent's directory, on a console's behalf.

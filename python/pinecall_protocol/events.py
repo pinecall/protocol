@@ -237,7 +237,13 @@ class CreditsExhausted(WireModel):
 
     org: str
     quota: Literal[
-        "minutes", "messages", "agents", "concurrent_calls", "memory_facts", "knowledge_chunks"
+        "minutes",
+        "messages",
+        "agents",
+        "concurrent_calls",
+        "memory_facts",
+        "knowledge_chunks",
+        "numbers",
     ]
     used: float
     limit: int

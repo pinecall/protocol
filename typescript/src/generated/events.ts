@@ -253,7 +253,7 @@ export type ConfirmRequest = z.infer<typeof ConfirmRequestSchema>;
  */
 export const CreditsExhaustedSchema = z.strictObject({
   org: z.string(),
-  quota: z.enum(["minutes", "messages", "agents", "concurrent_calls", "memory_facts", "knowledge_chunks"]),
+  quota: z.enum(["minutes", "messages", "agents", "concurrent_calls", "memory_facts", "knowledge_chunks", "numbers"]),
   used: z.number(),
   limit: z.int(),
 });
