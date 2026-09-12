@@ -19,6 +19,7 @@ What reaches the gateway: the commands an app sends over its socket, each with t
 | `call.transfer` | call | `call.transferred` | Send the caller to another number. |
 | `call.unhold` | call | `call.line` | Take the caller off hold. |
 | `call.unmute` | call | `call.line` | Unmute the agent. |
+| `dev.answer` | agent | nothing | The app's answer to a dev.request: what the verb produced, or the refusal it ended in — a status and a sentence, which the gateway hands the console verbatim. |
 | `participant.mute` | call | `track.unpublished` | Silence a participant for the rest of the call: their audio leaves the room, for everyone in it. |
 | `participant.remove` | call | `participant.left` | Put a participant out of the room. |
 | `ping` | agent | `pong` | Is the socket alive? The gateway answers pong. |
@@ -170,6 +171,16 @@ Unmute the agent.
 Lands in the log as: `call.line`.
 
 No fields.
+
+### `dev.answer`
+
+The app's answer to a dev.request: what the verb produced, or the refusal it ended in — a status and a sentence, which the gateway hands the console verbatim. One of the two, never both.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `id` | `string` | yes | The dev.request this answers. |
+| `result` | `object` | no | What the verb produced, as the verb's own answer: the call that opened, the run's id, the roster, the score. |
+| `refused` | `DevRefusal` | no | Why the verb did not run, in the words the console shows: the status it travels under, and the sentence. |
 
 ### `participant.mute`
 

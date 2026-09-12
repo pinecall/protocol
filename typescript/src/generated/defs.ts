@@ -23,6 +23,17 @@ export const EnvSchema = z.enum(["production", "development"]);
 export type Env = z.infer<typeof EnvSchema>;
 
 /**
+ * What a console may ask of the process standing in the agent's directory, relayed by the gateway:
+ * a written call to the class mounted there (chat), a simulated caller from its personas, its
+ * goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory
+ * goldens, a call promoted to a candidate file, the drift of the last two windows, and the
+ * reproductions a broken run left on that disk. Everything else a console needs is a door of the
+ * gateway.
+ */
+export const DevVerbSchema = z.enum(["chat.roster", "chat.start", "chat.say", "chat.end", "simulate.roster", "simulate.start", "goldens.roster", "goldens.run", "knowledge.roster", "knowledge.push", "knowledge.eval", "memory.roster", "memory.eval", "memory.extraction", "promote.roster", "promote.write", "drift.read", "reproductions.roster", "reproductions.read"]);
+export type DevVerb = z.infer<typeof DevVerbSchema>;
+
+/**
  * Why the call is over. Who hung up, what failed before anybody could, drained: the platform took
  * the worker down (a deploy, a stop) with the call still on it, or app_detached: the app holding
  * the agent closed its socket mid-call, so nothing was rendering the prompt or answering a tool —

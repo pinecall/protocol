@@ -15,6 +15,7 @@ import {
   CallTransferSchema,
   CallUnholdSchema,
   CallUnmuteSchema,
+  DevAnswerSchema,
   ParticipantMuteSchema,
   ParticipantRemoveSchema,
   PingSchema,
@@ -47,6 +48,7 @@ import {
   ConfirmRequestSchema,
   CreditsExhaustedSchema,
   CustomSchema,
+  DevRequestSchema,
   DocsSourcesSchema,
   ErrorEventSchema,
   FleetFullSchema,
@@ -110,6 +112,7 @@ export const EVENT_SCHEMAS = {
   "confirm.request": ConfirmRequestSchema,
   "credits.exhausted": CreditsExhaustedSchema,
   "custom": CustomSchema,
+  "dev.request": DevRequestSchema,
   "docs.sources": DocsSourcesSchema,
   "error": ErrorEventSchema,
   "event.received": EventReceivedSchema,
@@ -153,7 +156,7 @@ export const EVENT_SCHEMAS = {
 export type EventType = keyof typeof EVENT_SCHEMAS;
 
 /** Events a store may drop and a slow reader may miss: the entry's ephemeral flag defaults to this. */
-export const EPHEMERAL_EVENTS: ReadonlySet<EventType> = new Set<EventType>(["agent.transcript", "log.caught_up", "log.gap", "metrics.vad", "participant.speaking", "pong", "room.sent", "user.transcript"]);
+export const EPHEMERAL_EVENTS: ReadonlySet<EventType> = new Set<EventType>(["agent.transcript", "dev.request", "log.caught_up", "log.gap", "metrics.vad", "participant.speaking", "pong", "room.sent", "user.transcript"]);
 
 /** The one event that ends a call: after it nothing more is true and the log is sealed. */
 export const TERMINAL_EVENT: EventType = "call.score";
@@ -174,6 +177,7 @@ export const COMMAND_SCHEMAS = {
   "call.transfer": CallTransferSchema,
   "call.unhold": CallUnholdSchema,
   "call.unmute": CallUnmuteSchema,
+  "dev.answer": DevAnswerSchema,
   "participant.mute": ParticipantMuteSchema,
   "participant.remove": ParticipantRemoveSchema,
   "ping": PingSchema,
@@ -204,6 +208,7 @@ export const PRODUCES: Readonly<Record<CommandType, readonly string[]>> = {
   "call.transfer": ["call.transferred"],
   "call.unhold": ["call.line"],
   "call.unmute": ["call.line"],
+  "dev.answer": [],
   "participant.mute": ["track.unpublished"],
   "participant.remove": ["participant.left"],
   "ping": ["pong"],

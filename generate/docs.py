@@ -29,6 +29,7 @@ EVENT_PAGES: tuple[tuple[str, tuple[str, ...]], ...] = (
             "credits.",
             "fleet.",
             "callback.",
+            "dev.",
         ),
     ),
     ("events-room.md", ("room.", "participant.", "track.", "event.")),

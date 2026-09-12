@@ -794,6 +794,15 @@ module Pinecall
         }.freeze,
         "CallUnhold" => {}.freeze,
         "CallUnmute" => {}.freeze,
+        "DevAnswer" => {
+          id: { kind: :str, required: true },
+          result: { kind: :json },
+          refused: { kind: :ref, ref: "DevRefusal" }
+        }.freeze,
+        "DevRefusal" => {
+          status: { kind: :int, required: true },
+          detail: { kind: :str, required: true }
+        }.freeze,
         "ParticipantMute" => {
           identity: { kind: :str, required: true }
         }.freeze,
@@ -956,6 +965,11 @@ module Pinecall
         }.freeze,
         "Custom" => {
           name: { kind: :str, required: true },
+          data: { kind: :json, required: true }
+        }.freeze,
+        "DevRequest" => {
+          id: { kind: :str, required: true },
+          verb: { kind: :ref, ref: "DevVerb", required: true },
           data: { kind: :json, required: true }
         }.freeze,
         "DocsSources" => {

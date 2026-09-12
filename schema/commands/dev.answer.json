@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/dev.answer.json",
+  "title": "dev.answer",
+  "description": "The app's answer to a dev.request: what the verb produced, or the refusal it ended in — a status and a sentence, which the gateway hands the console verbatim. One of the two, never both.",
+  "x-pinecall": {"kind": "command", "type": "dev.answer", "scope": "agent", "produces": []},
+  "$ref": "#/$defs/DevAnswer",
+  "$defs": {
+    "DevAnswer": {
+      "type": "object",
+      "description": "What came of one dev.request, named by its id.",
+      "properties": {
+        "id": {"type": "string", "description": "The dev.request this answers."},
+        "result": {"type": "object", "additionalProperties": true, "description": "What the verb produced, as the verb's own answer: the call that opened, the run's id, the roster, the score."},
+        "refused": {"$ref": "#/$defs/DevRefusal"}
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    },
+    "DevRefusal": {
+      "type": "object",
+      "description": "Why the verb did not run, in the words the console shows: the status it travels under, and the sentence.",
+      "properties": {
+        "status": {"type": "integer", "description": "The HTTP status the console's door answers with."},
+        "detail": {"type": "string", "description": "The sentence, in the app's or the gateway's own words."}
+      },
+      "required": ["status", "detail"],
+      "additionalProperties": false
+    }
+  }
+}

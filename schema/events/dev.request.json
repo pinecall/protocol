@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/dev.request.json",
+  "title": "dev.request",
+  "description": "The gateway asks the app process holding the agent to do something only that process can — read a file of the agent's directory, mount its class, run its goldens — on a console's behalf. Sent down the one socket the gateway chose, never stored: a request is a fact about two processes talking, not about the world. The app answers with dev.answer naming the same id.",
+  "x-pinecall": {"kind": "event", "type": "dev.request", "scope": "agent", "ephemeral": true},
+  "$ref": "#/$defs/DevRequest",
+  "$defs": {
+    "DevRequest": {
+      "type": "object",
+      "description": "One ask of the process in the agent's directory, on a console's behalf.",
+      "properties": {
+        "id": {"type": "string", "description": "The gateway's id for this ask; the dev.answer repeats it."},
+        "verb": {"$ref": "../defs.json#/$defs/DevVerb"},
+        "data": {"type": "object", "additionalProperties": true, "description": "What the console asked, as the verb's own body: the persona and the turns, the goldens ticked, the base name, the call to promote."}
+      },
+      "required": ["id", "verb", "data"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -110,6 +110,23 @@ class CallUnmute(WireModel):
     """Unmute the agent."""
 
 
+# Why the verb did not run, in the words the console shows: the status it travels under, and the
+# sentence.
+class DevRefusal(WireModel):
+    """Why the verb did not run, in the words the console shows."""
+
+    status: int
+    detail: str
+
+
+class DevAnswer(WireModel):
+    """What came of one dev.request, named by its id."""
+
+    id: str
+    result: dict[str, Any] | None = None
+    refused: DevRefusal | None = None
+
+
 # Silence a participant for the rest of the call: their audio leaves the room, for everyone in it.
 # Lands as track.unpublished for their microphone. There is no unmute; a leg that must speak again
 # is invited again.

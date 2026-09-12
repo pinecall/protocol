@@ -45,6 +45,16 @@ The gateway refused a call or a register because one of the org's quotas ran out
 | `used` | `number` | yes | How much the org had consumed when the door refused. |
 | `limit` | `integer` | yes | The quota the operator set. |
 
+### `dev.request`
+
+The gateway asks the app process holding the agent to do something only that process can — read a file of the agent's directory, mount its class, run its goldens — on a console's behalf. Sent down the one socket the gateway chose, never stored: a request is a fact about two processes talking, not about the world. The app answers with dev.answer naming the same id.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `id` | `string` | yes | The gateway's id for this ask; the dev.answer repeats it. |
+| `verb` | `DevVerb` | yes | What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller from its personas, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk. |
+| `data` | `object` | yes | What the console asked, as the verb's own body: the persona and the turns, the goldens ticked, the base name, the call to promote. |
+
 ### `error`
 
 Something went wrong. Inside a call it says what failed; outside a call it says which command the gateway refused.

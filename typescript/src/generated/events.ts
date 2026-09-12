@@ -6,6 +6,7 @@ import {
   ChannelSchema,
   ContactSchema,
   CostSchema,
+  DevVerbSchema,
   DirectionSchema,
   DocSourceSchema,
   EndedBySchema,
@@ -259,6 +260,14 @@ export const CustomSchema = z.strictObject({
   data: z.record(z.string(), z.unknown()),
 });
 export type Custom = z.infer<typeof CustomSchema>;
+
+/** One ask of the process in the agent's directory, on a console's behalf. */
+export const DevRequestSchema = z.strictObject({
+  id: z.string(),
+  verb: DevVerbSchema,
+  data: z.record(z.string(), z.unknown()),
+});
+export type DevRequest = z.infer<typeof DevRequestSchema>;
 
 /**
  * What retrieval put in front of the model for this turn. An answer can be traced back to its

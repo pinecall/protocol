@@ -10,6 +10,7 @@ from pinecall_protocol.defs import (
     Channel,
     Contact,
     Cost,
+    DevVerb,
     Direction,
     DocSource,
     EndedBy,
@@ -239,6 +240,14 @@ class Custom(WireModel):
     """A line the app wrote into the log with call.log."""
 
     name: str
+    data: dict[str, Any]
+
+
+class DevRequest(WireModel):
+    """One ask of the process in the agent's directory, on a console's behalf."""
+
+    id: str
+    verb: DevVerb
     data: dict[str, Any]
 
 

@@ -121,6 +121,24 @@ export const CallUnmuteSchema = z.strictObject({});
 export type CallUnmute = z.infer<typeof CallUnmuteSchema>;
 
 /**
+ * Why the verb did not run, in the words the console shows: the status it travels under, and the
+ * sentence.
+ */
+export const DevRefusalSchema = z.strictObject({
+  status: z.int(),
+  detail: z.string(),
+});
+export type DevRefusal = z.infer<typeof DevRefusalSchema>;
+
+/** What came of one dev.request, named by its id. */
+export const DevAnswerSchema = z.strictObject({
+  id: z.string(),
+  result: z.record(z.string(), z.unknown()).nullish(),
+  refused: DevRefusalSchema.nullish(),
+});
+export type DevAnswer = z.infer<typeof DevAnswerSchema>;
+
+/**
  * Silence a participant for the rest of the call: their audio leaves the room, for everyone in it.
  * Lands as track.unpublished for their microphone. There is no unmute; a leg that must speak again
  * is invited again.

@@ -11,6 +11,8 @@ module Pinecall
       type direction = "inbound" | "outbound"
       # Which of the two worlds a key opens, and so which world an agent is held in and a call ran in.
       type env = "production" | "development"
+      # What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller from its personas, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk.
+      type dev_verb = "chat.roster" | "chat.start" | "chat.say" | "chat.end" | "simulate.roster" | "simulate.start" | "goldens.roster" | "goldens.run" | "knowledge.roster" | "knowledge.push" | "knowledge.eval" | "memory.roster" | "memory.eval" | "memory.extraction" | "promote.roster" | "promote.write" | "drift.read" | "reproductions.roster" | "reproductions.read"
       # Why the call is over.
       type end_reason = "caller_hung_up" | "agent_hung_up" | "supervisor_ended" | "transferred" | "no_answer" | "busy" | "dial_failed" | "timeout" | "drained" | "app_detached" | "error"
       # Whose action ended the call.
@@ -295,6 +297,10 @@ module Pinecall
       type call_unhold = { }
       # Unmute the agent.
       type call_unmute = { }
+      # What came of one dev.request, named by its id.
+      type dev_answer = { id: String, ?result: Hash[Symbol, untyped], ?refused: dev_refusal }
+      # Why the verb did not run, in the words the console shows: the status it travels under, and the sentence.
+      type dev_refusal = { status: Integer, detail: String }
       # Silence a participant for the rest of the call: their audio leaves the room, for everyone in it.
       type participant_mute = { identity: String }
       # Put a participant out of the room.
@@ -355,6 +361,8 @@ module Pinecall
       type credits_exhausted = { org: String, quota: "minutes" | "messages" | "agents" | "concurrent_calls" | "memory_facts" | "knowledge_chunks", used: Float, limit: Integer }
       # A line the app wrote into the log with call.log.
       type custom = { name: String, data: Hash[Symbol, untyped] }
+      # One ask of the process in the agent's directory, on a console's behalf.
+      type dev_request = { id: String, verb: dev_verb, data: Hash[Symbol, untyped] }
       # What retrieval put in front of the model for this turn.
       type docs_sources = { query: String, sources: Array[doc_source], took_ms: Float, ?speech_id: String }
       # Something went wrong.
