@@ -30,6 +30,7 @@ import {
 import { ToolResultSchema } from "./defs.js";
 import {
   AgentConfiguredSchema,
+  AgentDetachedSchema,
   AgentRegisteredSchema,
   AgentStateChangedSchema,
   AgentTranscriptSchema,
@@ -95,6 +96,7 @@ import {
 /** Every event by its wire type; the codec looks the schema up here. */
 export const EVENT_SCHEMAS = {
   "agent.configured": AgentConfiguredSchema,
+  "agent.detached": AgentDetachedSchema,
   "agent.registered": AgentRegisteredSchema,
   "agent.state": AgentStateChangedSchema,
   "agent.transcript": AgentTranscriptSchema,

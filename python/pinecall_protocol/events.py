@@ -34,6 +34,14 @@ class AgentConfigured(WireModel):
     changed: list[str]
 
 
+class AgentDetached(WireModel):
+    """One socket stopped holding the agent."""
+
+    app: str
+    env: Env
+    left: bool
+
+
 # The gateway accepted an agent.register: this socket now speaks for the agent and answers its
 # routes. Many sockets may hold one agent at once — a new call takes the newest of them, unless the
 # caller names one by its `app` id.

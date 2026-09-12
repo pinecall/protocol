@@ -38,6 +38,7 @@ class SessionLine(WireModel):
     """One call as a list draws it: which call, how far the log got, and the state's own fields."""
 
     call: str
+    agent: str
     live: bool
     last_seq: int
     status: CallStatus

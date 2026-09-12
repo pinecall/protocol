@@ -11,6 +11,16 @@ The gateway applied an agent.configure. Live calls keep their session; the next 
 |---|---|---|---|
 | `changed` | `string[]` | yes | The config fields that changed. |
 
+### `agent.detached`
+
+A socket that held the agent is gone — the process exited, the connection dropped — and the agent's doors are whoever is left holding it. Written to the agent's own log by the gateway, so a console reading the floor sees a process leave as it saw it arrive.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `app` | `string` | yes | The socket that left, as agent.registered named it. |
+| `env` | `Env` | yes | The world it held the agent in. |
+| `left` | `boolean` | yes | True when nobody holds the agent in that world any more; false when another socket still does. |
+
 ### `agent.registered`
 
 The gateway accepted an agent.register: this socket now speaks for the agent and answers its routes. Many sockets may hold one agent at once — a new call takes the newest of them, unless the caller names one by its `app` id.

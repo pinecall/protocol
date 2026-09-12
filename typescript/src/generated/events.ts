@@ -31,6 +31,14 @@ export const AgentConfiguredSchema = z.strictObject({
 });
 export type AgentConfigured = z.infer<typeof AgentConfiguredSchema>;
 
+/** One socket stopped holding the agent. */
+export const AgentDetachedSchema = z.strictObject({
+  app: z.string(),
+  env: EnvSchema,
+  left: z.boolean(),
+});
+export type AgentDetached = z.infer<typeof AgentDetachedSchema>;
+
 /**
  * The gateway accepted an agent.register: this socket now speaks for the agent and answers its
  * routes. Many sockets may hold one agent at once — a new call takes the newest of them, unless

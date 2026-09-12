@@ -33,6 +33,7 @@ from pinecall_protocol.commands import (
 from pinecall_protocol.defs import ToolResult
 from pinecall_protocol.events import (
     AgentConfigured,
+    AgentDetached,
     AgentRegistered,
     AgentStateChanged,
     AgentTranscript,
@@ -98,6 +99,7 @@ from pinecall_protocol.room import (
 # Every event by its wire type; codec looks the model up here.
 EVENTS: dict[str, type[WireModel]] = {
     "agent.configured": AgentConfigured,
+    "agent.detached": AgentDetached,
     "agent.registered": AgentRegistered,
     "agent.state": AgentStateChanged,
     "agent.transcript": AgentTranscript,
@@ -159,6 +161,7 @@ EVENTS: dict[str, type[WireModel]] = {
 
 type EventType = Literal[
     "agent.configured",
+    "agent.detached",
     "agent.registered",
     "agent.state",
     "agent.transcript",

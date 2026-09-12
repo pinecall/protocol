@@ -32,6 +32,7 @@ export type LogPage = z.infer<typeof LogPageSchema>;
 /** One call as a list draws it: which call, how far the log got, and the state's own fields. */
 export const SessionLineSchema = z.strictObject({
   call: z.string(),
+  agent: z.string(),
   live: z.boolean(),
   last_seq: z.int(),
   status: CallStatusSchema,

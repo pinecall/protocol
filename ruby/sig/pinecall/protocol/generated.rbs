@@ -146,7 +146,7 @@ module Pinecall
       # One page of a log: what this reader may see, whether the log is open, and where to resume.
       type log_page = { entries: Array[entry], live: bool, next: Integer? }
       # One call as a list draws it: which call, how far the log got, and the state's own fields.
-      type session_line = { call: String, live: bool, last_seq: Integer, status: call_status, channel: channel?, direction: direction?, from: String?, to: String?, caller: contact?, started_at: Float?, ended_at: Float?, end_reason: end_reason?, outcome: String?, cost: cost? }
+      type session_line = { call: String, agent: String, live: bool, last_seq: Integer, status: call_status, channel: channel?, direction: direction?, from: String?, to: String?, caller: contact?, started_at: Float?, ended_at: Float?, end_reason: end_reason?, outcome: String?, cost: cost? }
       # GET /v1/agents/{slug}/sessions: which calls that agent handled, newest first.
       type session_list = { calls: Array[session_line] }
       # One agent, as somebody choosing which to open needs to see it: its name and its channels.
@@ -323,6 +323,8 @@ module Pinecall
       type tools_set = { tools: Array[tool_spec] }
       # The gateway applied an agent.configure.
       type agent_configured = { changed: Array[String] }
+      # One socket stopped holding the agent.
+      type agent_detached = { app: String, env: env, left: bool }
       # The gateway accepted an agent.register: this socket now speaks for the agent and answers its routes.
       type agent_registered = { routes: Array[route], app: String, ?sdk: String, ?env: env }
       # The agent's state changed, in the session's own words.

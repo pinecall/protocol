@@ -396,6 +396,7 @@ module Pinecall
         }.freeze,
         "SessionLine" => {
           call: { kind: :str, required: true },
+          agent: { kind: :str, required: true },
           live: { kind: :bool, required: true },
           last_seq: { kind: :int, required: true },
           status: { kind: :ref, ref: "CallStatus", required: true },
@@ -840,6 +841,11 @@ module Pinecall
         }.freeze,
         "AgentConfigured" => {
           changed: { kind: :list, items: { kind: :str }, required: true }
+        }.freeze,
+        "AgentDetached" => {
+          app: { kind: :str, required: true },
+          env: { kind: :ref, ref: "Env", required: true },
+          left: { kind: :bool, required: true }
         }.freeze,
         "AgentRegistered" => {
           routes: { kind: :list, items: { kind: :ref, ref: "Route" }, required: true },

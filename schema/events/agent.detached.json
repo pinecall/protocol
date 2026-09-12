@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/agent.detached.json",
+  "title": "agent.detached",
+  "description": "A socket that held the agent is gone — the process exited, the connection dropped — and the agent's doors are whoever is left holding it. Written to the agent's own log by the gateway, so a console reading the floor sees a process leave as it saw it arrive.",
+  "x-pinecall": {"kind": "event", "type": "agent.detached", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/AgentDetached",
+  "$defs": {
+    "AgentDetached": {
+      "type": "object",
+      "description": "One socket stopped holding the agent.",
+      "properties": {
+        "app": {"type": "string", "description": "The socket that left, as agent.registered named it."},
+        "env": {"$ref": "../defs.json#/$defs/Env", "description": "The world it held the agent in."},
+        "left": {"type": "boolean", "description": "True when nobody holds the agent in that world any more; false when another socket still does."}
+      },
+      "required": ["app", "env", "left"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -29,11 +29,12 @@
       "additionalProperties": false,
       "description": "One call as a list draws it: which call, how far the log got, and the state's own fields.",
       "required": [
-        "call", "live", "last_seq", "status", "channel", "direction", "from", "to",
+        "call", "agent", "live", "last_seq", "status", "channel", "direction", "from", "to",
         "caller", "started_at", "ended_at", "end_reason", "outcome", "cost"
       ],
       "properties": {
         "call": {"type": "string", "description": "The call id."},
+        "agent": {"type": "string", "description": "The agent that handled it: which, when the list spans an org."},
         "live": {"type": "boolean", "description": "True while the call's log is still open."},
         "last_seq": {"type": "integer", "description": "The seq its fold reached."},
         "status": {"$ref": "state.json#/$defs/CallStatus"},

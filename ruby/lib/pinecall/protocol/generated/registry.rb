@@ -11,6 +11,7 @@ module Pinecall
       # The shape each event's data is, by the event's wire type.
       EVENTS = {
         "agent.configured" => "AgentConfigured",
+        "agent.detached" => "AgentDetached",
         "agent.registered" => "AgentRegistered",
         "agent.state" => "AgentStateChanged",
         "agent.transcript" => "AgentTranscript",
@@ -101,7 +102,7 @@ module Pinecall
       }.freeze
 
       # Every event this protocol declares, in the schema's own order.
-      EVENT_TYPES = %w[agent.configured agent.registered agent.state agent.transcript call.dialing call.ended call.line call.ringing call.score call.started call.summary call.transferred callback.requested confirm.declined confirm.granted confirm.request credits.exhausted custom dev.request docs.sources error event.received fleet.full log.caught_up log.gap memory.ops metrics.avatar metrics.eot metrics.eou metrics.interruption metrics.llm metrics.realtime metrics.stt metrics.tts metrics.vad participant.joined participant.left participant.speaking pong prompt.changed room.opened room.sent state.changed supervisor.ended supervisor.released supervisor.said supervisor.took_over supervisor.transferred supervisor.whispered tool.call tool.result tools.changed track.published track.unpublished turn.agent turn.user user.state user.transcript].freeze
+      EVENT_TYPES = %w[agent.configured agent.detached agent.registered agent.state agent.transcript call.dialing call.ended call.line call.ringing call.score call.started call.summary call.transferred callback.requested confirm.declined confirm.granted confirm.request credits.exhausted custom dev.request docs.sources error event.received fleet.full log.caught_up log.gap memory.ops metrics.avatar metrics.eot metrics.eou metrics.interruption metrics.llm metrics.realtime metrics.stt metrics.tts metrics.vad participant.joined participant.left participant.speaking pong prompt.changed room.opened room.sent state.changed supervisor.ended supervisor.released supervisor.said supervisor.took_over supervisor.transferred supervisor.whispered tool.call tool.result tools.changed track.published track.unpublished turn.agent turn.user user.state user.transcript].freeze
 
       # Every command an app may send.
       COMMAND_TYPES = %w[agent.configure agent.register agent.reply agent.say call.dial call.dtmf call.event call.hangup call.hold call.log call.mute call.transfer call.unhold call.unmute dev.answer participant.mute participant.remove ping prompt.set room.invite room.send session.configure state.set supervisor.verb tool.result tools.set].freeze
