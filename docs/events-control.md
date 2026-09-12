@@ -51,7 +51,7 @@ The gateway refused a call or a register because one of the org's quotas ran out
 | field | type | required | meaning |
 |---|---|---|---|
 | `org` | `string` | yes | The org whose quota ran out. |
-| `quota` | `"minutes" | "messages" | "agents" | "concurrent_calls" | "memory_facts" | "knowledge_chunks" | "numbers"` | yes | Which quota: minutes of call, messages, agents held, calls at once, facts memory keeps, chunks the knowledge bases keep, numbers the box bought for the org. |
+| `quota` | `"minutes" | "messages" | "agents" | "concurrent_calls" | "memory_facts" | "knowledge_chunks" | "numbers" | "seats"` | yes | Which quota: minutes of call, messages, agents held, calls at once, facts memory keeps, chunks the knowledge bases keep, numbers the box bought for the org, people it seats. Every quota a gateway can refuse for is a word here, whether or not that refusal is one an entry is written for: a push and an invitation name no agent, so they are answered at the door and never logged. |
 | `used` | `number` | yes | How much the org had consumed when the door refused. |
 | `limit` | `integer` | yes | The quota the operator set. |
 

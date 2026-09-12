@@ -244,6 +244,7 @@ class CreditsExhausted(WireModel):
         "memory_facts",
         "knowledge_chunks",
         "numbers",
+        "seats",
     ]
     used: float
     limit: int
