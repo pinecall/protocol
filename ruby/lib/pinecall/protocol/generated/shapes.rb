@@ -421,6 +421,18 @@ module Pinecall
         "AgentList" => {
           agents: { kind: :list, items: { kind: :ref, ref: "HeldAgent" }, required: true }
         }.freeze,
+        "LineHolder" => {
+          holder: { kind: :str, null: true, required: true },
+          name: { kind: :str, null: true, required: true }
+        }.freeze,
+        "TheLine" => {
+          agent: { kind: :str, required: true },
+          env: { kind: :ref, ref: "Env", required: true },
+          held: { kind: :bool, required: true },
+          holding: { kind: :ref, ref: "LineHolder" },
+          yours: { kind: :bool, required: true },
+          waiting: { kind: :list, items: { kind: :ref, ref: "LineHolder" }, required: true }
+        }.freeze,
         "KnowledgePush" => {
           files: { kind: :list, items: { kind: :ref, ref: "KnowledgeFile" }, required: true }
         }.freeze,

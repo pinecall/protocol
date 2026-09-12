@@ -153,6 +153,10 @@ module Pinecall
       type held_agent = { slug: String, channels: Array[channel] }
       # GET /v1/agents: every agent this fleet is holding right now, as the front page lists them.
       type agent_list = { agents: Array[held_agent] }
+      # One corner of a world holding an agent: the member whose it is, named so a person can read it.
+      type line_holder = { holder: String?, name: String? }
+      # GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in.
+      type the_line = { agent: String, env: env, held: bool, ?holding: line_holder, yours: bool, waiting: Array[line_holder] }
       # PUT /v1/knowledge/{base}, the body: the tenant's folder as of now, sent whole.
       type knowledge_push = { files: Array[knowledge_file] }
       # One question of a base's golden: what somebody asks, and the chunk that should answer it.

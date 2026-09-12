@@ -7,6 +7,7 @@ import {
   CostSchema,
   DirectionSchema,
   EndReasonSchema,
+  EnvSchema,
   KnowledgeFileSchema,
   PlatformToolSchema,
 } from "./defs.js";
@@ -67,6 +68,27 @@ export const AgentListSchema = z.strictObject({
   agents: z.array(HeldAgentSchema),
 });
 export type AgentList = z.infer<typeof AgentListSchema>;
+
+/** One corner of a world holding an agent: the member whose it is, named so a person can read it. */
+export const LineHolderSchema = z.strictObject({
+  holder: z.string().nullable(),
+  name: z.string().nullable(),
+});
+export type LineHolder = z.infer<typeof LineHolderSchema>;
+
+/**
+ * GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in. An
+ * org shares one development number, so it rings in one place and which one is claimed.
+ */
+export const TheLineSchema = z.strictObject({
+  agent: z.string(),
+  env: EnvSchema,
+  held: z.boolean(),
+  holding: LineHolderSchema.nullish(),
+  yours: z.boolean(),
+  waiting: z.array(LineHolderSchema),
+});
+export type TheLine = z.infer<typeof TheLineSchema>;
 
 /**
  * PUT /v1/knowledge/{base}, the body: the tenant's folder as of now, sent whole. The base is

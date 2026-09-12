@@ -11,6 +11,7 @@ from pinecall_protocol.defs import (
     Cost,
     Direction,
     EndReason,
+    Env,
     KnowledgeFile,
     PlatformTool,
 )
@@ -71,6 +72,27 @@ class AgentList(WireModel):
     """GET /v1/agents: every agent this fleet is holding right now, as the front page lists them."""
 
     agents: list[HeldAgent]
+
+
+# One corner of a world holding an agent: the member whose it is, named so a person can read it.
+class LineHolder(WireModel):
+    """One corner of a world holding an agent."""
+
+    holder: str | None
+    name: str | None
+
+
+# GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in. An
+# org shares one development number, so it rings in one place and which one is claimed.
+class TheLine(WireModel):
+    """GET /v1/agents/{slug}/line."""
+
+    agent: str
+    env: Env
+    held: bool
+    holding: LineHolder | None = None
+    yours: bool
+    waiting: list[LineHolder]
 
 
 # The base is replaced, never merged.

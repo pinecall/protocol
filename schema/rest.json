@@ -78,6 +78,30 @@
         "agents": {"type": "array", "items": {"$ref": "#/$defs/HeldAgent"}, "description": "One row per agent, in the order their sockets claimed them."}
       }
     },
+    "LineHolder": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One corner of a world holding an agent: the member whose it is, named so a person can read it.",
+      "required": ["holder", "name"],
+      "properties": {
+        "holder": {"type": ["string", "null"], "description": "The member id whose corner it is, or null for the org's own — a machine key names nobody."},
+        "name": {"type": ["string", "null"], "description": "Who that member is, for a person reading a terminal. Null for the org's own corner."}
+      }
+    },
+    "TheLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in. An org shares one development number, so it rings in one place and which one is claimed.",
+      "required": ["agent", "env", "held", "yours", "waiting"],
+      "properties": {
+        "agent": {"type": "string", "description": "The agent whose ringing doors these are."},
+        "env": {"$ref": "defs.json#/$defs/Env", "description": "The world. Production has one corner and always holds its own line."},
+        "held": {"type": "boolean", "description": "Whether any corner is answering the ring at all. False means a call at the number reaches nobody."},
+        "holding": {"$ref": "#/$defs/LineHolder", "description": "The corner answering it. Absent when nobody is."},
+        "yours": {"type": "boolean", "description": "Whether the line is this key's corner, so a terminal knows to say 'you' rather than a name."},
+        "waiting": {"type": "array", "items": {"$ref": "#/$defs/LineHolder"}, "description": "Every other corner holding this agent that could claim it, newest claim first."}
+      }
+    },
     "KnowledgePush": {
       "type": "object",
       "additionalProperties": false,
