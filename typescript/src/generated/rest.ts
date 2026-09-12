@@ -87,6 +87,7 @@ export const TheLineSchema = z.strictObject({
   holding: LineHolderSchema.nullish(),
   yours: z.boolean(),
   waiting: z.array(LineHolderSchema),
+  calling: z.array(z.string()),
 });
 export type TheLine = z.infer<typeof TheLineSchema>;
 

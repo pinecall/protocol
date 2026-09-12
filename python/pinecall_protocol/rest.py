@@ -93,6 +93,7 @@ class TheLine(WireModel):
     holding: LineHolder | None = None
     yours: bool
     waiting: list[LineHolder]
+    calling: list[str]
 
 
 # The base is replaced, never merged.

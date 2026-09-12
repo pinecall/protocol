@@ -431,7 +431,8 @@ module Pinecall
           held: { kind: :bool, required: true },
           holding: { kind: :ref, ref: "LineHolder" },
           yours: { kind: :bool, required: true },
-          waiting: { kind: :list, items: { kind: :ref, ref: "LineHolder" }, required: true }
+          waiting: { kind: :list, items: { kind: :ref, ref: "LineHolder" }, required: true },
+          calling: { kind: :list, items: { kind: :str }, required: true }
         }.freeze,
         "KnowledgePush" => {
           files: { kind: :list, items: { kind: :ref, ref: "KnowledgeFile" }, required: true }
