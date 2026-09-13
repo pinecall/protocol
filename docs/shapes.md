@@ -296,9 +296,9 @@ Which voice speaks for the agent: the name it was asked for, or the id the provi
 | field | type | required | meaning |
 |---|---|---|---|
 | `name` | `string` | no | The voice as the app wrote it: one of the platform's curated names, or a provider's own id. Resolved to a provider and an id when the app declares itself, so an unknown name is refused there and never at the first utterance. |
-| `provider` | `string` | no | The TTS provider: elevenlabs. Absent when the curated name decides it. |
+| `provider` | `string` | no | The TTS provider: elevenlabs, cartesia, rime, hume, or any other vendor LiveKit reaches. Absent when the curated name decides it. Naming it changes what voice_id means: the runtime passes the id through as that vendor's own, because only ElevenLabs' shape is known here. |
 | `model` | `string` | no | The provider's model, when the default is not wanted. |
-| `voice_id` | `string` | no | The provider's id for the voice. |
+| `voice_id` | `string` | no | The provider's id for the voice, in that provider's own shape — a 20-character ElevenLabs id, a Cartesia uuid, a Rime speaker name. |
 
 ### `ModelConfig`
 
@@ -306,7 +306,7 @@ Which model does a job (the LLM, or the STT), and the one or two knobs worth tur
 
 | field | type | required | meaning |
 |---|---|---|---|
-| `provider` | `string` | yes | The provider: anthropic, openai, soniox, deepgram. |
+| `provider` | `string` | yes | The provider, by its own name or any of the words it answers to: anthropic (claude), openai (gpt), cartesia, deepgram, soniox, groq, google (gemini) — every vendor LiveKit ships a plugin for — or livekit, which is LiveKit Inference and carries the vendor inside the model name (openai/gpt-5-mini). The runtime answers the whole list at GET /v1/providers. |
 | `model` | `string` | yes | The provider's model name. |
 | `temperature` | `number` | no | Sampling temperature, for an LLM. Absent means the provider's default. |
 
