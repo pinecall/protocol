@@ -78,7 +78,7 @@ export type LineHolder = z.infer<typeof LineHolderSchema>;
 
 /**
  * GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in. An
- * org shares one development number, so it rings in one place and which one is claimed.
+ * org shares one sandbox number, so it rings in one place and which one is claimed.
  */
 export const TheLineSchema = z.strictObject({
   agent: z.string(),

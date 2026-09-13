@@ -43,9 +43,9 @@ One of: `inbound`, `outbound`.
 
 ### `Env`
 
-Which of the two worlds a key opens, and so which world an agent is held in and a call ran in. A key is issued into one; an agent registered on it and every call it takes carry that one; a door claimed in one is refused to a key of the other. Every key issued before the field existed is production.
+Which of the two worlds a key opens, and so which world an agent is held in and a call ran in. A key is issued into one; an agent registered on it and every call it takes carry that one; a door claimed in one is refused to a key of the other. `sandbox` is where things are written and `production` is what the public reaches — and whether a sandbox agent is one PERSON's copy or the team's shared one is not this field: it is whether the key that registered it names a person. Every key issued before the field existed is production.
 
-One of: `production`, `development`.
+One of: `production`, `sandbox`.
 
 ### `DevVerb`
 

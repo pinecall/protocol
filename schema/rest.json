@@ -91,7 +91,7 @@
     "TheLine": {
       "type": "object",
       "additionalProperties": false,
-      "description": "GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in. An org shares one development number, so it rings in one place and which one is claimed.",
+      "description": "GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in. An org shares one sandbox number, so it rings in one place and which one is claimed.",
       "required": ["agent", "env", "held", "yours", "waiting", "calling"],
       "properties": {
         "agent": {"type": "string", "description": "The agent whose ringing doors these are."},
