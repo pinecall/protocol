@@ -416,7 +416,8 @@ module Pinecall
         }.freeze,
         "HeldAgent" => {
           slug: { kind: :str, required: true },
-          channels: { kind: :list, items: { kind: :ref, ref: "Channel" }, required: true }
+          channels: { kind: :list, items: { kind: :ref, ref: "Channel" }, required: true },
+          holder: { kind: :str }
         }.freeze,
         "AgentList" => {
           agents: { kind: :list, items: { kind: :ref, ref: "HeldAgent" }, required: true }

@@ -60,6 +60,7 @@ export type SessionList = z.infer<typeof SessionListSchema>;
 export const HeldAgentSchema = z.strictObject({
   slug: z.string(),
   channels: z.array(ChannelSchema),
+  holder: z.string().nullish(),
 });
 export type HeldAgent = z.infer<typeof HeldAgentSchema>;
 

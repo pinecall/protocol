@@ -66,6 +66,7 @@ class HeldAgent(WireModel):
 
     slug: str
     channels: list[Channel]
+    holder: str | None = None
 
 
 class AgentList(WireModel):
