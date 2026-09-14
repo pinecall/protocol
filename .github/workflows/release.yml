@@ -92,7 +92,18 @@ jobs:
         working-directory: typescript
       - run: pnpm run build
         working-directory: typescript
-      - run: npm publish --provenance --access public
+      # Empaqueta pnpm y publica npm, y cada mitad está acá por un motivo distinto.
+      #
+      # `npm pack` NO aplica `publishConfig` — comprobado: el manifiesto que arma sigue diciendo
+      # `main: ./src/index.ts`, un archivo que `files: ["dist"]` no manda. Un `npm publish` directo
+      # publicaría un paquete cuyo import falla, en un número que ya no se puede reusar. `pnpm pack`
+      # sí lo aplica (dist/index.js) y además reescribe cualquier `workspace:`.
+      #
+      # Y publica npm porque es npm quien habla OIDC con el registro. El tarball viaja tal cual:
+      # `npm publish <tgz>` no reempaqueta nada.
+      - run: pnpm pack --pack-destination /tmp/pkg
+        working-directory: typescript
+      - run: npm publish --provenance --access public /tmp/pkg/*.tgz
         working-directory: typescript
 
   publish-gem:
