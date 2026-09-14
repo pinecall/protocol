@@ -56,11 +56,18 @@ export const SessionListSchema = z.strictObject({
 });
 export type SessionList = z.infer<typeof SessionListSchema>;
 
+/** One corner of a world holding an agent: the member whose it is, named so a person can read it. */
+export const LineHolderSchema = z.strictObject({
+  holder: z.string().nullable(),
+  name: z.string().nullable(),
+});
+export type LineHolder = z.infer<typeof LineHolderSchema>;
+
 /** One agent, as somebody choosing which to open needs to see it: its name and its channels. */
 export const HeldAgentSchema = z.strictObject({
   slug: z.string(),
   channels: z.array(ChannelSchema),
-  holder: z.string().nullish(),
+  holder: LineHolderSchema.nullish(),
 });
 export type HeldAgent = z.infer<typeof HeldAgentSchema>;
 
@@ -69,13 +76,6 @@ export const AgentListSchema = z.strictObject({
   agents: z.array(HeldAgentSchema),
 });
 export type AgentList = z.infer<typeof AgentListSchema>;
-
-/** One corner of a world holding an agent: the member whose it is, named so a person can read it. */
-export const LineHolderSchema = z.strictObject({
-  holder: z.string().nullable(),
-  name: z.string().nullable(),
-});
-export type LineHolder = z.infer<typeof LineHolderSchema>;
 
 /**
  * GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in. An

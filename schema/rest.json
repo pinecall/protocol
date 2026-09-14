@@ -67,7 +67,7 @@
       "properties": {
         "slug": {"type": "string", "description": "The agent's slug, which every other door takes."},
         "channels": {"type": "array", "items": {"$ref": "defs.json#/$defs/Channel"}, "description": "The doors it answers on, sorted."},
-        "holder": {"type": "string", "description": "Whose copy this is: the member id, for an agent one person is holding in their sandbox. Absent for the ORG's \u2014 what a machine key holds, which is production, and which in a sandbox is the team's shared one. A key that opens `team` is shown every member's; every other key is shown its own and the org's."}
+        "holder": {"$ref": "#/$defs/LineHolder", "description": "Whose copy this is: the member holding it in their sandbox, by id and by the address a person reads. Absent for the ORG's \u2014 what a machine key holds, which is production, and which in a sandbox is the team's shared one. A key that opens `team` is shown every member's; every other key is shown its own and the org's."}
       }
     },
     "AgentList": {

@@ -150,7 +150,7 @@ module Pinecall
       # GET /v1/agents/{slug}/sessions: which calls that agent handled, newest first.
       type session_list = { calls: Array[session_line] }
       # One agent, as somebody choosing which to open needs to see it: its name and its channels.
-      type held_agent = { slug: String, channels: Array[channel], ?holder: String }
+      type held_agent = { slug: String, channels: Array[channel], ?holder: line_holder }
       # GET /v1/agents: every agent this fleet is holding right now, as the front page lists them.
       type agent_list = { agents: Array[held_agent] }
       # One corner of a world holding an agent: the member whose it is, named so a person can read it.

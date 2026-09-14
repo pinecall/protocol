@@ -61,26 +61,26 @@ class SessionList(WireModel):
     calls: list[SessionLine]
 
 
-class HeldAgent(WireModel):
-    """One agent, as somebody choosing which to open needs to see it: its name and its channels."""
-
-    slug: str
-    channels: list[Channel]
-    holder: str | None = None
-
-
-class AgentList(WireModel):
-    """GET /v1/agents: every agent this fleet is holding right now, as the front page lists them."""
-
-    agents: list[HeldAgent]
-
-
 # One corner of a world holding an agent: the member whose it is, named so a person can read it.
 class LineHolder(WireModel):
     """One corner of a world holding an agent."""
 
     holder: str | None
     name: str | None
+
+
+class HeldAgent(WireModel):
+    """One agent, as somebody choosing which to open needs to see it: its name and its channels."""
+
+    slug: str
+    channels: list[Channel]
+    holder: LineHolder | None = None
+
+
+class AgentList(WireModel):
+    """GET /v1/agents: every agent this fleet is holding right now, as the front page lists them."""
+
+    agents: list[HeldAgent]
 
 
 # GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in. An
