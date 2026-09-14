@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# La versión que este repo declara, una sola vez y en tres idiomas: si los tres no dicen lo mismo,
+# el release publicaría tres paquetes que no son la misma cosa. Imprime la versión, o el desacuerdo.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+py=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' python/pinecall_protocol/_version.py)
+rb=$(sed -n 's/.*VERSION = "\(.*\)".*/\1/p' ruby/lib/pinecall/protocol/version.rb)
+ts=$(node -p "require('./typescript/package.json').version")
+
+if [ "$py" != "$rb" ] || [ "$py" != "$ts" ]; then
+  echo "las tres versiones tienen que decir lo mismo: python $py · ruby $rb · typescript $ts" >&2
+  exit 1
+fi
+echo "$py"

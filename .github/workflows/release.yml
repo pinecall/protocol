@@ -1,0 +1,113 @@
+# El tag ES la publicación. `git push origin vX.Y.Z` y esto publica los tres paquetes solo.
+#
+# Tres paquetes de UN tag, y está bien que sea así: son el mismo contrato en tres idiomas,
+# generados del mismo `schema/`. Una versión de python que no fuera la misma que la de typescript
+# sería dos wires que dicen ser uno. `scripts/the-version` es quien no lo deja pasar.
+#
+# El orden importa fuera de este archivo: los otros dos repos dependen de éste por ruta hasta que
+# haya una versión publicada. Este repo publica primero, siempre.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  # Para ensayar el camino sin quemar un número: corre guard + gates + build, y publish queda
+  # skipped porque no es un tag.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # Una versión de PyPI es permanente: un artefacto cuyo nombre miente no se deshace. Así que la
+  # primera pregunta es si el tag y lo que el árbol declara dicen lo mismo.
+  guard:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.declared.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - id: declared
+        run: echo "version=$(scripts/the-version)" >> "$GITHUB_OUTPUT"
+      - name: el tag y la versión declarada son el mismo número
+        if: github.ref_type == 'tag'
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          declared="${{ steps.declared.outputs.version }}"
+          if [ "$tag" != "$declared" ]; then
+            echo "el tag dice $tag y el árbol declara $declared — uno de los dos está mal" >&2
+            exit 1
+          fi
+          echo "v$declared"
+
+  # El gate de verdad, el mismo que corre en cada push: regenerar, diffear, y las tres suites.
+  gates:
+    uses: ./.github/workflows/ci.yml
+
+  publish-pypi:
+    needs: [guard, gates]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # Trusted Publishing: OIDC, sin token guardado en ningún lado
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv build
+        working-directory: python
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/dist
+          skip-existing: true   # idempotente: relanzar el workflow no es un error
+
+  publish-npm:
+    needs: [guard, gates]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      # setup-node con node 24 trae un npm que NO conoce el intercambio OIDC del registro y cae
+      # EN SILENCIO a un publish anónimo: 404 en el PUT, después de haber dicho que firmó la
+      # provenance. El éxito de la firma no prueba nada sobre el auth.
+      - run: npm install -g npm@latest
+      - run: pnpm install --frozen-lockfile
+        working-directory: typescript
+      - run: pnpm run build
+        working-directory: typescript
+      - run: npm publish --provenance --access public
+        working-directory: typescript
+
+  publish-gem:
+    needs: [guard, gates]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    environment: rubygems
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+      - uses: rubygems/release-gem@v1
+        with:
+          await-release: false
+          working-directory: ruby

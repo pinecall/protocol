@@ -12,6 +12,9 @@ on:
     branches: ["**"]
   pull_request:
   workflow_dispatch:
+  # Un push de tag NO matchea `push: branches` — un tag no es una rama — así que sin esto el
+  # camino de release no tendría ningún gate. `release.yml` lo invoca como un job suyo.
+  workflow_call:
 
 permissions:
   contents: read
