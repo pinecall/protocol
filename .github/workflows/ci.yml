@@ -1,0 +1,59 @@
+# The gate: the generator is re-run, its output is diffed against what is committed, and then all
+# three languages are tested. One job, because the whole check is a minute and a matrix would only
+# make a failure harder to read.
+#
+# The diff is the point of the job. This repository's Python, TypeScript and Ruby are WRITTEN by
+# `scripts/generate` from `schema/`, so a hand edit to one of them is a wire that three languages
+# no longer agree about — and nothing else would ever notice.
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: python/uv.lock
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: typescript/pnpm-lock.yaml
+
+      # `rake` runs `rbs -I sig validate` over the RBS the generator wrote, so the gem has to be
+      # here. bundler-cache is off: this repository has no Gemfile — the gem is packaged from a
+      # gemspec and its only build-time need is rbs itself.
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+      - run: gem install rbs --no-document
+
+      - run: uv sync --locked
+        working-directory: python
+      - run: pnpm install --frozen-lockfile
+        working-directory: typescript
+
+      # generate → diff → python → typescript → ruby, in that order, and scripts/check is where
+      # the order is written.
+      - run: scripts/check
