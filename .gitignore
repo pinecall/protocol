@@ -12,3 +12,6 @@ docs/decision.md
 Gemfile.lock
 pkg/
 .bundle/
+
+# `gem build` writes the package beside the gemspec; the registry keeps the copy that matters.
+*.gem
