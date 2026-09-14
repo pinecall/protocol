@@ -3,6 +3,6 @@
 module Pinecall
   module Protocol
     # The version is the human's call and nobody else's: it stays here until he names a number.
-    VERSION = "0.0.0"
+    VERSION = "0.1.0"
   end
 end

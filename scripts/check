@@ -4,10 +4,12 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 scripts/generate
-# Only what the generator writes. `fixtures/` is hand-written and lives inside the package
-# because hatchling cannot pack a file from outside the project it builds, so an honest edit
-# there must not read as stale output.
+# Only what the generator writes. Two things inside the package are hand-written and must not
+# read as stale output: `fixtures/`, which lives here because hatchling cannot pack a file from
+# outside the project it builds, and `_version.py`, which is the number a person chooses — without
+# this line every release fails its own gate, on the one commit that only touches the version.
 git diff --exit-code -- python/pinecall_protocol ':!python/pinecall_protocol/fixtures' \
+  ':!python/pinecall_protocol/_version.py' \
   typescript/src/generated ruby/lib/pinecall/protocol/generated ruby/sig/pinecall/protocol/generated.rbs docs \
   || { echo "generated output is stale: commit what scripts/generate wrote" >&2; exit 1; }
 (cd python && uv run ruff check . ../tests && uv run pyright && uv run pytest -q)
