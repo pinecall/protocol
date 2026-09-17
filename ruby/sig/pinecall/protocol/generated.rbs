@@ -197,6 +197,18 @@ module Pinecall
       type org_mail = { configured: bool, host: String?, port: Integer?, security: String?, username: String?, from: String?, verified_at: String?, last_error: String? }
       # PUT /v1/org/mail, the body.
       type org_mail_wanted = { host: String, port: Integer, ?security: "starttls" | "tls" | "none", ?username: String, ?password: String, from: String }
+      # GET and PUT /v1/ops/mail: the SMTP account the BOX posts its letters through — what the operator stored, or the environment's two variables — how the last one went, and never the password.
+      type box_mail = { configured: bool, source: String?, host: String?, port: Integer?, security: String?, username: String?, from: String?, verified_at: String?, last_error: String? }
+      # GET and PUT /v1/ops/brand, and `brand` on GET /.well-known/pinecall: what this box's letters and its sign-in page are called and painted with.
+      type box_brand = { name: String, logo_url: String?, accent: String }
+      # PUT /v1/ops/brand, the body.
+      type box_brand_wanted = { ?name: String?, ?logo_url: String?, ?accent: String? }
+      # One box-wide identity provider as the operator reads it: whether it is usable, the client this gateway is at it, and the URI to register there.
+      type box_provider = { configured: bool, client_id: String?, redirect_uri: String }
+      # GET /v1/ops/signin: every provider this box can offer every org's people, wired or not, one key each.
+      type box_sign_in = { google: box_provider }
+      # PUT /v1/ops/signin/google, the body: the OAuth client the operator made at Google for this gateway.
+      type box_provider_wanted = { client_id: String, client_secret: String }
       # POST /v1/org/mail/test: one letter, waited for — the only door of this runtime that waits for a mail server, because it is the one a person is watching.
       type mail_sent = { sent: bool, error: String? }
       # One org a sign-in page may send somebody to, named — and nothing about whether anybody answers to the address that asked.

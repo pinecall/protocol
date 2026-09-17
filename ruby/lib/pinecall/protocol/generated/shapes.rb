@@ -553,6 +553,39 @@ module Pinecall
           password: { kind: :str },
           from: { kind: :str, required: true }
         }.freeze,
+        "BoxMail" => {
+          configured: { kind: :bool, required: true },
+          source: { kind: :str, null: true, required: true },
+          host: { kind: :str, null: true, required: true },
+          port: { kind: :int, null: true, required: true },
+          security: { kind: :str, null: true, required: true },
+          username: { kind: :str, null: true, required: true },
+          from: { kind: :str, null: true, required: true },
+          verified_at: { kind: :str, null: true, required: true },
+          last_error: { kind: :str, null: true, required: true }
+        }.freeze,
+        "BoxBrand" => {
+          name: { kind: :str, required: true },
+          logo_url: { kind: :str, null: true, required: true },
+          accent: { kind: :str, required: true }
+        }.freeze,
+        "BoxBrandWanted" => {
+          name: { kind: :str, null: true },
+          logo_url: { kind: :str, null: true },
+          accent: { kind: :str, null: true }
+        }.freeze,
+        "BoxProvider" => {
+          configured: { kind: :bool, required: true },
+          client_id: { kind: :str, null: true, required: true },
+          redirect_uri: { kind: :str, required: true }
+        }.freeze,
+        "BoxSignIn" => {
+          google: { kind: :ref, ref: "BoxProvider", required: true }
+        }.freeze,
+        "BoxProviderWanted" => {
+          client_id: { kind: :str, required: true },
+          client_secret: { kind: :str, required: true }
+        }.freeze,
         "MailSent" => {
           sent: { kind: :bool, required: true },
           error: { kind: :str, null: true, required: true }

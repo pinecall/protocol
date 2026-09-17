@@ -298,6 +298,71 @@ class OrgMailWanted(WireModel):
     from_: str = Field(alias="from")
 
 
+# GET and PUT /v1/ops/mail: the SMTP account the BOX posts its letters through — what the operator
+# stored, or the environment's two variables — how the last one went, and never the password. An
+# org's own account (OrgMail) still wins over both.
+class BoxMail(WireModel):
+    """GET and PUT /v1/ops/mail."""
+
+    configured: bool
+    source: str | None
+    host: str | None
+    port: int | None
+    security: str | None
+    username: str | None
+    from_: str | None = Field(alias="from")
+    verified_at: str | None
+    last_error: str | None
+
+
+# GET and PUT /v1/ops/brand, and `brand` on GET /.well-known/pinecall: what this box's letters and
+# its sign-in page are called and painted with. Pinecall, its accent and no logo until the operator
+# says.
+class BoxBrand(WireModel):
+    """GET and PUT /v1/ops/brand, and `brand` on GET /.well-known/pinecall."""
+
+    name: str
+    logo_url: str | None
+    accent: str
+
+
+# A field left out keeps what it had; an empty string goes back to the default — which for the logo
+# is none at all, the only way to clear one.
+class BoxBrandWanted(WireModel):
+    """PUT /v1/ops/brand, the body."""
+
+    name: str | None = None
+    logo_url: str | None = None
+    accent: str | None = None
+
+
+# One box-wide identity provider as the operator reads it: whether it is usable, the client this
+# gateway is at it, and the URI to register there. Never the secret.
+class BoxProvider(WireModel):
+    """One box-wide identity provider as the operator reads it."""
+
+    configured: bool
+    client_id: str | None
+    redirect_uri: str
+
+
+# GET /v1/ops/signin: every provider this box can offer every org's people, wired or not, one key
+# each. Only `google` today; a second is a key here and a row on the box.
+class BoxSignIn(WireModel):
+    """GET /v1/ops/signin."""
+
+    google: BoxProvider
+
+
+# PUT /v1/ops/signin/google, the body: the OAuth client the operator made at Google for this
+# gateway. Replaced whole, the secret write-only; the issuer is Google's own and is not a field.
+class BoxProviderWanted(WireModel):
+    """PUT /v1/ops/signin/google, the body."""
+
+    client_id: str
+    client_secret: str
+
+
 # POST /v1/org/mail/test: one letter, waited for — the only door of this runtime that waits for a
 # mail server, because it is the one a person is watching.
 class MailSent(WireModel):

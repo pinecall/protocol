@@ -309,6 +309,77 @@ export const OrgMailWantedSchema = z.strictObject({
 export type OrgMailWanted = z.infer<typeof OrgMailWantedSchema>;
 
 /**
+ * GET and PUT /v1/ops/mail: the SMTP account the BOX posts its letters through — what the operator
+ * stored, or the environment's two variables — how the last one went, and never the password. An
+ * org's own account (OrgMail) still wins over both.
+ */
+export const BoxMailSchema = z.strictObject({
+  configured: z.boolean(),
+  source: z.string().nullable(),
+  host: z.string().nullable(),
+  port: z.int().nullable(),
+  security: z.string().nullable(),
+  username: z.string().nullable(),
+  from: z.string().nullable(),
+  verified_at: z.string().nullable(),
+  last_error: z.string().nullable(),
+});
+export type BoxMail = z.infer<typeof BoxMailSchema>;
+
+/**
+ * GET and PUT /v1/ops/brand, and `brand` on GET /.well-known/pinecall: what this box's letters and
+ * its sign-in page are called and painted with. Pinecall, its accent and no logo until the
+ * operator says.
+ */
+export const BoxBrandSchema = z.strictObject({
+  name: z.string(),
+  logo_url: z.string().nullable(),
+  accent: z.string(),
+});
+export type BoxBrand = z.infer<typeof BoxBrandSchema>;
+
+/**
+ * PUT /v1/ops/brand, the body. A field left out keeps what it had; an empty string goes back to
+ * the default — which for the logo is none at all, the only way to clear one.
+ */
+export const BoxBrandWantedSchema = z.strictObject({
+  name: z.string().nullable().nullish(),
+  logo_url: z.string().nullable().nullish(),
+  accent: z.string().nullable().nullish(),
+});
+export type BoxBrandWanted = z.infer<typeof BoxBrandWantedSchema>;
+
+/**
+ * One box-wide identity provider as the operator reads it: whether it is usable, the client this
+ * gateway is at it, and the URI to register there. Never the secret.
+ */
+export const BoxProviderSchema = z.strictObject({
+  configured: z.boolean(),
+  client_id: z.string().nullable(),
+  redirect_uri: z.string(),
+});
+export type BoxProvider = z.infer<typeof BoxProviderSchema>;
+
+/**
+ * GET /v1/ops/signin: every provider this box can offer every org's people, wired or not, one key
+ * each. Only `google` today; a second is a key here and a row on the box.
+ */
+export const BoxSignInSchema = z.strictObject({
+  google: BoxProviderSchema,
+});
+export type BoxSignIn = z.infer<typeof BoxSignInSchema>;
+
+/**
+ * PUT /v1/ops/signin/google, the body: the OAuth client the operator made at Google for this
+ * gateway. Replaced whole, the secret write-only; the issuer is Google's own and is not a field.
+ */
+export const BoxProviderWantedSchema = z.strictObject({
+  client_id: z.string(),
+  client_secret: z.string(),
+});
+export type BoxProviderWanted = z.infer<typeof BoxProviderWantedSchema>;
+
+/**
  * POST /v1/org/mail/test: one letter, waited for — the only door of this runtime that waits for a
  * mail server, because it is the one a person is watching.
  */
