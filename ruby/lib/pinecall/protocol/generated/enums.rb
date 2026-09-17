@@ -76,6 +76,13 @@ module Pinecall
       # a participant reading its own call, tenant for the tenant's readers. The contract is
       # docs/protocol/projections.md; a client never applies one.
       PROJECTION = %w[public tenant].freeze
+      # escalated: a person took part — a transfer, a supervisor taking the line, saying
+      # something, or ending the call. low_score: a judge answered broken. promise: the promises
+      # judge found the agent committing the business to something no tool call records.
+      SESSION_FLAG = %w[escalated low_score promise].freeze
+      # in: the contact wrote it. out: the agent, or a person as the agent, did. call: a spoken
+      # call, drawn as one pill.
+      THREAD_KIND = %w[in out call].freeze
       # Where the call is in its life. idle before any call.* entry, which is what an agent's own
       # log looks like.
       CALL_STATUS = %w[idle ringing dialing active ended].freeze
@@ -100,6 +107,8 @@ module Pinecall
         "EventSource" => EVENT_SOURCE,
         "Visibility" => VISIBILITY,
         "Projection" => PROJECTION,
+        "SessionFlag" => SESSION_FLAG,
+        "ThreadKind" => THREAD_KIND,
         "CallStatus" => CALL_STATUS
       }.freeze
     end

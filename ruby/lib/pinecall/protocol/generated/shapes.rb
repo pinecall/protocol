@@ -409,10 +409,114 @@ module Pinecall
           ended_at: { kind: :float, null: true, required: true },
           end_reason: { kind: :ref, null: true, ref: "EndReason", required: true },
           outcome: { kind: :str, null: true, required: true },
-          cost: { kind: :ref, null: true, ref: "Cost", required: true }
+          cost: { kind: :ref, null: true, ref: "Cost", required: true },
+          score: { kind: :ref, null: true, ref: "SessionScore" },
+          flags: { kind: :list, items: { kind: :ref, ref: "SessionFlag" } }
+        }.freeze,
+        "SessionScore" => {
+          held: { kind: :int, required: true },
+          judged: { kind: :int, required: true },
+          passed: { kind: :bool, required: true },
+          reason: { kind: :str, null: true, required: true }
         }.freeze,
         "SessionList" => {
-          calls: { kind: :list, items: { kind: :ref, ref: "SessionLine" }, required: true }
+          calls: { kind: :list, items: { kind: :ref, ref: "SessionLine" }, required: true },
+          total: { kind: :int, null: true },
+          next: { kind: :str, null: true }
+        }.freeze,
+        "Insights" => {
+          day: { kind: :str, required: true },
+          timezone: { kind: :str, required: true },
+          conversations: { kind: :ref, ref: "InsightsConversations", required: true },
+          resolved_rate: { kind: :float, null: true, required: true },
+          median_e2e_s: { kind: :float, null: true, required: true },
+          spend_eur: { kind: :float, required: true },
+          channels: { kind: :ref, ref: "InsightsChannels", required: true },
+          sessions_total: { kind: :int, required: true },
+          live: { kind: :int, required: true },
+          agents: { kind: :list, items: { kind: :ref, ref: "InsightsAgent" }, required: true },
+          budget: { kind: :ref, ref: "InsightsBudget", required: true }
+        }.freeze,
+        "InsightsConversations" => {
+          today: { kind: :int, required: true },
+          yesterday: { kind: :int, required: true }
+        }.freeze,
+        "InsightsChannels" => {
+          phone: { kind: :int, required: true },
+          web: { kind: :int, required: true },
+          whatsapp: { kind: :int, required: true }
+        }.freeze,
+        "InsightsAgent" => {
+          slug: { kind: :str, required: true },
+          today: { kind: :int, required: true },
+          score: { kind: :float, null: true, required: true }
+        }.freeze,
+        "InsightsBudget" => {
+          limit_eur: { kind: :float, null: true, required: true },
+          spent_eur_month: { kind: :float, required: true }
+        }.freeze,
+        "Judging" => {
+          on: { kind: :bool, required: true },
+          ceiling_eur: { kind: :float, null: true, required: true }
+        }.freeze,
+        "JudgingWanted" => {
+          on: { kind: :bool, required: true }
+        }.freeze,
+        "ThreadLast" => {
+          text: { kind: :str, null: true, required: true },
+          at: { kind: :float, required: true },
+          kind: { kind: :ref, ref: "ThreadKind", required: true }
+        }.freeze,
+        "ThreadLine" => {
+          contact: { kind: :str, required: true },
+          name: { kind: :str, null: true, required: true },
+          channel_last: { kind: :ref, ref: "Channel", required: true },
+          last: { kind: :ref, ref: "ThreadLast", required: true },
+          unread: { kind: :int, required: true },
+          calls: { kind: :int, required: true }
+        }.freeze,
+        "ThreadList" => {
+          threads: { kind: :list, items: { kind: :ref, ref: "ThreadLine" }, required: true },
+          next: { kind: :str, null: true, required: true }
+        }.freeze,
+        "ThreadMessage" => {
+          kind: { kind: :ref, ref: "ThreadKind", required: true },
+          text: { kind: :str, null: true, required: true },
+          at: { kind: :float, required: true },
+          call: { kind: :str, required: true },
+          channel: { kind: :ref, ref: "Channel", required: true },
+          duration_s: { kind: :float, null: true },
+          answered: { kind: :bool }
+        }.freeze,
+        "Thread" => {
+          contact: { kind: :str, required: true },
+          name: { kind: :str, null: true, required: true },
+          messages: { kind: :list, items: { kind: :ref, ref: "ThreadMessage" }, required: true }
+        }.freeze,
+        "ThreadSay" => {
+          text: { kind: :str, required: true }
+        }.freeze,
+        "ThreadSaid" => {
+          contact: { kind: :str, required: true },
+          call: { kind: :str, required: true }
+        }.freeze,
+        "AgentFact" => {
+          id: { kind: :str, required: true },
+          contact: { kind: :str, required: true },
+          text: { kind: :str, required: true },
+          category: { kind: :str, null: true, required: true },
+          written_at: { kind: :float, required: true }
+        }.freeze,
+        "AgentMemory" => {
+          facts: { kind: :list, items: { kind: :ref, ref: "AgentFact" }, required: true },
+          next: { kind: :str, null: true, required: true }
+        }.freeze,
+        "WidgetSettings" => {
+          title: { kind: :str, null: true, required: true },
+          tagline: { kind: :str, null: true, required: true },
+          greeting: { kind: :str, null: true, required: true },
+          accent: { kind: :str, null: true, required: true },
+          autostart: { kind: :bool, required: true }
         }.freeze,
         "HeldAgent" => {
           slug: { kind: :str, required: true },

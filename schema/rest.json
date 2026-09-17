@@ -47,16 +47,230 @@
         "ended_at": {"type": ["number", "null"], "description": "When the call ended, unix seconds."},
         "end_reason": {"anyOf": [{"$ref": "defs.json#/$defs/EndReason"}, {"type": "null"}], "description": "Why it ended, once it did."},
         "outcome": {"type": ["string", "null"], "description": "The one-line outcome from call.summary."},
-        "cost": {"anyOf": [{"$ref": "defs.json#/$defs/Cost"}, {"type": "null"}], "description": "The cost from call.summary."}
+        "cost": {"anyOf": [{"$ref": "defs.json#/$defs/Cost"}, {"type": "null"}], "description": "The cost from call.summary."},
+        "score": {"anyOf": [{"$ref": "#/$defs/SessionScore"}, {"type": "null"}], "description": "How the judges answered at hang-up, cut to a row; null when nobody judged the call. Absent from a gateway that predates it."},
+        "flags": {"type": "array", "items": {"$ref": "#/$defs/SessionFlag"}, "description": "What a person reviewing calls should look at first. Absent from a gateway that predates it."}
       }
     },
+    "SessionScore": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One call's call.score as a list draws it: how many judges held of how many answered, and why the first one that broke did.",
+      "required": ["held", "judged", "passed", "reason"],
+      "properties": {
+        "held": {"type": "integer", "description": "The judges that answered held."},
+        "judged": {"type": "integer", "description": "The judges that answered held or broken. A skipped or deferred judge answered neither and is not counted."},
+        "passed": {"type": "boolean", "description": "False when any judge answered broken."},
+        "reason": {"type": ["string", "null"], "description": "The first broken judge's reason, as it wrote it; null when none broke."}
+      }
+    },
+    "SessionFlag": {"type": "string", "enum": ["escalated", "low_score", "promise"], "description": "escalated: a person took part — a transfer, a supervisor taking the line, saying something, or ending the call. low_score: a judge answered broken. promise: the promises judge found the agent committing the business to something no tool call records."},
     "SessionList": {
       "type": "object",
       "additionalProperties": false,
-      "description": "GET /v1/agents/{slug}/sessions: which calls that agent handled, newest first.",
+      "description": "GET /v1/agents/{slug}/sessions and GET /v1/sessions: the calls that match, newest first, a page at a time.",
       "required": ["calls"],
       "properties": {
-        "calls": {"type": "array", "items": {"$ref": "#/$defs/SessionLine"}, "description": "One line per call, newest first."}
+        "calls": {"type": "array", "items": {"$ref": "#/$defs/SessionLine"}, "description": "One line per call, newest first."},
+        "total": {"type": ["integer", "null"], "description": "How many calls match the filter, every page together. Absent from a gateway that predates it."},
+        "next": {"type": ["string", "null"], "description": "The cursor the next page is asked with as `before`, or null on the last page. Absent from a gateway that predates it."}
+      }
+    },
+    "Insights": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/insights: one day of the key's world and corner at a glance, counted off the call index and never off a log.",
+      "required": ["day", "timezone", "conversations", "resolved_rate", "median_e2e_s", "spend_eur", "channels", "sessions_total", "live", "agents", "budget"],
+      "properties": {
+        "day": {"type": "string", "description": "The day counted, YYYY-MM-DD."},
+        "timezone": {"type": "string", "description": "The zone the day is cut in. Always UTC: an org carries no timezone."},
+        "conversations": {"$ref": "#/$defs/InsightsConversations"},
+        "resolved_rate": {"type": ["number", "null"], "description": "The share, 0..1, of the day's finished calls no person took part in; null when none finished."},
+        "median_e2e_s": {"type": ["number", "null"], "description": "The median e2e_latency over every agent turn of the day's calls, seconds; null when no turn measured one."},
+        "spend_eur": {"type": "number", "description": "What the day's calls cost, call.summary's cost summed, euros."},
+        "channels": {"$ref": "#/$defs/InsightsChannels"},
+        "sessions_total": {"type": "integer", "description": "Every call this world's corner ever held."},
+        "live": {"type": "integer", "description": "The calls whose log is still open, right now."},
+        "agents": {"type": "array", "items": {"$ref": "#/$defs/InsightsAgent"}, "description": "One row per agent that took a call that day, busiest first."},
+        "budget": {"$ref": "#/$defs/InsightsBudget"}
+      }
+    },
+    "InsightsConversations": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "How many calls started on the day, and on the day before it.",
+      "required": ["today", "yesterday"],
+      "properties": {
+        "today": {"type": "integer", "description": "Calls started on the day counted."},
+        "yesterday": {"type": "integer", "description": "Calls started on the day before."}
+      }
+    },
+    "InsightsChannels": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The day's calls by the door they came in by.",
+      "required": ["phone", "web", "whatsapp"],
+      "properties": {
+        "phone": {"type": "integer", "description": "Phone calls."},
+        "web": {"type": "integer", "description": "Web calls, spoken or written."},
+        "whatsapp": {"type": "integer", "description": "WhatsApp conversations."}
+      }
+    },
+    "InsightsAgent": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One agent's day.",
+      "required": ["slug", "today", "score"],
+      "properties": {
+        "slug": {"type": "string", "description": "The agent."},
+        "today": {"type": "integer", "description": "Calls it started on the day."},
+        "score": {"type": ["number", "null"], "description": "The share of judges that held, 0..1, averaged over the day's judged calls; null when none was judged."}
+      }
+    },
+    "InsightsBudget": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What the org may spend in a month and what it has spent so far, both worlds together.",
+      "required": ["limit_eur", "spent_eur_month"],
+      "properties": {
+        "limit_eur": {"type": ["number", "null"], "description": "The operator's budget_eur quota; null is no limit."},
+        "spent_eur_month": {"type": "number", "description": "What calls started this calendar month (UTC) cost, every world and corner of the org."}
+      }
+    },
+    "Judging": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET and PUT /v1/org/judging: whether the org's calls are judged at hang-up, and what judging one may spend on a model.",
+      "required": ["on", "ceiling_eur"],
+      "properties": {
+        "on": {"type": "boolean", "description": "False: no judge runs at hang-up, and call.score says so; a call can still be judged later by POST /v1/evals/judge/{call}."},
+        "ceiling_eur": {"type": ["number", "null"], "description": "What judging one call may spend on a model, euros: the box's setting, which the org reads and does not set."}
+      }
+    },
+    "JudgingWanted": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/org/judging, the body.",
+      "required": ["on"],
+      "properties": {
+        "on": {"type": "boolean", "description": "Judge the org's calls at hang-up, or do not."}
+      }
+    },
+    "ThreadLast": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The newest thing on a contact's thread.",
+      "required": ["text", "at", "kind"],
+      "properties": {
+        "text": {"type": ["string", "null"], "description": "The words, or for a spoken call its outcome; null when nothing was said."},
+        "at": {"type": "number", "description": "When, unix seconds."},
+        "kind": {"$ref": "#/$defs/ThreadKind"}
+      }
+    },
+    "ThreadKind": {"type": "string", "enum": ["in", "out", "call"], "description": "in: the contact wrote it. out: the agent, or a person as the agent, did. call: a spoken call, drawn as one pill."},
+    "ThreadLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One contact of an agent's inbox: every call of theirs, folded into one line.",
+      "required": ["contact", "name", "channel_last", "last", "unread", "calls"],
+      "properties": {
+        "contact": {"type": "string", "description": "Who: the id the app resolved, else the number or visitor id the call came from."},
+        "name": {"type": ["string", "null"], "description": "The contact's name when a call recorded one."},
+        "channel_last": {"$ref": "defs.json#/$defs/Channel"},
+        "last": {"$ref": "#/$defs/ThreadLast"},
+        "unread": {"type": "integer", "description": "What arrived after the reader last marked the thread read: each message the contact wrote, and each spoken call."},
+        "calls": {"type": "integer", "description": "How many calls the thread is made of."}
+      }
+    },
+    "ThreadList": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/agents/{slug}/threads: the agent's contacts, the newest thread first.",
+      "required": ["threads", "next"],
+      "properties": {
+        "threads": {"type": "array", "items": {"$ref": "#/$defs/ThreadLine"}, "description": "One line per contact."},
+        "next": {"type": ["string", "null"], "description": "The cursor the next page is asked with as `after`, or null on the last page."}
+      }
+    },
+    "ThreadMessage": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One message of a thread, or one spoken call drawn as a pill.",
+      "required": ["kind", "text", "at", "call", "channel"],
+      "properties": {
+        "kind": {"$ref": "#/$defs/ThreadKind"},
+        "text": {"type": ["string", "null"], "description": "The words; for a spoken call, its outcome."},
+        "at": {"type": "number", "description": "When, unix seconds."},
+        "call": {"type": "string", "description": "The call it belongs to: its log is the whole of it."},
+        "channel": {"$ref": "defs.json#/$defs/Channel"},
+        "duration_s": {"type": ["number", "null"], "description": "A spoken call's length, seconds; null while it is live."},
+        "answered": {"type": "boolean", "description": "A spoken call's: whether it ever came up."}
+      }
+    },
+    "Thread": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/agents/{slug}/threads/{contact}: every call of one contact, merged, oldest first.",
+      "required": ["contact", "name", "messages"],
+      "properties": {
+        "contact": {"type": "string", "description": "Who."},
+        "name": {"type": ["string", "null"], "description": "The contact's name when a call recorded one."},
+        "messages": {"type": "array", "items": {"$ref": "#/$defs/ThreadMessage"}, "description": "Oldest first."}
+      }
+    },
+    "ThreadSay": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/agents/{slug}/threads/{contact}/messages, the body.",
+      "required": ["text"],
+      "properties": {
+        "text": {"type": "string", "description": "What the agent says to the contact, verbatim."}
+      }
+    },
+    "ThreadSaid": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/agents/{slug}/threads/{contact}/messages, the answer: the call it was said on. The turn.agent it lands as is on that call's log.",
+      "required": ["contact", "call"],
+      "properties": {
+        "contact": {"type": "string", "description": "Who it was said to."},
+        "call": {"type": "string", "description": "The open conversation it was said on."}
+      }
+    },
+    "AgentFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One current fact memory holds, across the contacts an agent's calls taught.",
+      "required": ["id", "contact", "text", "category", "written_at"],
+      "properties": {
+        "id": {"type": "string", "description": "The fact's id: DELETE /v1/memory/facts/{id} forgets it."},
+        "contact": {"type": "string", "description": "Whose fact it is."},
+        "text": {"type": "string", "description": "The fact, one sentence."},
+        "category": {"type": ["string", "null"], "description": "The tenant's word it was filed under."},
+        "written_at": {"type": "number", "description": "When it was written, unix seconds."}
+      }
+    },
+    "AgentMemory": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/agents/{slug}/memory: the current facts the agent's calls taught, newest first.",
+      "required": ["facts", "next"],
+      "properties": {
+        "facts": {"type": "array", "items": {"$ref": "#/$defs/AgentFact"}, "description": "Newest first."},
+        "next": {"type": ["string", "null"], "description": "The cursor the next page is asked with as `after`, or null on the last page."}
+      }
+    },
+    "WidgetSettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET and PUT /v1/agents/{slug}/widget: how the widget presents this agent, kept per org, world and agent. PUT takes the whole set.",
+      "required": ["title", "tagline", "greeting", "accent", "autostart"],
+      "properties": {
+        "title": {"type": ["string", "null"], "description": "The widget's name attribute."},
+        "tagline": {"type": ["string", "null"], "description": "The line under it."},
+        "greeting": {"type": ["string", "null"], "description": "The first line the widget shows before the call starts, as plain text."},
+        "accent": {"type": ["string", "null"], "description": "The accent colour, a CSS colour."},
+        "autostart": {"type": "boolean", "description": "Open with the microphone asked for and the call started, without a second click."}
       }
     },
     "HeldAgent": {

@@ -1,6 +1,6 @@
 """Generated from schema/rest.json: the envelopes the read doors answer in."""
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -35,6 +35,23 @@ class LogPage(WireModel):
     next: int | None
 
 
+# One call's call.score as a list draws it: how many judges held of how many answered, and why the
+# first one that broke did.
+class SessionScore(WireModel):
+    """One call's call.score as a list draws it."""
+
+    held: int
+    judged: int
+    passed: bool
+    reason: str | None
+
+
+# escalated: a person took part — a transfer, a supervisor taking the line, saying something, or
+# ending the call. low_score: a judge answered broken. promise: the promises judge found the agent
+# committing the business to something no tool call records.
+type SessionFlag = Literal["escalated", "low_score", "promise"]
+
+
 class SessionLine(WireModel):
     """One call as a list draws it: which call, how far the log got, and the state's own fields."""
 
@@ -53,12 +70,175 @@ class SessionLine(WireModel):
     end_reason: EndReason | None
     outcome: str | None
     cost: Cost | None
+    score: SessionScore | None = None
+    flags: list[SessionFlag] | None = None
 
 
+# GET /v1/agents/{slug}/sessions and GET /v1/sessions: the calls that match, newest first, a page at
+# a time.
 class SessionList(WireModel):
-    """GET /v1/agents/{slug}/sessions: which calls that agent handled, newest first."""
+    """GET /v1/agents/{slug}/sessions and GET /v1/sessions."""
 
     calls: list[SessionLine]
+    total: int | None = None
+    next: str | None = None
+
+
+class InsightsConversations(WireModel):
+    """How many calls started on the day, and on the day before it."""
+
+    today: int
+    yesterday: int
+
+
+class InsightsChannels(WireModel):
+    """The day's calls by the door they came in by."""
+
+    phone: int
+    web: int
+    whatsapp: int
+
+
+class InsightsAgent(WireModel):
+    """One agent's day."""
+
+    slug: str
+    today: int
+    score: float | None
+
+
+class InsightsBudget(WireModel):
+    """What the org may spend in a month and what it has spent so far, both worlds together."""
+
+    limit_eur: float | None
+    spent_eur_month: float
+
+
+# GET /v1/insights: one day of the key's world and corner at a glance, counted off the call index
+# and never off a log.
+class Insights(WireModel):
+    """GET /v1/insights."""
+
+    day: str
+    timezone: str
+    conversations: InsightsConversations
+    resolved_rate: float | None
+    median_e2e_s: float | None
+    spend_eur: float
+    channels: InsightsChannels
+    sessions_total: int
+    live: int
+    agents: list[InsightsAgent]
+    budget: InsightsBudget
+
+
+# GET and PUT /v1/org/judging: whether the org's calls are judged at hang-up, and what judging one
+# may spend on a model.
+class Judging(WireModel):
+    """GET and PUT /v1/org/judging."""
+
+    on: bool
+    ceiling_eur: float | None
+
+
+class JudgingWanted(WireModel):
+    """PUT /v1/org/judging, the body."""
+
+    on: bool
+
+
+# in: the contact wrote it. out: the agent, or a person as the agent, did. call: a spoken call,
+# drawn as one pill.
+type ThreadKind = Literal["in", "out", "call"]
+
+
+class ThreadLast(WireModel):
+    """The newest thing on a contact's thread."""
+
+    text: str | None
+    at: float
+    kind: ThreadKind
+
+
+class ThreadLine(WireModel):
+    """One contact of an agent's inbox: every call of theirs, folded into one line."""
+
+    contact: str
+    name: str | None
+    channel_last: Channel
+    last: ThreadLast
+    unread: int
+    calls: int
+
+
+class ThreadList(WireModel):
+    """GET /v1/agents/{slug}/threads: the agent's contacts, the newest thread first."""
+
+    threads: list[ThreadLine]
+    next: str | None
+
+
+class ThreadMessage(WireModel):
+    """One message of a thread, or one spoken call drawn as a pill."""
+
+    kind: ThreadKind
+    text: str | None
+    at: float
+    call: str
+    channel: Channel
+    duration_s: float | None = None
+    answered: bool | None = None
+
+
+class Thread(WireModel):
+    """GET /v1/agents/{slug}/threads/{contact}: every call of one contact, merged, oldest first."""
+
+    contact: str
+    name: str | None
+    messages: list[ThreadMessage]
+
+
+class ThreadSay(WireModel):
+    """POST /v1/agents/{slug}/threads/{contact}/messages, the body."""
+
+    text: str
+
+
+# The turn.agent it lands as is on that call's log.
+class ThreadSaid(WireModel):
+    """POST /v1/agents/{slug}/threads/{contact}/messages, the answer: the call it was said on."""
+
+    contact: str
+    call: str
+
+
+class AgentFact(WireModel):
+    """One current fact memory holds, across the contacts an agent's calls taught."""
+
+    id: str
+    contact: str
+    text: str
+    category: str | None
+    written_at: float
+
+
+class AgentMemory(WireModel):
+    """GET /v1/agents/{slug}/memory: the current facts the agent's calls taught, newest first."""
+
+    facts: list[AgentFact]
+    next: str | None
+
+
+# GET and PUT /v1/agents/{slug}/widget: how the widget presents this agent, kept per org, world and
+# agent. PUT takes the whole set.
+class WidgetSettings(WireModel):
+    """GET and PUT /v1/agents/{slug}/widget."""
+
+    title: str | None
+    tagline: str | None
+    greeting: str | None
+    accent: str | None
+    autostart: bool
 
 
 # One corner of a world holding an agent: the member whose it is, named so a person can read it.

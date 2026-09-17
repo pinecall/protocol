@@ -30,6 +30,26 @@ export const LogPageSchema = z.strictObject({
 });
 export type LogPage = z.infer<typeof LogPageSchema>;
 
+/**
+ * One call's call.score as a list draws it: how many judges held of how many answered, and why the
+ * first one that broke did.
+ */
+export const SessionScoreSchema = z.strictObject({
+  held: z.int(),
+  judged: z.int(),
+  passed: z.boolean(),
+  reason: z.string().nullable(),
+});
+export type SessionScore = z.infer<typeof SessionScoreSchema>;
+
+/**
+ * escalated: a person took part — a transfer, a supervisor taking the line, saying something, or
+ * ending the call. low_score: a judge answered broken. promise: the promises judge found the agent
+ * committing the business to something no tool call records.
+ */
+export const SessionFlagSchema = z.enum(["escalated", "low_score", "promise"]);
+export type SessionFlag = z.infer<typeof SessionFlagSchema>;
+
 /** One call as a list draws it: which call, how far the log got, and the state's own fields. */
 export const SessionLineSchema = z.strictObject({
   call: z.string(),
@@ -47,14 +67,185 @@ export const SessionLineSchema = z.strictObject({
   end_reason: EndReasonSchema.nullable(),
   outcome: z.string().nullable(),
   cost: CostSchema.nullable(),
+  score: SessionScoreSchema.nullable().nullish(),
+  flags: z.array(SessionFlagSchema).nullish(),
 });
 export type SessionLine = z.infer<typeof SessionLineSchema>;
 
-/** GET /v1/agents/{slug}/sessions: which calls that agent handled, newest first. */
+/**
+ * GET /v1/agents/{slug}/sessions and GET /v1/sessions: the calls that match, newest first, a page
+ * at a time.
+ */
 export const SessionListSchema = z.strictObject({
   calls: z.array(SessionLineSchema),
+  total: z.int().nullable().nullish(),
+  next: z.string().nullable().nullish(),
 });
 export type SessionList = z.infer<typeof SessionListSchema>;
+
+/** How many calls started on the day, and on the day before it. */
+export const InsightsConversationsSchema = z.strictObject({
+  today: z.int(),
+  yesterday: z.int(),
+});
+export type InsightsConversations = z.infer<typeof InsightsConversationsSchema>;
+
+/** The day's calls by the door they came in by. */
+export const InsightsChannelsSchema = z.strictObject({
+  phone: z.int(),
+  web: z.int(),
+  whatsapp: z.int(),
+});
+export type InsightsChannels = z.infer<typeof InsightsChannelsSchema>;
+
+/** One agent's day. */
+export const InsightsAgentSchema = z.strictObject({
+  slug: z.string(),
+  today: z.int(),
+  score: z.number().nullable(),
+});
+export type InsightsAgent = z.infer<typeof InsightsAgentSchema>;
+
+/** What the org may spend in a month and what it has spent so far, both worlds together. */
+export const InsightsBudgetSchema = z.strictObject({
+  limit_eur: z.number().nullable(),
+  spent_eur_month: z.number(),
+});
+export type InsightsBudget = z.infer<typeof InsightsBudgetSchema>;
+
+/**
+ * GET /v1/insights: one day of the key's world and corner at a glance, counted off the call index
+ * and never off a log.
+ */
+export const InsightsSchema = z.strictObject({
+  day: z.string(),
+  timezone: z.string(),
+  conversations: InsightsConversationsSchema,
+  resolved_rate: z.number().nullable(),
+  median_e2e_s: z.number().nullable(),
+  spend_eur: z.number(),
+  channels: InsightsChannelsSchema,
+  sessions_total: z.int(),
+  live: z.int(),
+  agents: z.array(InsightsAgentSchema),
+  budget: InsightsBudgetSchema,
+});
+export type Insights = z.infer<typeof InsightsSchema>;
+
+/**
+ * GET and PUT /v1/org/judging: whether the org's calls are judged at hang-up, and what judging one
+ * may spend on a model.
+ */
+export const JudgingSchema = z.strictObject({
+  on: z.boolean(),
+  ceiling_eur: z.number().nullable(),
+});
+export type Judging = z.infer<typeof JudgingSchema>;
+
+/** PUT /v1/org/judging, the body. */
+export const JudgingWantedSchema = z.strictObject({
+  on: z.boolean(),
+});
+export type JudgingWanted = z.infer<typeof JudgingWantedSchema>;
+
+/**
+ * in: the contact wrote it. out: the agent, or a person as the agent, did. call: a spoken call,
+ * drawn as one pill.
+ */
+export const ThreadKindSchema = z.enum(["in", "out", "call"]);
+export type ThreadKind = z.infer<typeof ThreadKindSchema>;
+
+/** The newest thing on a contact's thread. */
+export const ThreadLastSchema = z.strictObject({
+  text: z.string().nullable(),
+  at: z.number(),
+  kind: ThreadKindSchema,
+});
+export type ThreadLast = z.infer<typeof ThreadLastSchema>;
+
+/** One contact of an agent's inbox: every call of theirs, folded into one line. */
+export const ThreadLineSchema = z.strictObject({
+  contact: z.string(),
+  name: z.string().nullable(),
+  channel_last: ChannelSchema,
+  last: ThreadLastSchema,
+  unread: z.int(),
+  calls: z.int(),
+});
+export type ThreadLine = z.infer<typeof ThreadLineSchema>;
+
+/** GET /v1/agents/{slug}/threads: the agent's contacts, the newest thread first. */
+export const ThreadListSchema = z.strictObject({
+  threads: z.array(ThreadLineSchema),
+  next: z.string().nullable(),
+});
+export type ThreadList = z.infer<typeof ThreadListSchema>;
+
+/** One message of a thread, or one spoken call drawn as a pill. */
+export const ThreadMessageSchema = z.strictObject({
+  kind: ThreadKindSchema,
+  text: z.string().nullable(),
+  at: z.number(),
+  call: z.string(),
+  channel: ChannelSchema,
+  duration_s: z.number().nullable().nullish(),
+  answered: z.boolean().nullish(),
+});
+export type ThreadMessage = z.infer<typeof ThreadMessageSchema>;
+
+/** GET /v1/agents/{slug}/threads/{contact}: every call of one contact, merged, oldest first. */
+export const ThreadSchema = z.strictObject({
+  contact: z.string(),
+  name: z.string().nullable(),
+  messages: z.array(ThreadMessageSchema),
+});
+export type Thread = z.infer<typeof ThreadSchema>;
+
+/** POST /v1/agents/{slug}/threads/{contact}/messages, the body. */
+export const ThreadSaySchema = z.strictObject({
+  text: z.string(),
+});
+export type ThreadSay = z.infer<typeof ThreadSaySchema>;
+
+/**
+ * POST /v1/agents/{slug}/threads/{contact}/messages, the answer: the call it was said on. The
+ * turn.agent it lands as is on that call's log.
+ */
+export const ThreadSaidSchema = z.strictObject({
+  contact: z.string(),
+  call: z.string(),
+});
+export type ThreadSaid = z.infer<typeof ThreadSaidSchema>;
+
+/** One current fact memory holds, across the contacts an agent's calls taught. */
+export const AgentFactSchema = z.strictObject({
+  id: z.string(),
+  contact: z.string(),
+  text: z.string(),
+  category: z.string().nullable(),
+  written_at: z.number(),
+});
+export type AgentFact = z.infer<typeof AgentFactSchema>;
+
+/** GET /v1/agents/{slug}/memory: the current facts the agent's calls taught, newest first. */
+export const AgentMemorySchema = z.strictObject({
+  facts: z.array(AgentFactSchema),
+  next: z.string().nullable(),
+});
+export type AgentMemory = z.infer<typeof AgentMemorySchema>;
+
+/**
+ * GET and PUT /v1/agents/{slug}/widget: how the widget presents this agent, kept per org, world
+ * and agent. PUT takes the whole set.
+ */
+export const WidgetSettingsSchema = z.strictObject({
+  title: z.string().nullable(),
+  tagline: z.string().nullable(),
+  greeting: z.string().nullable(),
+  accent: z.string().nullable(),
+  autostart: z.boolean(),
+});
+export type WidgetSettings = z.infer<typeof WidgetSettingsSchema>;
 
 /** One corner of a world holding an agent: the member whose it is, named so a person can read it. */
 export const LineHolderSchema = z.strictObject({
