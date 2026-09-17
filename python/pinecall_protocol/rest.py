@@ -522,3 +522,46 @@ class Remembered(WireModel):
 
     ops: int
     took_ms: float
+
+
+# POST /v1/agents/{slug}/dial, the answer: the call a dial became, accepted before the far end has
+# heard anything ring.
+class Dialled(WireModel):
+    """POST /v1/agents/{slug}/dial, the answer."""
+
+    call: str
+    agent: str
+    to: str
+    from_: str = Field(alias="from")
+    env: Env
+
+
+class DialGuards(WireModel):
+    """GET /v1/carrier/outbound, the guards: what this org may dial and how often."""
+
+    dial_anywhere: bool
+    per_minute: int
+    per_day: int
+    countries: list[str]
+    max_duration_s: int
+
+
+# GET /v1/carrier/outbound, the answer: whether this org can place a call yet, and what is missing.
+class CarrierOutbound(WireModel):
+    """GET /v1/carrier/outbound, the answer."""
+
+    ready: bool
+    kind: str | None
+    from_numbers: list[str]
+    steps_missing: list[str]
+    guards: DialGuards
+
+
+class OutboundProvisioned(WireModel):
+    """POST /v1/carrier/outbound, the answer: the plan, and whether it was carried out."""
+
+    steps: list[str]
+    dry_run: bool
+    ready: bool
+    trunk: str | None = None
+    address: str | None = None

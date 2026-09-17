@@ -245,6 +245,14 @@ module Pinecall
       type lookup_result = { output: Hash[Symbol, untyped], took_ms: Float }
       # POST /v1/calls/{call}/remember, the answer: what the call taught about the contact, counted.
       type remembered = { ops: Integer, took_ms: Float }
+      # POST /v1/agents/{slug}/dial, the answer: the call a dial became, accepted before the far end has heard anything ring.
+      type dialled = { call: String, agent: String, to: String, from: String, env: env }
+      # GET /v1/carrier/outbound, the guards: what this org may dial and how often.
+      type dial_guards = { dial_anywhere: bool, per_minute: Integer, per_day: Integer, countries: Array[String], max_duration_s: Integer }
+      # GET /v1/carrier/outbound, the answer: whether this org can place a call yet, and what is missing.
+      type carrier_outbound = { ready: bool, kind: String?, from_numbers: Array[String], steps_missing: Array[String], guards: dial_guards }
+      # POST /v1/carrier/outbound, the answer: the plan, and whether it was carried out.
+      type outbound_provisioned = { steps: Array[String], dry_run: bool, ready: bool, ?trunk: String, ?address: String }
       # The LiveKit room exists and the call lives in it.
       type room_opened = { name: String, sid: String, channel: channel }
       # Somebody joined the room: the caller over SIP or the widget, the agent, a supervisor, a listener, or a second SIP leg.
@@ -376,7 +384,7 @@ module Pinecall
       # Words from the agent as they are played, synced to the audio.
       type agent_transcript = { speech_id: String, text: String, final: bool, ?start: Float, ?end: Float }
       # The platform is placing an outbound call and the far end has not answered yet.
-      type call_dialing = { channel: channel, from: String, to: String, ?run: String?, caller: contact?, ?external_id: String }
+      type call_dialing = { channel: channel, from: String, to: String, ?run: String?, caller: contact?, ?external_id: String, ?asked_by: String }
       # The call is over.
       type call_ended = { reason: end_reason, ended_by: ended_by, ended_at: Float, duration_s: Float }
       # The line's hold and mute flags after one of them changed.

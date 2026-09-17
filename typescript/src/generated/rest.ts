@@ -554,3 +554,49 @@ export const RememberedSchema = z.strictObject({
   took_ms: z.number(),
 });
 export type Remembered = z.infer<typeof RememberedSchema>;
+
+/**
+ * POST /v1/agents/{slug}/dial, the answer: the call a dial became, accepted before the far end has
+ * heard anything ring.
+ */
+export const DialledSchema = z.strictObject({
+  call: z.string(),
+  agent: z.string(),
+  to: z.string(),
+  from: z.string(),
+  env: EnvSchema,
+});
+export type Dialled = z.infer<typeof DialledSchema>;
+
+/** GET /v1/carrier/outbound, the guards: what this org may dial and how often. */
+export const DialGuardsSchema = z.strictObject({
+  dial_anywhere: z.boolean(),
+  per_minute: z.int(),
+  per_day: z.int(),
+  countries: z.array(z.string()),
+  max_duration_s: z.int(),
+});
+export type DialGuards = z.infer<typeof DialGuardsSchema>;
+
+/**
+ * GET /v1/carrier/outbound, the answer: whether this org can place a call yet, and what is
+ * missing.
+ */
+export const CarrierOutboundSchema = z.strictObject({
+  ready: z.boolean(),
+  kind: z.string().nullable(),
+  from_numbers: z.array(z.string()),
+  steps_missing: z.array(z.string()),
+  guards: DialGuardsSchema,
+});
+export type CarrierOutbound = z.infer<typeof CarrierOutboundSchema>;
+
+/** POST /v1/carrier/outbound, the answer: the plan, and whether it was carried out. */
+export const OutboundProvisionedSchema = z.strictObject({
+  steps: z.array(z.string()),
+  dry_run: z.boolean(),
+  ready: z.boolean(),
+  trunk: z.string().nullish(),
+  address: z.string().nullish(),
+});
+export type OutboundProvisioned = z.infer<typeof OutboundProvisionedSchema>;

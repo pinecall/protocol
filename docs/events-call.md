@@ -35,6 +35,7 @@ The platform is placing an outbound call and the far end has not answered yet. T
 | `run` | `string | null` | no | The eval run that placed this call, when one did. Absent or null for a call the platform placed for a person. |
 | `caller` | `Contact | null` | yes | Who is being called, when the app said. |
 | `external_id` | `string` | no | The carrier or SIP call id, once assigned. |
+| `asked_by` | `string` | no | Who asked for this call: the member id whose key placed it, or the key id itself when a machine key did. A call back is somebody's, and this is whose. Absent from a gateway that predates it. |
 
 ### `call.ended`
 
