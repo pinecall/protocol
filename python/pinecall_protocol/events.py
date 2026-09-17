@@ -81,6 +81,7 @@ class CallDialing(WireModel):
     run: str | None = None
     caller: Contact | None
     external_id: str | None = None
+    asked_by: str | None = None
 
 
 # Nothing about the conversation follows; call.summary still does.

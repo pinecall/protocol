@@ -15,7 +15,8 @@
         "to": {"type": "string", "description": "The number being dialed, E.164."},
         "run": {"type": ["string", "null"], "description": "The eval run that placed this call, when one did. Absent or null for a call the platform placed for a person."},
         "caller": {"anyOf": [{"$ref": "../defs.json#/$defs/Contact"}, {"type": "null"}], "description": "Who is being called, when the app said."},
-        "external_id": {"type": "string", "description": "The carrier or SIP call id, once assigned."}
+        "external_id": {"type": "string", "description": "The carrier or SIP call id, once assigned."},
+        "asked_by": {"type": "string", "description": "Who asked for this call: the member id whose key placed it, or the key id itself when a machine key did. A call back is somebody's, and this is whose. Absent from a gateway that predates it."}
       },
       "required": ["channel", "from", "to", "caller"],
       "additionalProperties": false

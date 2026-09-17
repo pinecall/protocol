@@ -82,6 +82,7 @@ export const CallDialingSchema = z.strictObject({
   run: z.string().nullable().nullish(),
   caller: ContactSchema.nullable(),
   external_id: z.string().nullish(),
+  asked_by: z.string().nullish(),
 });
 export type CallDialing = z.infer<typeof CallDialingSchema>;
 

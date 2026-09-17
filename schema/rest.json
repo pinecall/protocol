@@ -635,6 +635,58 @@
         "ops": {"type": "integer", "description": "How many memory operations the call produced: adds, updates and invalidations together."},
         "took_ms": {"type": "number", "description": "How long remembering took, the one model call included, in milliseconds."}
       }
+    },
+    "Dialled": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/agents/{slug}/dial, the answer: the call a dial became, accepted before the far end has heard anything ring.",
+      "required": ["call", "agent", "to", "from", "env"],
+      "properties": {
+        "call": {"type": "string", "description": "The id of the call this became; its log opens with call.dialing."},
+        "agent": {"type": "string", "description": "The agent that will answer on it."},
+        "to": {"type": "string", "description": "The number being dialled, E.164."},
+        "from": {"type": "string", "description": "The org's own number the call shows as coming from, E.164."},
+        "env": {"$ref": "defs.json#/$defs/Env"}
+      }
+    },
+    "DialGuards": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/carrier/outbound, the guards: what this org may dial and how often.",
+      "required": ["dial_anywhere", "per_minute", "per_day", "countries", "max_duration_s"],
+      "properties": {
+        "dial_anywhere": {"type": "boolean", "description": "False, the default, means a destination must already have called or written to this org — a call back goes back to somebody. Only an operator lifts it."},
+        "per_minute": {"type": "integer", "description": "How many outbound calls this org may place in a minute."},
+        "per_day": {"type": "integer", "description": "How many in a day."},
+        "countries": {"type": "array", "items": {"type": "string"}, "description": "The country calling codes this org may reach, as digits without the plus. Empty means the codes of the org's own numbers, worked out at each dial."},
+        "max_duration_s": {"type": "integer", "description": "How long one outbound call may run before the platform ends it."}
+      }
+    },
+    "CarrierOutbound": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/carrier/outbound, the answer: whether this org can place a call yet, and what is missing.",
+      "required": ["ready", "kind", "from_numbers", "steps_missing", "guards"],
+      "properties": {
+        "ready": {"type": "boolean", "description": "Whether a call placed right now would reach the carrier."},
+        "kind": {"type": ["string", "null"], "description": "The carrier this org brought, `twilio` or `sip`; null when it brought none."},
+        "from_numbers": {"type": "array", "items": {"type": "string"}, "description": "The org's own numbers a call may be shown as coming from, E.164."},
+        "steps_missing": {"type": "array", "items": {"type": "string"}, "description": "One sentence per thing still to do before a call can be placed, empty when nothing is."},
+        "guards": {"$ref": "#/$defs/DialGuards"}
+      }
+    },
+    "OutboundProvisioned": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/carrier/outbound, the answer: the plan, and whether it was carried out.",
+      "required": ["steps", "dry_run", "ready"],
+      "properties": {
+        "steps": {"type": "array", "items": {"type": "string"}, "description": "Each step of the provisioning, in order, saying what was found standing and what was made — the same shape POST /v1/numbers answers with."},
+        "dry_run": {"type": "boolean", "description": "True when this was the plan and nothing was written."},
+        "ready": {"type": "boolean", "description": "Whether the org can place a call now."},
+        "trunk": {"type": "string", "description": "The SFU's own id for the org's outbound trunk, once there is one."},
+        "address": {"type": "string", "description": "Where the box sends a call it places through this trunk."}
+      }
     }
   }
 }

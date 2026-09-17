@@ -690,6 +690,34 @@ module Pinecall
           ops: { kind: :int, required: true },
           took_ms: { kind: :float, required: true }
         }.freeze,
+        "Dialled" => {
+          call: { kind: :str, required: true },
+          agent: { kind: :str, required: true },
+          to: { kind: :str, required: true },
+          from: { kind: :str, required: true },
+          env: { kind: :ref, ref: "Env", required: true }
+        }.freeze,
+        "DialGuards" => {
+          dial_anywhere: { kind: :bool, required: true },
+          per_minute: { kind: :int, required: true },
+          per_day: { kind: :int, required: true },
+          countries: { kind: :list, items: { kind: :str }, required: true },
+          max_duration_s: { kind: :int, required: true }
+        }.freeze,
+        "CarrierOutbound" => {
+          ready: { kind: :bool, required: true },
+          kind: { kind: :str, null: true, required: true },
+          from_numbers: { kind: :list, items: { kind: :str }, required: true },
+          steps_missing: { kind: :list, items: { kind: :str }, required: true },
+          guards: { kind: :ref, ref: "DialGuards", required: true }
+        }.freeze,
+        "OutboundProvisioned" => {
+          steps: { kind: :list, items: { kind: :str }, required: true },
+          dry_run: { kind: :bool, required: true },
+          ready: { kind: :bool, required: true },
+          trunk: { kind: :str },
+          address: { kind: :str }
+        }.freeze,
         "RoomOpened" => {
           name: { kind: :str, required: true },
           sid: { kind: :str, required: true },
@@ -1012,7 +1040,8 @@ module Pinecall
           to: { kind: :str, required: true },
           run: { kind: :str, null: true },
           caller: { kind: :ref, null: true, ref: "Contact", required: true },
-          external_id: { kind: :str }
+          external_id: { kind: :str },
+          asked_by: { kind: :str }
         }.freeze,
         "CallEnded" => {
           reason: { kind: :ref, ref: "EndReason", required: true },
