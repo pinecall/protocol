@@ -277,6 +277,48 @@ export const OrgSsoWantedSchema = z.strictObject({
 export type OrgSsoWanted = z.infer<typeof OrgSsoWantedSchema>;
 
 /**
+ * GET and PUT /v1/org/mail: the SMTP account this org's letters go out through, how the last one
+ * went, and never the password it was wired with. An org that wired none sends through the box's
+ * own mail, or through nothing.
+ */
+export const OrgMailSchema = z.strictObject({
+  configured: z.boolean(),
+  host: z.string().nullable(),
+  port: z.int().nullable(),
+  security: z.string().nullable(),
+  username: z.string().nullable(),
+  from: z.string().nullable(),
+  verified_at: z.string().nullable(),
+  last_error: z.string().nullable(),
+});
+export type OrgMail = z.infer<typeof OrgMailSchema>;
+
+/**
+ * PUT /v1/org/mail, the body. The account is replaced whole, the password included: it is write-
+ * only, so a change of anything else carries it again — and the standing is reset with it, since
+ * what a server said about the old password is not news about a new one.
+ */
+export const OrgMailWantedSchema = z.strictObject({
+  host: z.string(),
+  port: z.int(),
+  security: z.enum(["starttls", "tls", "none"]).nullish(),
+  username: z.string().nullish(),
+  password: z.string().nullish(),
+  from: z.string(),
+});
+export type OrgMailWanted = z.infer<typeof OrgMailWantedSchema>;
+
+/**
+ * POST /v1/org/mail/test: one letter, waited for — the only door of this runtime that waits for a
+ * mail server, because it is the one a person is watching.
+ */
+export const MailSentSchema = z.strictObject({
+  sent: z.boolean(),
+  error: z.string().nullable(),
+});
+export type MailSent = z.infer<typeof MailSentSchema>;
+
+/**
  * One org a sign-in page may send somebody to, named — and nothing about whether anybody answers
  * to the address that asked.
  */

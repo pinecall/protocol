@@ -535,6 +535,28 @@ module Pinecall
           role: { kind: :str, null: true },
           required: { kind: :bool }
         }.freeze,
+        "OrgMail" => {
+          configured: { kind: :bool, required: true },
+          host: { kind: :str, null: true, required: true },
+          port: { kind: :int, null: true, required: true },
+          security: { kind: :str, null: true, required: true },
+          username: { kind: :str, null: true, required: true },
+          from: { kind: :str, null: true, required: true },
+          verified_at: { kind: :str, null: true, required: true },
+          last_error: { kind: :str, null: true, required: true }
+        }.freeze,
+        "OrgMailWanted" => {
+          host: { kind: :str, required: true },
+          port: { kind: :int, required: true },
+          security: { kind: :enum, values: %w[starttls tls none] },
+          username: { kind: :str },
+          password: { kind: :str },
+          from: { kind: :str, required: true }
+        }.freeze,
+        "MailSent" => {
+          sent: { kind: :bool, required: true },
+          error: { kind: :str, null: true, required: true }
+        }.freeze,
         "SsoOrg" => {
           org: { kind: :str, required: true },
           slug: { kind: :str, required: true },

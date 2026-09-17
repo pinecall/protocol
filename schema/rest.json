@@ -302,6 +302,46 @@
         "required": {"type": "boolean", "description": "Whether a password opens this org any more. Left out: it does."}
       }
     },
+    "OrgMail": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET and PUT /v1/org/mail: the SMTP account this org's letters go out through, how the last one went, and never the password it was wired with. An org that wired none sends through the box's own mail, or through nothing.",
+      "required": ["configured", "host", "port", "security", "username", "from", "verified_at", "last_error"],
+      "properties": {
+        "configured": {"type": "boolean", "description": "Whether this org wired a mail account of its own. False: every field below is its empty answer, and its letters go through the box's mail, or none are sent at all."},
+        "host": {"type": ["string", "null"], "description": "The mail server the letters are handed to."},
+        "port": {"type": ["integer", "null"], "description": "Its port: 587 with STARTTLS, 465 with implicit TLS, 25 for a relay on the same machine."},
+        "security": {"type": ["string", "null"], "description": "How the connection is protected \u2014 starttls, tls or none: starttls upgrades a plain socket, tls opens protected, none is plain and is only ever right for a relay beside the gateway."},
+        "username": {"type": ["string", "null"], "description": "Who signs in at that server. Empty for a relay that asks for no credentials; the password beside it is sealed under the box's vault key and no door answers with it."},
+        "from": {"type": ["string", "null"], "description": "The From header the letters carry, as it is written: \"Pinecall <no-reply@example.com>\" or a bare address."},
+        "verified_at": {"type": ["string", "null"], "description": "When a letter was last taken by this server. Null until one has been, because a mailbox is kept without anything being sent to find out it works."},
+        "last_error": {"type": ["string", "null"], "description": "What the server said the last time it refused one, host and port included and credentials never. Null when the last letter went through."}
+      }
+    },
+    "OrgMailWanted": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/org/mail, the body. The account is replaced whole, the password included: it is write-only, so a change of anything else carries it again \u2014 and the standing is reset with it, since what a server said about the old password is not news about a new one.",
+      "required": ["host", "port", "from"],
+      "properties": {
+        "host": {"type": "string", "description": "The mail server: SES's SMTP endpoint, Postmark's, Mailgun's, or one of your own."},
+        "port": {"type": "integer", "description": "587 with STARTTLS, 465 with implicit TLS."},
+        "security": {"type": "string", "enum": ["starttls", "tls", "none"], "description": "Left out: starttls."},
+        "username": {"type": "string", "description": "Who signs in there. Left out: nobody, for a relay that asks for no credentials."},
+        "password": {"type": "string", "description": "Its password. It goes in and never comes out: the row holds a Fernet token under the box's vault key."},
+        "from": {"type": "string", "description": "Who the letters are from. An address, or a name and an address."}
+      }
+    },
+    "MailSent": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/org/mail/test: one letter, waited for \u2014 the only door of this runtime that waits for a mail server, because it is the one a person is watching.",
+      "required": ["sent", "error"],
+      "properties": {
+        "sent": {"type": "boolean", "description": "Whether the mail server took it."},
+        "error": {"type": ["string", "null"], "description": "What it said when it did not, host and port included and credentials never. Null when it took it."}
+      }
+    },
     "SsoOrg": {
       "type": "object",
       "additionalProperties": false,
