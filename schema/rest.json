@@ -273,6 +273,55 @@
         "autostart": {"type": "boolean", "description": "Open with the microphone asked for and the call started, without a second click."}
       }
     },
+    "OrgSso": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET and PUT /v1/org/sso: the OpenID Connect provider this org's people sign in at, and never the client secret it was wired with.",
+      "required": ["configured", "issuer", "client_id", "domains", "role", "required", "redirect_uri"],
+      "properties": {
+        "configured": {"type": "boolean", "description": "Whether a provider is wired at all. False: every field below is its empty answer, and this org's people sign in with a password."},
+        "issuer": {"type": ["string", "null"], "description": "The issuer as the provider publishes it, an https URL with no trailing slash: what /.well-known/openid-configuration hangs off, and what every id_token carries as `iss`."},
+        "client_id": {"type": ["string", "null"], "description": "The client this gateway is at that provider. Public by design; the secret beside it is sealed under the box's vault key and no door answers with it."},
+        "domains": {"type": "array", "items": {"type": "string"}, "description": "The email domains this org signs in with, folded. An address outside them is refused at the callback even when the provider vouched for it."},
+        "role": {"type": ["string", "null"], "description": "What an address nobody invited is seated as: a member role, or null for no auto-provisioning at all \u2014 the default, which refuses a stranger."},
+        "required": {"type": "boolean", "description": "True: a password opens this org no longer. The way back when the provider stops answering is the operator's, never the org's."},
+        "redirect_uri": {"type": "string", "description": "Where the provider sends the person back \u2014 https://<gateway>/v1/login/sso/callback \u2014 which is what an admin registers at the provider. Answered even when nothing is wired, because it is what they need before they can wire anything."}
+      }
+    },
+    "OrgSsoWanted": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/org/sso, the body. The configuration is replaced whole, the client secret included: it is write-only, so a change of anything else carries it again.",
+      "required": ["issuer", "client_id", "client_secret", "domains"],
+      "properties": {
+        "issuer": {"type": "string", "description": "The provider's issuer, an https URL. It is fetched before anything is kept, so a typo is a refusal with nothing written."},
+        "client_id": {"type": "string", "description": "The client this gateway is at that provider."},
+        "client_secret": {"type": "string", "description": "Its secret. It goes in and never comes out: the row holds a Fernet token under the box's vault key."},
+        "domains": {"type": "array", "items": {"type": "string"}, "description": "The email domains this org signs in with. Folded, and without an `@` somebody pasted."},
+        "role": {"type": ["string", "null"], "description": "The role an address nobody invited is seated with, a seat taken for it. Left out: nobody is auto-provisioned."},
+        "required": {"type": "boolean", "description": "Whether a password opens this org any more. Left out: it does."}
+      }
+    },
+    "SsoOrg": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One org a sign-in page may send somebody to, named \u2014 and nothing about whether anybody answers to the address that asked.",
+      "required": ["org", "slug", "name"],
+      "properties": {
+        "org": {"type": "string", "description": "The org's id."},
+        "slug": {"type": "string", "description": "Its slug, which is what GET /v1/login/sso?org= takes."},
+        "name": {"type": "string", "description": "What to call it on the page."}
+      }
+    },
+    "SsoDiscovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/login/sso/discover: the orgs whose domains match an address's and that wired a provider. Empty is the answer for a domain nobody wired, and for a box that keeps no provider at all.",
+      "required": ["orgs"],
+      "properties": {
+        "orgs": {"type": "array", "items": {"$ref": "#/$defs/SsoOrg"}, "description": "Oldest first."}
+      }
+    },
     "HeldAgent": {
       "type": "object",
       "additionalProperties": false,

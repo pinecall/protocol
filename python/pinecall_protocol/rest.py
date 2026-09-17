@@ -241,6 +241,51 @@ class WidgetSettings(WireModel):
     autostart: bool
 
 
+# GET and PUT /v1/org/sso: the OpenID Connect provider this org's people sign in at, and never the
+# client secret it was wired with.
+class OrgSso(WireModel):
+    """GET and PUT /v1/org/sso."""
+
+    configured: bool
+    issuer: str | None
+    client_id: str | None
+    domains: list[str]
+    role: str | None
+    required: bool
+    redirect_uri: str
+
+
+# The configuration is replaced whole, the client secret included: it is write-only, so a change of
+# anything else carries it again.
+class OrgSsoWanted(WireModel):
+    """PUT /v1/org/sso, the body."""
+
+    issuer: str
+    client_id: str
+    client_secret: str
+    domains: list[str]
+    role: str | None = None
+    required: bool | None = None
+
+
+# One org a sign-in page may send somebody to, named — and nothing about whether anybody answers to
+# the address that asked.
+class SsoOrg(WireModel):
+    """SsoOrg, as protocol/schema declares it."""
+
+    org: str
+    slug: str
+    name: str
+
+
+# POST /v1/login/sso/discover: the orgs whose domains match an address's and that wired a provider.
+# Empty is the answer for a domain nobody wired, and for a box that keeps no provider at all.
+class SsoDiscovery(WireModel):
+    """POST /v1/login/sso/discover."""
+
+    orgs: list[SsoOrg]
+
+
 # One corner of a world holding an agent: the member whose it is, named so a person can read it.
 class LineHolder(WireModel):
     """One corner of a world holding an agent."""

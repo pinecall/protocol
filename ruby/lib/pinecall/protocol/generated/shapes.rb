@@ -518,6 +518,31 @@ module Pinecall
           accent: { kind: :str, null: true, required: true },
           autostart: { kind: :bool, required: true }
         }.freeze,
+        "OrgSso" => {
+          configured: { kind: :bool, required: true },
+          issuer: { kind: :str, null: true, required: true },
+          client_id: { kind: :str, null: true, required: true },
+          domains: { kind: :list, items: { kind: :str }, required: true },
+          role: { kind: :str, null: true, required: true },
+          required: { kind: :bool, required: true },
+          redirect_uri: { kind: :str, required: true }
+        }.freeze,
+        "OrgSsoWanted" => {
+          issuer: { kind: :str, required: true },
+          client_id: { kind: :str, required: true },
+          client_secret: { kind: :str, required: true },
+          domains: { kind: :list, items: { kind: :str }, required: true },
+          role: { kind: :str, null: true },
+          required: { kind: :bool }
+        }.freeze,
+        "SsoOrg" => {
+          org: { kind: :str, required: true },
+          slug: { kind: :str, required: true },
+          name: { kind: :str, required: true }
+        }.freeze,
+        "SsoDiscovery" => {
+          orgs: { kind: :list, items: { kind: :ref, ref: "SsoOrg" }, required: true }
+        }.freeze,
         "HeldAgent" => {
           slug: { kind: :str, required: true },
           channels: { kind: :list, items: { kind: :ref, ref: "Channel" }, required: true },

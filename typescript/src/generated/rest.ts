@@ -247,6 +247,56 @@ export const WidgetSettingsSchema = z.strictObject({
 });
 export type WidgetSettings = z.infer<typeof WidgetSettingsSchema>;
 
+/**
+ * GET and PUT /v1/org/sso: the OpenID Connect provider this org's people sign in at, and never the
+ * client secret it was wired with.
+ */
+export const OrgSsoSchema = z.strictObject({
+  configured: z.boolean(),
+  issuer: z.string().nullable(),
+  client_id: z.string().nullable(),
+  domains: z.array(z.string()),
+  role: z.string().nullable(),
+  required: z.boolean(),
+  redirect_uri: z.string(),
+});
+export type OrgSso = z.infer<typeof OrgSsoSchema>;
+
+/**
+ * PUT /v1/org/sso, the body. The configuration is replaced whole, the client secret included: it
+ * is write-only, so a change of anything else carries it again.
+ */
+export const OrgSsoWantedSchema = z.strictObject({
+  issuer: z.string(),
+  client_id: z.string(),
+  client_secret: z.string(),
+  domains: z.array(z.string()),
+  role: z.string().nullable().nullish(),
+  required: z.boolean().nullish(),
+});
+export type OrgSsoWanted = z.infer<typeof OrgSsoWantedSchema>;
+
+/**
+ * One org a sign-in page may send somebody to, named — and nothing about whether anybody answers
+ * to the address that asked.
+ */
+export const SsoOrgSchema = z.strictObject({
+  org: z.string(),
+  slug: z.string(),
+  name: z.string(),
+});
+export type SsoOrg = z.infer<typeof SsoOrgSchema>;
+
+/**
+ * POST /v1/login/sso/discover: the orgs whose domains match an address's and that wired a
+ * provider. Empty is the answer for a domain nobody wired, and for a box that keeps no provider at
+ * all.
+ */
+export const SsoDiscoverySchema = z.strictObject({
+  orgs: z.array(SsoOrgSchema),
+});
+export type SsoDiscovery = z.infer<typeof SsoDiscoverySchema>;
+
 /** One corner of a world holding an agent: the member whose it is, named so a person can read it. */
 export const LineHolderSchema = z.strictObject({
   holder: z.string().nullable(),
