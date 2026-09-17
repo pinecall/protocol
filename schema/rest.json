@@ -332,6 +332,74 @@
         "from": {"type": "string", "description": "Who the letters are from. An address, or a name and an address."}
       }
     },
+    "BoxMail": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET and PUT /v1/ops/mail: the SMTP account the BOX posts its letters through \u2014 what the operator stored, or the environment's two variables \u2014 how the last one went, and never the password. An org's own account (OrgMail) still wins over both.",
+      "required": ["configured", "source", "host", "port", "security", "username", "from", "verified_at", "last_error"],
+      "properties": {
+        "configured": {"type": "boolean", "description": "Whether the box can post a letter at all, from either place. False: every field below is its empty answer."},
+        "source": {"type": ["string", "null"], "description": "`stored` or `environment`: where the mailbox was read from \u2014 `stored` for a row the operator wrote at PUT /v1/ops/mail, which wins; `environment` for PINECALL_SMTP_URL and PINECALL_MAIL_FROM; null with neither."},
+        "host": {"type": ["string", "null"], "description": "The mail server the letters are handed to."},
+        "port": {"type": ["integer", "null"], "description": "Its port."},
+        "security": {"type": ["string", "null"], "description": "starttls, tls or none."},
+        "username": {"type": ["string", "null"], "description": "Who signs in there; empty for a relay that asks for nobody. The password beside it is sealed under the box's vault key and no door answers with it."},
+        "from": {"type": ["string", "null"], "description": "The From header the letters carry."},
+        "verified_at": {"type": ["string", "null"], "description": "When a letter was last taken through the STORED mailbox. Null for the environment's, whose outcome is in the box's log."},
+        "last_error": {"type": ["string", "null"], "description": "What the server said the last time it refused one through the stored mailbox, credentials never. Null when the last letter went through."}
+      }
+    },
+    "BoxBrand": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET and PUT /v1/ops/brand, and `brand` on GET /.well-known/pinecall: what this box's letters and its sign-in page are called and painted with. Pinecall, its accent and no logo until the operator says.",
+      "required": ["name", "logo_url", "accent"],
+      "properties": {
+        "name": {"type": "string", "description": "One line, at most 60 characters: it goes into a subject."},
+        "logo_url": {"type": ["string", "null"], "description": "An https URL of an image, drawn 28px tall at the top of every letter where the wordmark stood; null is the name as text, and a letter that fetches nothing."},
+        "accent": {"type": "string", "description": "#rrggbb, six hex digits, lower-cased: the button in every letter."}
+      }
+    },
+    "BoxBrandWanted": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/ops/brand, the body. A field left out keeps what it had; an empty string goes back to the default \u2014 which for the logo is none at all, the only way to clear one.",
+      "properties": {
+        "name": {"type": ["string", "null"], "description": "One line, at most 60 characters; empty is Pinecall again."},
+        "logo_url": {"type": ["string", "null"], "description": "https only; empty clears it."},
+        "accent": {"type": ["string", "null"], "description": "#rrggbb; empty is the default accent again."}
+      }
+    },
+    "BoxProvider": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One box-wide identity provider as the operator reads it: whether it is usable, the client this gateway is at it, and the URI to register there. Never the secret.",
+      "required": ["configured", "client_id", "redirect_uri"],
+      "properties": {
+        "configured": {"type": "boolean", "description": "Wired, and its secret openable with this box's vault key: what GET /.well-known/pinecall carries as `google`."},
+        "client_id": {"type": ["string", "null"], "description": "The client this gateway is at the provider, read off the row even when it is not usable, so a page shows what was typed."},
+        "redirect_uri": {"type": "string", "description": "https://<gateway>/v1/login/<provider>/callback \u2014 what the operator registers at the provider as an authorised redirect URI."}
+      }
+    },
+    "BoxSignIn": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/ops/signin: every provider this box can offer every org's people, wired or not, one key each. Only `google` today; a second is a key here and a row on the box.",
+      "required": ["google"],
+      "properties": {
+        "google": {"$ref": "#/$defs/BoxProvider", "description": "Continue with Google."}
+      }
+    },
+    "BoxProviderWanted": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/ops/signin/google, the body: the OAuth client the operator made at Google for this gateway. Replaced whole, the secret write-only; the issuer is Google's own and is not a field.",
+      "required": ["client_id", "client_secret"],
+      "properties": {
+        "client_id": {"type": "string", "description": "The web client's id, as Google's console shows it."},
+        "client_secret": {"type": "string", "description": "Goes in and never comes out: the row holds a Fernet token under the box's vault key."}
+      }
+    },
     "MailSent": {
       "type": "object",
       "additionalProperties": false,
