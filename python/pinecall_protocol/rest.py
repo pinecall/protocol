@@ -268,6 +268,45 @@ class OrgSsoWanted(WireModel):
     required: bool | None = None
 
 
+# GET and PUT /v1/org/mail: the SMTP account this org's letters go out through, how the last one
+# went, and never the password it was wired with. An org that wired none sends through the box's own
+# mail, or through nothing.
+class OrgMail(WireModel):
+    """GET and PUT /v1/org/mail."""
+
+    configured: bool
+    host: str | None
+    port: int | None
+    security: str | None
+    username: str | None
+    from_: str | None = Field(alias="from")
+    verified_at: str | None
+    last_error: str | None
+
+
+# The account is replaced whole, the password included: it is write-only, so a change of anything
+# else carries it again — and the standing is reset with it, since what a server said about the old
+# password is not news about a new one.
+class OrgMailWanted(WireModel):
+    """PUT /v1/org/mail, the body."""
+
+    host: str
+    port: int
+    security: Literal["starttls", "tls", "none"] | None = None
+    username: str | None = None
+    password: str | None = None
+    from_: str = Field(alias="from")
+
+
+# POST /v1/org/mail/test: one letter, waited for — the only door of this runtime that waits for a
+# mail server, because it is the one a person is watching.
+class MailSent(WireModel):
+    """POST /v1/org/mail/test."""
+
+    sent: bool
+    error: str | None
+
+
 # One org a sign-in page may send somebody to, named — and nothing about whether anybody answers to
 # the address that asked.
 class SsoOrg(WireModel):

@@ -193,6 +193,12 @@ module Pinecall
       type org_sso = { configured: bool, issuer: String?, client_id: String?, domains: Array[String], role: String?, required: bool, redirect_uri: String }
       # PUT /v1/org/sso, the body.
       type org_sso_wanted = { issuer: String, client_id: String, client_secret: String, domains: Array[String], ?role: String?, ?required: bool }
+      # GET and PUT /v1/org/mail: the SMTP account this org's letters go out through, how the last one went, and never the password it was wired with.
+      type org_mail = { configured: bool, host: String?, port: Integer?, security: String?, username: String?, from: String?, verified_at: String?, last_error: String? }
+      # PUT /v1/org/mail, the body.
+      type org_mail_wanted = { host: String, port: Integer, ?security: "starttls" | "tls" | "none", ?username: String, ?password: String, from: String }
+      # POST /v1/org/mail/test: one letter, waited for — the only door of this runtime that waits for a mail server, because it is the one a person is watching.
+      type mail_sent = { sent: bool, error: String? }
       # One org a sign-in page may send somebody to, named — and nothing about whether anybody answers to the address that asked.
       type sso_org = { org: String, slug: String, name: String }
       # POST /v1/login/sso/discover: the orgs whose domains match an address's and that wired a provider.
