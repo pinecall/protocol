@@ -9,7 +9,7 @@ Every event the gateway writes, one line each, with the page that holds its data
 | `agent.detached` | agent | no | [events-control.md](events-control.md) | A socket that held the agent is gone — the process exited, the connection dropped — and the agent's doors are whoever is left holding it. |
 | `agent.registered` | agent | no | [events-control.md](events-control.md) | The gateway accepted an agent.register: this socket now speaks for the agent and answers its routes. |
 | `agent.state` | call | no | [events-call.md](events-call.md) | The agent's state changed, in the session's own words. |
-| `agent.transcript` | call | yes | [events-call.md](events-call.md) | Words from the agent as they are played, synced to the audio. |
+| `agent.transcript` | call | yes | [events-call.md](events-call.md) | One delta of the reply the agent is giving, never the reply so far: in a voice call one word, as the voice plays it, with the seconds it was aligned to; in a written call one model token. |
 | `call.dialing` | call | no | [events-call.md](events-call.md) | The platform is placing an outbound call and the far end has not answered yet. |
 | `call.ended` | call | no | [events-call.md](events-call.md) | The call is over. |
 | `call.line` | call | no | [events-call.md](events-call.md) | The line's hold and mute flags after one of them changed. |

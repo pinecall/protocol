@@ -761,12 +761,11 @@
       "type": "object",
       "additionalProperties": false,
       "description": "GET /v1/carrier/outbound, the guards: what this org may dial and how often.",
-      "required": ["dial_anywhere", "per_minute", "per_day", "countries", "max_duration_s"],
+      "required": ["dial_anywhere", "per_minute", "per_day", "max_duration_s"],
       "properties": {
         "dial_anywhere": {"type": "boolean", "description": "False, the default, means a destination must already have called or written to this org — a call back goes back to somebody. Only an operator lifts it."},
         "per_minute": {"type": "integer", "description": "How many outbound calls this org may place in a minute."},
         "per_day": {"type": "integer", "description": "How many in a day."},
-        "countries": {"type": "array", "items": {"type": "string"}, "description": "The country calling codes this org may reach, as digits without the plus. Empty means the codes of the org's own numbers, worked out at each dial."},
         "max_duration_s": {"type": "integer", "description": "How long one outbound call may run before the platform ends it."}
       }
     },

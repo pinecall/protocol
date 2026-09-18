@@ -691,7 +691,6 @@ class DialGuards(WireModel):
     dial_anywhere: bool
     per_minute: int
     per_day: int
-    countries: list[str]
     max_duration_s: int
 
 

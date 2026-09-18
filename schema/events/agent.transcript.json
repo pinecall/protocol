@@ -2,17 +2,17 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pinecall.io/protocol/events/agent.transcript.json",
   "title": "agent.transcript",
-  "description": "Words from the agent as they are played, synced to the audio. Interim while final is false; the whole reply becomes turn.agent. Interim entries are ephemeral.",
+  "description": "One delta of the reply the agent is giving, never the reply so far: in a voice call one word, as the voice plays it, with the seconds it was aligned to; in a written call one model token. The reply so far is every delta of the same speech_id since the last turn.agent, joined; turn.agent carries the whole reply and closes it. Interim entries are ephemeral.",
   "x-pinecall": {"kind": "event", "type": "agent.transcript", "scope": "call", "ephemeral": true},
   "$ref": "#/$defs/AgentTranscript",
   "$defs": {
     "AgentTranscript": {
       "type": "object",
-      "description": "Words from the agent as they are played, synced to the audio. Interim while final is false; the whole reply becomes turn.agent. Interim entries are ephemeral.",
+      "description": "One delta of the reply the agent is giving, never the reply so far: in a voice call one word, as the voice plays it, with the seconds it was aligned to; in a written call one model token. The reply so far is every delta of the same speech_id since the last turn.agent, joined; turn.agent carries the whole reply and closes it. Interim entries are ephemeral.",
       "properties": {
         "speech_id": {"type": "string", "description": "The reply these words belong to."},
-        "text": {"type": "string", "description": "The words played so far."},
-        "final": {"type": "boolean", "description": "True when the reply is fully played or was cut."},
+        "text": {"type": "string", "description": "This delta alone: a word (a token, in a written call), not the words so far."},
+        "final": {"type": "boolean", "description": "False on every delta of a spoken or written reply, which turn.agent closes. True on an entry that carries a whole reply at once, as the box's own message to a caller nobody could take does."},
         "start": {"type": "number", "description": "When these words start, in seconds from the start of the reply's audio, as the voice aligned them. Absent when the voice returned no word timings."},
         "end": {"type": "number", "description": "When these words end, in seconds from the start of the reply's audio, as the voice aligned them. Absent when the voice returned no word timings."}
       },

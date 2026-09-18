@@ -60,9 +60,12 @@ class AgentStateChanged(WireModel):
     state: AgentState
 
 
-# Interim while final is false; the whole reply becomes turn.agent. Interim entries are ephemeral.
+# One delta of the reply the agent is giving, never the reply so far: in a voice call one word, as
+# the voice plays it, with the seconds it was aligned to; in a written call one model token. The
+# reply so far is every delta of the same speech_id since the last turn.agent, joined; turn.agent
+# carries the whole reply and closes it. Interim entries are ephemeral.
 class AgentTranscript(WireModel):
-    """Words from the agent as they are played, synced to the audio."""
+    """One delta of the reply the agent is giving, never the reply so far."""
 
     speech_id: str
     text: str
