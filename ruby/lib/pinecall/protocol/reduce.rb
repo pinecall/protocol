@@ -67,7 +67,7 @@ module Pinecall
         when "user.state" then state[:user_state] = data[:state]
         when "agent.state" then state[:agent_state] = data[:state]
         when "user.transcript" then state[:live][:user] = data[:final] ? nil : data[:text]
-        when "agent.transcript" then state[:live][:agent] = data[:final] ? nil : data[:text]
+        when "agent.transcript" then state[:live][:agent] = data[:final] ? nil : said_so_far(state[:live][:agent], data)
         when "turn.user" then turn(state, data, "user")
         when "turn.agent" then turn(state, data, "agent")
         when "memory.ops" then state[:memory].concat(data[:ops])
@@ -149,6 +149,15 @@ module Pinecall
         state[:cost] = data[:cost]
         state[:outcome] = data[:outcome]
         state[:end_reason] ||= data[:reason]
+      end
+
+      # A delta, not the reply so far: one word of a spoken reply, one token of a written one. A word
+      # the voice aligned arrives bare and is set a space apart; a token carries its own spacing.
+      def said_so_far(so_far, data)
+        return data[:text] if so_far.nil? || so_far.empty?
+
+        apart = so_far.match?(/\s\z/) || data[:text].match?(/\A\s/)
+        !data[:start].nil? && !apart ? "#{so_far} #{data[:text]}" : "#{so_far}#{data[:text]}"
       end
 
       def turn(state, data, who)

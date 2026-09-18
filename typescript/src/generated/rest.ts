@@ -736,7 +736,6 @@ export const DialGuardsSchema = z.strictObject({
   dial_anywhere: z.boolean(),
   per_minute: z.int(),
   per_day: z.int(),
-  countries: z.array(z.string()),
   max_duration_s: z.int(),
 });
 export type DialGuards = z.infer<typeof DialGuardsSchema>;

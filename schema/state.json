@@ -135,8 +135,8 @@
       "type": "object",
       "description": "The words on screen right now: interim transcripts that a finished turn clears.",
       "properties": {
-        "user": {"type": ["string", "null"], "description": "What the caller is saying, so far."},
-        "agent": {"type": ["string", "null"], "description": "What the agent is saying, so far."}
+        "user": {"type": ["string", "null"], "description": "What the caller is saying, so far: the recognizer's latest interim, which arrives whole."},
+        "agent": {"type": ["string", "null"], "description": "What the agent is saying, so far: every agent.transcript delta of the reply in flight, joined, since it arrives one word or one token at a time."}
       },
       "required": ["user", "agent"],
       "additionalProperties": false

@@ -756,7 +756,6 @@ module Pinecall
           dial_anywhere: { kind: :bool, required: true },
           per_minute: { kind: :int, required: true },
           per_day: { kind: :int, required: true },
-          countries: { kind: :list, items: { kind: :str }, required: true },
           max_duration_s: { kind: :int, required: true }
         }.freeze,
         "CarrierOutbound" => {

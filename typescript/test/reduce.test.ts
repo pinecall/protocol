@@ -99,4 +99,15 @@ describe("reduce", () => {
     expect(state.events).toEqual([{ seq: 1, name: "slot.released", source: "app" }]);
     expect(state.app_state).toEqual({ slots: ["10:15"] });
   });
+
+  it("the agent's words on screen are its deltas joined, and the finished turn clears them", () => {
+    const word = (seq: number, text: string, start: number) => entry(seq, "agent.transcript", { speech_id: "s1", text, final: false, start, end: start + 0.2 }, true);
+    const spoken = reduce([word(1, "Buenos", 0), word(2, "días,", 0.3), word(3, "Clínica", 0.6)]);
+    expect(spoken.live.agent).toBe("Buenos días, Clínica");
+    const token = (seq: number, text: string) => entry(seq, "agent.transcript", { speech_id: "s2", text, final: false }, true);
+    const written = reduce([token(1, "Buenos"), token(2, " días"), token(3, ","), token(4, " clean"), token(5, "ing")]);
+    expect(written.live.agent).toBe("Buenos días, cleaning");
+    const closed = reduce([word(1, "Buenos", 0), entry(2, "turn.agent", { speech_id: "s1", text: "Buenos días.", interrupted: false, metrics: {} })]);
+    expect(closed.live.agent).toBeNull();
+  });
 });

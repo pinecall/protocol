@@ -131,8 +131,8 @@ The words on screen right now: interim transcripts that a finished turn clears.
 
 | field | type | required | meaning |
 |---|---|---|---|
-| `user` | `string | null` | yes | What the caller is saying, so far. |
-| `agent` | `string | null` | yes | What the agent is saying, so far. |
+| `user` | `string | null` | yes | What the caller is saying, so far: the recognizer's latest interim, which arrives whole. |
+| `agent` | `string | null` | yes | What the agent is saying, so far: every agent.transcript delta of the reply in flight, joined, since it arrives one word or one token at a time. |
 
 ### `Gap`
 

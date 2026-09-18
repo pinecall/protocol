@@ -13,13 +13,13 @@ The agent's state changed, in the session's own words.
 
 ### `agent.transcript`
 
-Words from the agent as they are played, synced to the audio. Interim while final is false; the whole reply becomes turn.agent. Interim entries are ephemeral.
+One delta of the reply the agent is giving, never the reply so far: in a voice call one word, as the voice plays it, with the seconds it was aligned to; in a written call one model token. The reply so far is every delta of the same speech_id since the last turn.agent, joined; turn.agent carries the whole reply and closes it. Interim entries are ephemeral.
 
 | field | type | required | meaning |
 |---|---|---|---|
 | `speech_id` | `string` | yes | The reply these words belong to. |
-| `text` | `string` | yes | The words played so far. |
-| `final` | `boolean` | yes | True when the reply is fully played or was cut. |
+| `text` | `string` | yes | This delta alone: a word (a token, in a written call), not the words so far. |
+| `final` | `boolean` | yes | False on every delta of a spoken or written reply, which turn.agent closes. True on an entry that carries a whole reply at once, as the box's own message to a caller nobody could take does. |
 | `start` | `number` | no | When these words start, in seconds from the start of the reply's audio, as the voice aligned them. Absent when the voice returned no word timings. |
 | `end` | `number` | no | When these words end, in seconds from the start of the reply's audio, as the voice aligned them. Absent when the voice returned no word timings. |
 

@@ -274,7 +274,7 @@ module Pinecall
       # POST /v1/agents/{slug}/dial, the answer: the call a dial became, accepted before the far end has heard anything ring.
       type dialled = { call: String, agent: String, to: String, from: String, env: env }
       # GET /v1/carrier/outbound, the guards: what this org may dial and how often.
-      type dial_guards = { dial_anywhere: bool, per_minute: Integer, per_day: Integer, countries: Array[String], max_duration_s: Integer }
+      type dial_guards = { dial_anywhere: bool, per_minute: Integer, per_day: Integer, max_duration_s: Integer }
       # GET /v1/carrier/outbound, the answer: whether this org can place a call yet, and what is missing.
       type carrier_outbound = { ready: bool, kind: String?, from_numbers: Array[String], steps_missing: Array[String], guards: dial_guards }
       # POST /v1/carrier/outbound, the answer: the plan, and whether it was carried out.
@@ -407,7 +407,7 @@ module Pinecall
       type agent_registered = { routes: Array[route], app: String, ?sdk: String, ?env: env }
       # The agent's state changed, in the session's own words.
       type agent_state_changed = { state: agent_state }
-      # Words from the agent as they are played, synced to the audio.
+      # One delta of the reply the agent is giving, never the reply so far: in a voice call one word, as the voice plays it, with the seconds it was aligned to; in a written call one model token.
       type agent_transcript = { speech_id: String, text: String, final: bool, ?start: Float, ?end: Float }
       # The platform is placing an outbound call and the far end has not answered yet.
       type call_dialing = { channel: channel, from: String, to: String, ?run: String?, caller: contact?, ?external_id: String, ?asked_by: String }

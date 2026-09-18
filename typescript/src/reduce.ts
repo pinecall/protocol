@@ -161,7 +161,8 @@ function applyEvent(state: State, entry: Entry, event: Event): void {
       state.live.user = event.data.final ? null : event.data.text;
       return;
     case "agent.transcript":
-      state.live.agent = event.data.final ? null : event.data.text;
+      // A delta, not the reply so far: one word of a spoken reply, one token of a written one.
+      state.live.agent = event.data.final ? null : saidSoFar(state.live.agent, event.data);
       return;
     case "turn.user":
       state.turns.push({ role: "user", ...event.data });
@@ -370,4 +371,15 @@ function lastIndex<T>(items: T[], matches: (item: T) => boolean): number {
     }
   }
   return -1;
+}
+
+/**
+ * The reply in flight with one more delta. A word the voice aligned arrives bare and is set a
+ * space apart; a token of a written reply carries its own spacing, and a space glued between
+ * "clean" and "ing" would be a word nobody said.
+ */
+function saidSoFar(soFar: string | null, delta: { text: string; start?: number }): string {
+  if (soFar === null || soFar === "") return delta.text;
+  const apart = /\s$/.test(soFar) || /^\s/.test(delta.text);
+  return delta.start !== undefined && !apart ? `${soFar} ${delta.text}` : `${soFar}${delta.text}`;
 }
