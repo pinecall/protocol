@@ -4,8 +4,9 @@ What leaves the platform is never the whole log. Before a state or an entry reac
 gateway or the worker applies a **projection** at the sink — the SSE stream, the DataChannel, a
 `GET` — and a client never applies one, because a client can be modified and a token cannot ask for
 more than it was issued with. The two projections are the `Projection` enum in `shapes.md`; this
-page is the contract every sink obeys, and the tests on both sides (`runtime/tests/log/
-test_projection.py`, `typescript/test/projection.test.ts`) assert it over the golden state.
+page is the contract every sink obeys, and the tests on both sides
+(`runtime/tests/api/calls/test_state.py`, `typescript/test/projection.test.ts`) assert it over the
+golden state.
 
 ## Who gets which
 
@@ -93,5 +94,7 @@ the tenant's business.
 ## Where the code lives
 
 `schema/defs.json` declares `Projection`, `Visibility`, `StateFieldSpec` and `EventSpec`.
-The functions that project — `project_state`, `project_entry` in `runtime/src/pinecall/log/`, and
-their TypeScript twins for the console — follow this page; the tests name each row of the table.
+The functions that project — `project_state`, `project_entry` in
+`runtime/src/pinecall/log/projection.py` — follow this page; the tests name each row of the table.
+There is no TypeScript projection: on that side the contract is held by
+`typescript/test/projection.test.ts` alone, over the golden state.

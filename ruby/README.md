@@ -10,7 +10,7 @@ require "pinecall/protocol"
 log   = Pinecall::Protocol.decode_entries(File.read("call.json"))
 state = Pinecall::Protocol.reduce(log)          # what a reader of the whole log knows
 state[:turns].size                              # => 12
-state[:cost][:total_usd]                        # => 0.0184
+state[:cost][:eur]                              # => 0.022937
 
 # One command, checked here — where the backtrace is still yours — before it goes anywhere.
 say = Pinecall::Protocol.command(type: "agent.say", agent: "clinica-norte", call: "CA_1",

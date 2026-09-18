@@ -1,9 +1,10 @@
 # The Pinecall protocol
 
 The seam between whoever does the real time and the application. It is written as JSON
-Schema 2020-12 under `schema/` and generates both sides: the pydantic models the
-runtime speaks (`python/pinecall_protocol/`) and the zod schemas the SDK speaks
-(`typescript/src/generated/`). Neither is edited by hand; `scripts/generate`
+Schema 2020-12 under `schema/` and generates every side: the pydantic models the
+runtime speaks (`python/pinecall_protocol/`), the zod schemas the SDK speaks
+(`typescript/src/generated/`) and the Ruby tables (`ruby/lib/pinecall/protocol/generated/`).
+None is edited by hand; `scripts/generate`
 rewrites them and CI diffs. The reasoning behind the vocabulary is
 `docs/decision.md`; the reference, page by page, is listed at the end.
 
@@ -122,10 +123,10 @@ What a supervisor sends over `WS /v1/attach`. Each lands in the log as its own e
 ## State
 
 `schema/state.json` is what a log reduces to: fold every entry in `seq` order and
-that is what you hold. Both reducers (`runtime/src/pinecall/log/reduce.py`,
-`typescript/src/reduce.ts`) are written by hand and must agree, field for field, on
-`protocol/fixtures/call-log-golden.json`; its expected state is
-`protocol/fixtures/call-log-golden.state.json`. The shape is in `state.md`.
+that is what you hold. The three reducers (`runtime/src/pinecall/log/reduce.py`,
+`typescript/src/reduce.ts`, `ruby/lib/pinecall/protocol/reduce.rb`) are written by hand and must
+agree, field for field, on `python/pinecall_protocol/fixtures/call-log-golden.json`; its expected
+state is `python/pinecall_protocol/fixtures/call-log-golden.state.json`. The shape is in `state.md`.
 
 ## The reference
 
