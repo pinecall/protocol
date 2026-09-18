@@ -378,8 +378,8 @@ function lastIndex<T>(items: T[], matches: (item: T) => boolean): number {
  * space apart; a token of a written reply carries its own spacing, and a space glued between
  * "clean" and "ing" would be a word nobody said.
  */
-function saidSoFar(soFar: string | null, delta: { text: string; start?: number }): string {
+function saidSoFar(soFar: string | null, delta: { text: string; start?: number | null }): string {
   if (soFar === null || soFar === "") return delta.text;
   const apart = /\s$/.test(soFar) || /^\s/.test(delta.text);
-  return delta.start !== undefined && !apart ? `${soFar} ${delta.text}` : `${soFar}${delta.text}`;
+  return delta.start != null && !apart ? `${soFar} ${delta.text}` : `${soFar}${delta.text}`;
 }
