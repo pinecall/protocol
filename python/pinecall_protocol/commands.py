@@ -23,6 +23,7 @@ class AgentRegister(WireModel):
 
     routes: list[Route]
     sdk: str | None = None
+    host: str | None = None
     takes_unclaimed: bool = True
 
 

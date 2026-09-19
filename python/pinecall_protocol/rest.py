@@ -418,6 +418,38 @@ class AgentList(WireModel):
     agents: list[HeldAgent]
 
 
+# One app connected to the gateway right now: one process on one machine, holding one or more agents
+# in one world.
+class AppProcess(WireModel):
+    """One app connected to the gateway right now."""
+
+    app: str
+    agents: list[str]
+    env: Env
+    host: str | None
+    address: str | None
+    sdk: str | None
+    holder: LineHolder | None
+    connected_at: float
+
+
+# GET /v1/apps: every app connected in the request's world that this key may see — its own corner's
+# and the org's, every corner's with `team`.
+class AppList(WireModel):
+    """GET /v1/apps."""
+
+    apps: list[AppProcess]
+
+
+# POST /v1/apps/{app}/stop, the answer: the socket was closed with the stop code, and the app exits
+# rather than reconnect.
+class AppStopped(WireModel):
+    """POST /v1/apps/{app}/stop, the answer."""
+
+    app: str
+    stopped: bool
+
+
 # GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in. An
 # org shares one sandbox number, so it rings in one place and which one is claimed.
 class TheLine(WireModel):

@@ -450,6 +450,41 @@
         "agents": {"type": "array", "items": {"$ref": "#/$defs/HeldAgent"}, "description": "One row per agent, in the order their sockets claimed them."}
       }
     },
+    "AppProcess": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One app connected to the gateway right now: one process on one machine, holding one or more agents in one world.",
+      "required": ["app", "agents", "env", "host", "address", "sdk", "holder", "connected_at"],
+      "properties": {
+        "app": {"type": "string", "description": "The socket's id, what POST /v1/apps/{app}/stop takes."},
+        "agents": {"type": "array", "items": {"type": "string"}, "description": "The slugs it holds, in the order it registered them."},
+        "env": {"$ref": "defs.json#/$defs/Env"},
+        "host": {"type": ["string", "null"], "description": "The machine, as the app named itself at register; null for an app too old to say."},
+        "address": {"type": ["string", "null"], "description": "The address the socket came from, as the gateway saw it."},
+        "sdk": {"type": ["string", "null"], "description": "The SDK and version it runs: pinecall/0.5.1."},
+        "holder": {"anyOf": [{"$ref": "#/$defs/LineHolder"}, {"type": "null"}], "description": "Whose corner it holds the agents in: a member's in the sandbox; null for the org's own — production's, a server's token."},
+        "connected_at": {"type": "number", "description": "When the socket opened, unix seconds."}
+      }
+    },
+    "AppList": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/apps: every app connected in the request's world that this key may see — its own corner's and the org's, every corner's with `team`.",
+      "required": ["apps"],
+      "properties": {
+        "apps": {"type": "array", "items": {"$ref": "#/$defs/AppProcess"}, "description": "Oldest connection first."}
+      }
+    },
+    "AppStopped": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/apps/{app}/stop, the answer: the socket was closed with the stop code, and the app exits rather than reconnect.",
+      "required": ["app", "stopped"],
+      "properties": {
+        "app": {"type": "string", "description": "The socket stopped."},
+        "stopped": {"type": "boolean", "description": "Always true: a socket this key may not stop is a 404."}
+      }
+    },
     "LineHolder": {
       "type": "object",
       "additionalProperties": false,

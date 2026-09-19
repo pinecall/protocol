@@ -27,6 +27,7 @@ export type AgentConfigure = z.infer<typeof AgentConfigureSchema>;
 export const AgentRegisterSchema = z.strictObject({
   routes: z.array(RouteSchema),
   sdk: z.string().nullish(),
+  host: z.string().nullish(),
   takes_unclaimed: z.boolean().nullish(),
 });
 export type AgentRegister = z.infer<typeof AgentRegisterSchema>;

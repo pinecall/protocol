@@ -608,6 +608,23 @@ module Pinecall
         "AgentList" => {
           agents: { kind: :list, items: { kind: :ref, ref: "HeldAgent" }, required: true }
         }.freeze,
+        "AppProcess" => {
+          app: { kind: :str, required: true },
+          agents: { kind: :list, items: { kind: :str }, required: true },
+          env: { kind: :ref, ref: "Env", required: true },
+          host: { kind: :str, null: true, required: true },
+          address: { kind: :str, null: true, required: true },
+          sdk: { kind: :str, null: true, required: true },
+          holder: { kind: :ref, null: true, ref: "LineHolder", required: true },
+          connected_at: { kind: :float, required: true }
+        }.freeze,
+        "AppList" => {
+          apps: { kind: :list, items: { kind: :ref, ref: "AppProcess" }, required: true }
+        }.freeze,
+        "AppStopped" => {
+          app: { kind: :str, required: true },
+          stopped: { kind: :bool, required: true }
+        }.freeze,
         "LineHolder" => {
           holder: { kind: :str, null: true, required: true },
           name: { kind: :str, null: true, required: true }
@@ -1082,6 +1099,7 @@ module Pinecall
         "AgentRegister" => {
           routes: { kind: :list, items: { kind: :ref, ref: "Route" }, required: true },
           sdk: { kind: :str },
+          host: { kind: :str },
           takes_unclaimed: { kind: :bool, default: true }
         }.freeze,
         "AgentReply" => {

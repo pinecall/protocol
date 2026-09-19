@@ -219,6 +219,12 @@ module Pinecall
       type held_agent = { slug: String, channels: Array[channel], ?holder: line_holder }
       # GET /v1/agents: every agent this fleet is holding right now, as the front page lists them.
       type agent_list = { agents: Array[held_agent] }
+      # One app connected to the gateway right now: one process on one machine, holding one or more agents in one world.
+      type app_process = { app: String, agents: Array[String], env: env, host: String?, address: String?, sdk: String?, holder: line_holder?, connected_at: Float }
+      # GET /v1/apps: every app connected in the request's world that this key may see — its own corner's and the org's, every corner's with `team`.
+      type app_list = { apps: Array[app_process] }
+      # POST /v1/apps/{app}/stop, the answer: the socket was closed with the stop code, and the app exits rather than reconnect.
+      type app_stopped = { app: String, stopped: bool }
       # One corner of a world holding an agent: the member whose it is, named so a person can read it.
       type line_holder = { holder: String?, name: String? }
       # GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in.
@@ -384,7 +390,7 @@ module Pinecall
       # Declare or change what the agent is: voice, models, language, greeting, the full tool list.
       type agent_configure = { config: agent_config }
       # The app's first message: this socket speaks for this agent and answers these doors.
-      type agent_register = { routes: Array[route], ?sdk: String, ?takes_unclaimed: bool }
+      type agent_register = { routes: Array[route], ?sdk: String, ?host: String, ?takes_unclaimed: bool }
       # Make the model speak now, guided by an instruction it reads and the caller never hears: 'tell them a slot at 10:15 just opened'.
       type agent_reply = { instructions: String, ?allow_interruptions: bool }
       # Make the agent say this text now, verbatim, outside the model's turn: a greeting, a read-back, a system notice.

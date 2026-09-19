@@ -438,6 +438,41 @@ export const AgentListSchema = z.strictObject({
 export type AgentList = z.infer<typeof AgentListSchema>;
 
 /**
+ * One app connected to the gateway right now: one process on one machine, holding one or more
+ * agents in one world.
+ */
+export const AppProcessSchema = z.strictObject({
+  app: z.string(),
+  agents: z.array(z.string()),
+  env: EnvSchema,
+  host: z.string().nullable(),
+  address: z.string().nullable(),
+  sdk: z.string().nullable(),
+  holder: LineHolderSchema.nullable(),
+  connected_at: z.number(),
+});
+export type AppProcess = z.infer<typeof AppProcessSchema>;
+
+/**
+ * GET /v1/apps: every app connected in the request's world that this key may see — its own
+ * corner's and the org's, every corner's with `team`.
+ */
+export const AppListSchema = z.strictObject({
+  apps: z.array(AppProcessSchema),
+});
+export type AppList = z.infer<typeof AppListSchema>;
+
+/**
+ * POST /v1/apps/{app}/stop, the answer: the socket was closed with the stop code, and the app
+ * exits rather than reconnect.
+ */
+export const AppStoppedSchema = z.strictObject({
+  app: z.string(),
+  stopped: z.boolean(),
+});
+export type AppStopped = z.infer<typeof AppStoppedSchema>;
+
+/**
  * GET /v1/agents/{slug}/line: whose terminal a call that RINGS at this agent's doors lands in. An
  * org shares one sandbox number, so it rings in one place and which one is claimed.
  */
