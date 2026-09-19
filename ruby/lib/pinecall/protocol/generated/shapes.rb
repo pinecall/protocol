@@ -120,8 +120,7 @@ module Pinecall
         }.freeze,
         "KnowledgeFile" => {
           path: { kind: :str, required: true },
-          text: { kind: :str, required: true },
-          mode: { kind: :enum, values: %w[retrieved whole], default: "retrieved" }
+          text: { kind: :str, required: true }
         }.freeze,
         "DocsConfig" => {
           base: { kind: :str, required: true },
@@ -667,9 +666,7 @@ module Pinecall
         "KnowledgePushed" => {
           base: { kind: :str, required: true },
           chunks: { kind: :int, required: true },
-          took_ms: { kind: :float, required: true },
-          whole_tokens: { kind: :int, default: 0 },
-          notice: { kind: :str, null: true }
+          took_ms: { kind: :float, required: true }
         }.freeze,
         "KnowledgeBase" => {
           base: { kind: :str, required: true },
@@ -811,7 +808,8 @@ module Pinecall
           hangup: { kind: :ref, ref: "HangupConfig" },
           turn: { kind: :ref, ref: "TurnConfig" },
           memory: { kind: :ref, ref: "MemoryConfig" },
-          knowledge: { kind: :list, items: { kind: :ref, ref: "DocsConfig" } }
+          knowledge: { kind: :str },
+          bases: { kind: :list, items: { kind: :ref, ref: "DocsConfig" } }
         }.freeze,
         "TuningRow" => {
           holder: { kind: :str, required: true },

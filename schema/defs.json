@@ -244,11 +244,10 @@
     },
     "KnowledgeFile": {
       "type": "object",
-      "description": "One file of knowledge, sent whole: its path as the tenant keeps it, and its text.",
+      "description": "One file of a base, as a push sends it: its path as the tenant keeps it, and its text.",
       "properties": {
         "path": {"type": "string", "description": "The file's path as the tenant keeps it, relative to the agent: 'knowledge/clinica.md', 'faq/horarios.md'."},
-        "text": {"type": "string", "description": "The file's whole text, as the app read it from disk."},
-        "mode": {"type": "string", "enum": ["retrieved", "whole"], "default": "retrieved", "description": "How the file reaches the model: retrieved, cut into chunks a turn searches; or whole, put entire into the static knowledge block of every call, cached ahead of everything. A base may hold both kinds."}
+        "text": {"type": "string", "description": "The file's whole text, as the app read it from disk."}
       },
       "required": ["path", "text"],
       "additionalProperties": false
@@ -294,21 +293,21 @@
     },
     "AgentConfig": {
       "type": "object",
-      "description": "What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what. Every field is optional so a configure can change one thing.",
+      "description": "What an app declares about its agent: the prompt's layout, the language, the tools, whether it searches its bases itself, and who may see and send what. Every field is optional so a configure can change one thing. The environment — voice, models, greeting, hangup, turn, says, hears, knowledge, docs, memory — is the world's, set in the agent's settings, and no longer read off this declaration.",
       "properties": {
         "prompt": {"type": "array", "items": {"$ref": "#/$defs/PromptBlockSpec"}, "description": "The blocks of the prompt in the one order they are sent: every static block, then the history, then every dynamic block. Absent, the layout is the default: identity · knowledge · tools, the history, view."},
         "language": {"type": "string", "description": "The language the agent speaks and expects, as a BCP 47 tag: es-ES, es-UY."},
-        "greeting": {"$ref": "#/$defs/GreetingConfig", "description": "How the agent opens a call: the words themselves, or what the model is told before it finds its own. Absent: nobody speaks until the caller does."},
-        "voice": {"$ref": "#/$defs/VoiceConfig"},
-        "llm": {"$ref": "#/$defs/ModelConfig"},
-        "stt": {"$ref": "#/$defs/ModelConfig"},
-        "turn": {"$ref": "#/$defs/TurnConfig"},
-        "says": {"type": "array", "items": {"$ref": "#/$defs/Pronunciation"}, "description": "How the voice says the words it would otherwise get wrong. Applied to the reply on its way to the TTS."},
-        "hears": {"type": "array", "items": {"type": "string"}, "description": "The words the ears must know: the agent's own name, the doctors', the streets. Given to the STT as keyterms."},
-        "knowledge": {"$ref": "#/$defs/KnowledgeFile", "description": "The one file the agent knows by heart, sent whole: the bridge reads it beside the class and the runtime puts its text in the static block, once per call."},
-        "docs": {"$ref": "#/$defs/DocsConfig", "description": "The knowledge base the agent answers from, by the name it was pushed under, and how its chunks reach the model."},
-        "memory": {"$ref": "#/$defs/MemoryConfig", "description": "What memory keeps about a contact across calls, in the tenant's words, and what it must never keep."},
-    "hangup": {"$ref": "#/$defs/HangupConfig", "description": "Whether the model may end the call itself, and when. Absent: it may not, and only the caller or a supervisor ends a call."},
+        "greeting": {"$ref": "#/$defs/GreetingConfig", "description": "Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next."},
+        "voice": {"$ref": "#/$defs/VoiceConfig", "description": "Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next."},
+        "llm": {"$ref": "#/$defs/ModelConfig", "description": "Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next."},
+        "stt": {"$ref": "#/$defs/ModelConfig", "description": "Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next."},
+        "turn": {"$ref": "#/$defs/TurnConfig", "description": "Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next."},
+        "says": {"type": "array", "items": {"$ref": "#/$defs/Pronunciation"}, "description": "Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next."},
+        "hears": {"type": "array", "items": {"type": "string"}, "description": "Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next."},
+        "knowledge": {"$ref": "#/$defs/KnowledgeFile", "description": "Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next."},
+        "docs": {"$ref": "#/$defs/DocsConfig", "description": "Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next."},
+        "memory": {"$ref": "#/$defs/MemoryConfig", "description": "Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next."},
+        "hangup": {"$ref": "#/$defs/HangupConfig", "description": "Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next."},
         "tools": {"type": "array", "items": {"$ref": "#/$defs/ToolSpec"}, "description": "Every tool the agent may ever see. Which ones are visible now is tools.set."},
         "uses_knowledge": {"type": "boolean", "default": false, "description": "Whether the class searches the knowledge base itself (this.knowledge.search). A world with no base attached to the agent refuses the registration, so a tool that would find nothing is refused at boot and not on a call."},
         "state_fields": {"type": "array", "items": {"$ref": "#/$defs/StateFieldSpec"}, "description": "Who may see each field of the app's state. A field not listed is tenant: seen by the tenant's readers, never by the public."},

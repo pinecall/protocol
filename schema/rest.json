@@ -569,14 +569,12 @@
     "KnowledgePushed": {
       "type": "object",
       "additionalProperties": false,
-      "description": "PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, how long that took, and what its whole files weigh on every call.",
+      "description": "PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that took.",
       "required": ["base", "chunks", "took_ms"],
       "properties": {
         "base": {"type": "string", "description": "The base's name, as the path named it."},
         "chunks": {"type": "integer", "description": "How many chunks the files were cut into and embedded."},
-        "took_ms": {"type": "number", "description": "How long the push took, chunking and embedding included, in milliseconds."},
-        "whole_tokens": {"type": "integer", "minimum": 0, "default": 0, "description": "About how many tokens the files kept whole come to: what every call of an agent reading this base carries in its prompt. 0 when no file was kept whole."},
-        "notice": {"type": ["string", "null"], "description": "Said when the whole files weigh past what the gateway calls heavy, with the figure and what to do about it. The push landed all the same: it is a notice, never a refusal."}
+        "took_ms": {"type": "number", "description": "How long the push took, chunking and embedding included, in milliseconds."}
       }
     },
     "KnowledgeBase": {
@@ -855,7 +853,7 @@
     "TuningBody": {
       "type": "object",
       "additionalProperties": false,
-      "description": "An agent's tuning: what the org set over what the app declared, per world and per corner. Every field is optional; one left out is not set, and what the app declared — or the runtime's own default — stands for it.",
+      "description": "An agent's settings: what the org set, per world and per corner. Every field is optional; one left out is not set, and the runtime's own default stands for it.",
       "properties": {
         "voice": {"type": "string", "description": "The voice that speaks: a curated name, or the vendor's own id when `tts` names the vendor."},
         "tts": {"type": "string", "description": "The vendor that speaks, `cartesia` or `cartesia/sonic-3`: a bare vendor keeps its own default model."},
@@ -866,7 +864,8 @@
         "hangup": {"$ref": "defs.json#/$defs/HangupConfig"},
         "turn": {"$ref": "defs.json#/$defs/TurnConfig"},
         "memory": {"$ref": "defs.json#/$defs/MemoryConfig"},
-        "knowledge": {"type": "array", "items": {"$ref": "defs.json#/$defs/DocsConfig"}, "description": "The knowledge bases the agent answers from, each with how its chunks reach the model. The first is the one a turn retrieves from today."}
+        "knowledge": {"type": "string", "description": "What the agent knows by heart, in Markdown: the business as the org describes it. Read whole into the static knowledge block of every call, cached ahead of everything. Set by whoever holds `words`."},
+        "bases": {"type": "array", "items": {"$ref": "defs.json#/$defs/DocsConfig"}, "description": "The bases the agent reads, each with how a turn reads it: searched before the turn (retrieved) or when the model asks (tool), k chunks, under a score."}
       }
     },
     "TuningRow": {

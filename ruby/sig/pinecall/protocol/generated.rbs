@@ -81,8 +81,8 @@ module Pinecall
       type state_field_spec = { name: String, visibility: visibility }
       # One outside event the agent accepts, and from whom.
       type event_spec = { name: String, from: Array[event_source] }
-      # One file of knowledge, sent whole: its path as the tenant keeps it, and its text.
-      type knowledge_file = { path: String, text: String, ?mode: "retrieved" | "whole" }
+      # One file of a base, as a push sends it: its path as the tenant keeps it, and its text.
+      type knowledge_file = { path: String, text: String }
       # The knowledge base the agent answers from, and how its chunks reach the model.
       type docs_config = { base: String, ?mode: docs_mode, ?k: Integer, ?min_score: Float }
       # How the agent opens a call, before the caller has said anything.
@@ -91,7 +91,7 @@ module Pinecall
       type hangup_config = { ?when: String }
       # What memory keeps about a contact across calls, and what it must never keep.
       type memory_config = { ?remember: Array[String], ?forget: Array[String] }
-      # What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what.
+      # What an app declares about its agent: the prompt's layout, the language, the tools, whether it searches its bases itself, and who may see and send what.
       type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: greeting_config, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?knowledge: knowledge_file, ?docs: docs_config, ?memory: memory_config, ?hangup: hangup_config, ?tools: Array[tool_spec], ?uses_knowledge: bool, ?state_fields: Array[state_field_spec], ?events: Array[event_spec] }
       # One line of a call's log, or of an agent's log when call is null.
       type entry = { seq: Integer, ts: Float, call: String?, agent: String, type: String, ephemeral: bool, data: Hash[Symbol, untyped] }
@@ -239,8 +239,8 @@ module Pinecall
       type golden_miss = { asks: String, expects: String, found: Array[String] }
       # POST /v1/knowledge/{base}/eval, the answer: how the index did on its own golden.
       type knowledge_score = { base: String, model: String, questions: Integer, k: Integer, recall_at_k: Float, ndcg_at_10: Float, took_ms: Float, misses: Array[golden_miss] }
-      # PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, how long that took, and what its whole files weigh on every call.
-      type knowledge_pushed = { base: String, chunks: Integer, took_ms: Float, ?whole_tokens: Integer, ?notice: String? }
+      # PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that took.
+      type knowledge_pushed = { base: String, chunks: Integer, took_ms: Float }
       # One knowledge base as the list draws it: its name, its size, and when it was last pushed.
       type knowledge_base = { base: String, chunks: Integer, model: String, pushed_at: Float }
       # GET /v1/knowledge: every base this org has pushed.
@@ -289,8 +289,8 @@ module Pinecall
       type carrier_outbound = { ready: bool, kind: String?, from_numbers: Array[String], steps_missing: Array[String], guards: dial_guards }
       # POST /v1/carrier/outbound, the answer: the plan, and whether it was carried out.
       type outbound_provisioned = { steps: Array[String], dry_run: bool, ready: bool, ?trunk: String, ?address: String }
-      # An agent's tuning: what the org set over what the app declared, per world and per corner.
-      type tuning_body = { ?voice: String, ?tts: String, ?tts_model: String, ?stt: String, ?llm: String, ?greeting: greeting_config, ?hangup: hangup_config, ?turn: turn_config, ?memory: memory_config, ?knowledge: Array[docs_config] }
+      # An agent's settings: what the org set, per world and per corner.
+      type tuning_body = { ?voice: String, ?tts: String, ?tts_model: String, ?stt: String, ?llm: String, ?greeting: greeting_config, ?hangup: hangup_config, ?turn: turn_config, ?memory: memory_config, ?knowledge: String, ?bases: Array[docs_config] }
       # One kept version of an agent's tuning: whose corner, which version, who set it and when, and what it says.
       type tuning_row = { holder: String, version: Integer, author: String, note: String?, set_at: Float, config: tuning_body }
       # GET /v1/agents/{slug}/settings: the agent's tuning as this key sees it — its own corner's, the team's and production's, each corner's own newest row, or null when that corner set nothing.

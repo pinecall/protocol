@@ -337,11 +337,10 @@ class EventSpec(WireModel):
 
 
 class KnowledgeFile(WireModel):
-    """One file of knowledge, sent whole: its path as the tenant keeps it, and its text."""
+    """One file of a base, as a push sends it: its path as the tenant keeps it, and its text."""
 
     path: str
     text: str
-    mode: Literal["retrieved", "whole"] = "retrieved"
 
 
 # It is named by the base it was pushed under, with PUT /v1/knowledge/{base}.
@@ -385,8 +384,11 @@ class MemoryConfig(WireModel):
     forget: list[str] = Field(default_factory=list[str])
 
 
-# What an app declares about its agent: the voice, the models, the language, the greeting, the
-# tools, and who may see and send what. Every field is optional so a configure can change one thing.
+# What an app declares about its agent: the prompt's layout, the language, the tools, whether it
+# searches its bases itself, and who may see and send what. Every field is optional so a configure
+# can change one thing. The environment — voice, models, greeting, hangup, turn, says, hears,
+# knowledge, docs, memory — is the world's, set in the agent's settings, and no longer read off this
+# declaration.
 class AgentConfig(WireModel):
     """What an app declares about its agent."""
 

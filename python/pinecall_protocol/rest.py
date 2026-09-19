@@ -513,16 +513,14 @@ class KnowledgeScore(WireModel):
     misses: list[GoldenMiss]
 
 
-# PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, how long that took,
-# and what its whole files weigh on every call.
+# PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that
+# took.
 class KnowledgePushed(WireModel):
     """PUT /v1/knowledge/{base}, the answer."""
 
     base: str
     chunks: int
     took_ms: float
-    whole_tokens: int = 0
-    notice: str | None = None
 
 
 class KnowledgeBase(WireModel):
@@ -772,10 +770,9 @@ class OutboundProvisioned(WireModel):
     address: str | None = None
 
 
-# Every field is optional; one left out is not set, and what the app declared — or the runtime's own
-# default — stands for it.
+# Every field is optional; one left out is not set, and the runtime's own default stands for it.
 class TuningBody(WireModel):
-    """An agent's tuning: what the org set over what the app declared, per world and per corner."""
+    """An agent's settings: what the org set, per world and per corner."""
 
     voice: str | None = None
     tts: str | None = None
@@ -786,7 +783,8 @@ class TuningBody(WireModel):
     hangup: HangupConfig | None = None
     turn: TurnConfig | None = None
     memory: MemoryConfig | None = None
-    knowledge: list[DocsConfig] | None = None
+    knowledge: str | None = None
+    bases: list[DocsConfig] | None = None
 
 
 # One kept version of an agent's tuning: whose corner, which version, who set it and when, and what

@@ -348,13 +348,12 @@ One outside event the agent accepts, and from whom. An event nobody declared is 
 
 ### `KnowledgeFile`
 
-One file of knowledge, sent whole: its path as the tenant keeps it, and its text.
+One file of a base, as a push sends it: its path as the tenant keeps it, and its text.
 
 | field | type | required | meaning |
 |---|---|---|---|
 | `path` | `string` | yes | The file's path as the tenant keeps it, relative to the agent: 'knowledge/clinica.md', 'faq/horarios.md'. |
 | `text` | `string` | yes | The file's whole text, as the app read it from disk. |
-| `mode` | `"retrieved" | "whole"` | no | How the file reaches the model: retrieved, cut into chunks a turn searches; or whole, put entire into the static knowledge block of every call, cached ahead of everything. A base may hold both kinds. |
 
 ### `DocsConfig`
 
@@ -396,23 +395,23 @@ What memory keeps about a contact across calls, and what it must never keep. Bot
 
 ### `AgentConfig`
 
-What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what. Every field is optional so a configure can change one thing.
+What an app declares about its agent: the prompt's layout, the language, the tools, whether it searches its bases itself, and who may see and send what. Every field is optional so a configure can change one thing. The environment — voice, models, greeting, hangup, turn, says, hears, knowledge, docs, memory — is the world's, set in the agent's settings, and no longer read off this declaration.
 
 | field | type | required | meaning |
 |---|---|---|---|
 | `prompt` | `PromptBlockSpec[]` | no | The blocks of the prompt in the one order they are sent: every static block, then the history, then every dynamic block. Absent, the layout is the default: identity · knowledge · tools, the history, view. |
 | `language` | `string` | no | The language the agent speaks and expects, as a BCP 47 tag: es-ES, es-UY. |
-| `greeting` | `GreetingConfig` | no | How the agent opens a call: the words themselves, or what the model is told before it finds its own. Absent: nobody speaks until the caller does. |
-| `voice` | `VoiceConfig` | no | Which voice speaks for the agent: the name it was asked for, or the id the provider knows it by. |
-| `llm` | `ModelConfig` | no | Which model does a job (the LLM, or the STT), and the one or two knobs worth turning. |
-| `stt` | `ModelConfig` | no | Which model does a job (the LLM, or the STT), and the one or two knobs worth turning. |
-| `turn` | `TurnConfig` | no | How the session decides that the caller has finished, and when the caller may interrupt. |
-| `says` | `Pronunciation[]` | no | How the voice says the words it would otherwise get wrong. Applied to the reply on its way to the TTS. |
-| `hears` | `string[]` | no | The words the ears must know: the agent's own name, the doctors', the streets. Given to the STT as keyterms. |
-| `knowledge` | `KnowledgeFile` | no | The one file the agent knows by heart, sent whole: the bridge reads it beside the class and the runtime puts its text in the static block, once per call. |
-| `docs` | `DocsConfig` | no | The knowledge base the agent answers from, by the name it was pushed under, and how its chunks reach the model. |
-| `memory` | `MemoryConfig` | no | What memory keeps about a contact across calls, in the tenant's words, and what it must never keep. |
-| `hangup` | `HangupConfig` | no | Whether the model may end the call itself, and when. Absent: it may not, and only the caller or a supervisor ends a call. |
+| `greeting` | `GreetingConfig` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
+| `voice` | `VoiceConfig` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
+| `llm` | `ModelConfig` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
+| `stt` | `ModelConfig` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
+| `turn` | `TurnConfig` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
+| `says` | `Pronunciation[]` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
+| `hears` | `string[]` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
+| `knowledge` | `KnowledgeFile` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
+| `docs` | `DocsConfig` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
+| `memory` | `MemoryConfig` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
+| `hangup` | `HangupConfig` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
 | `tools` | `ToolSpec[]` | no | Every tool the agent may ever see. Which ones are visible now is tools.set. |
 | `uses_knowledge` | `boolean` | no | Whether the class searches the knowledge base itself (this.knowledge.search). A world with no base attached to the agent refuses the registration, so a tool that would find nothing is refused at boot and not on a call. |
 | `state_fields` | `StateFieldSpec[]` | no | Who may see each field of the app's state. A field not listed is tenant: seen by the tenant's readers, never by the public. |

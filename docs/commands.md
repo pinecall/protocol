@@ -40,7 +40,7 @@ Lands in the log as: `agent.configured`.
 
 | field | type | required | meaning |
 |---|---|---|---|
-| `config` | `AgentConfig` | yes | What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what. |
+| `config` | `AgentConfig` | yes | What an app declares about its agent: the prompt's layout, the language, the tools, whether it searches its bases itself, and who may see and send what. |
 
 ### `agent.register`
 
@@ -254,7 +254,7 @@ Lands in the log as: `state.changed`, `agent.configured`.
 | field | type | required | meaning |
 |---|---|---|---|
 | `state` | `object` | no | The app's state at the start of the call, whole. |
-| `config` | `AgentConfig` | no | What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what. |
+| `config` | `AgentConfig` | no | What an app declares about its agent: the prompt's layout, the language, the tools, whether it searches its bases itself, and who may see and send what. |
 
 ### `state.set`
 

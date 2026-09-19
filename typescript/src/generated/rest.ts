@@ -543,15 +543,13 @@ export const KnowledgeScoreSchema = z.strictObject({
 export type KnowledgeScore = z.infer<typeof KnowledgeScoreSchema>;
 
 /**
- * PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, how long that took,
- * and what its whole files weigh on every call.
+ * PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that
+ * took.
  */
 export const KnowledgePushedSchema = z.strictObject({
   base: z.string(),
   chunks: z.int(),
   took_ms: z.number(),
-  whole_tokens: z.int().nullish(),
-  notice: z.string().nullable().nullish(),
 });
 export type KnowledgePushed = z.infer<typeof KnowledgePushedSchema>;
 
@@ -825,9 +823,8 @@ export const OutboundProvisionedSchema = z.strictObject({
 export type OutboundProvisioned = z.infer<typeof OutboundProvisionedSchema>;
 
 /**
- * An agent's tuning: what the org set over what the app declared, per world and per corner. Every
- * field is optional; one left out is not set, and what the app declared — or the runtime's own
- * default — stands for it.
+ * An agent's settings: what the org set, per world and per corner. Every field is optional; one
+ * left out is not set, and the runtime's own default stands for it.
  */
 export const TuningBodySchema = z.strictObject({
   voice: z.string().nullish(),
@@ -839,7 +836,8 @@ export const TuningBodySchema = z.strictObject({
   hangup: HangupConfigSchema.nullish(),
   turn: TurnConfigSchema.nullish(),
   memory: MemoryConfigSchema.nullish(),
-  knowledge: z.array(DocsConfigSchema).nullish(),
+  knowledge: z.string().nullish(),
+  bases: z.array(DocsConfigSchema).nullish(),
 });
 export type TuningBody = z.infer<typeof TuningBodySchema>;
 
