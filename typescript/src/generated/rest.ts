@@ -970,6 +970,56 @@ export const CallTuningSchema = z.strictObject({
 });
 export type CallTuning = z.infer<typeof CallTuningSchema>;
 
+/** One file of a base as the list draws it. */
+export const KnowledgeFileRowSchema = z.strictObject({
+  path: z.string(),
+  chars: z.int(),
+  chunks: z.int(),
+  pushed_at: z.number(),
+});
+export type KnowledgeFileRow = z.infer<typeof KnowledgeFileRowSchema>;
+
+/**
+ * GET /v1/knowledge/{base}: every file of the base, by path, with its size and what it became.
+ * Never the text: one file is read at a time.
+ */
+export const KnowledgeFilesSchema = z.strictObject({
+  base: z.string(),
+  kept: z.boolean(),
+  files: z.array(KnowledgeFileRowSchema),
+});
+export type KnowledgeFiles = z.infer<typeof KnowledgeFilesSchema>;
+
+/** GET /v1/knowledge/{base}/files/{path}: one file, text and all. */
+export const KnowledgeFileReadSchema = z.strictObject({
+  path: z.string(),
+  text: z.string(),
+  chunks: z.int(),
+  pushed_at: z.number(),
+});
+export type KnowledgeFileRead = z.infer<typeof KnowledgeFileReadSchema>;
+
+/**
+ * PUT /v1/knowledge/{base}/files/{path}, the body: the file's whole text. New under that path, or
+ * replaced in place; the base is begun when there is none.
+ */
+export const KnowledgeFilePutSchema = z.strictObject({
+  text: z.string(),
+});
+export type KnowledgeFilePut = z.infer<typeof KnowledgeFilePutSchema>;
+
+/**
+ * PUT /v1/knowledge/{base}/files/{path}, the answer: which file, how many chunks it became, and
+ * how long that took.
+ */
+export const KnowledgeFilePushedSchema = z.strictObject({
+  base: z.string(),
+  path: z.string(),
+  chunks: z.int(),
+  took_ms: z.number(),
+});
+export type KnowledgeFilePushed = z.infer<typeof KnowledgeFilePushedSchema>;
+
 /** One base and the agents whose settings attach it. */
 export const KnowledgeUseSchema = z.strictObject({
   base: z.string(),

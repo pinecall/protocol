@@ -880,6 +880,32 @@ module Pinecall
           config: { kind: :ref, null: true, ref: "TuningRow", required: true },
           lexicon: { kind: :ref, null: true, ref: "LexiconRow", required: true }
         }.freeze,
+        "KnowledgeFiles" => {
+          base: { kind: :str, required: true },
+          kept: { kind: :bool, required: true },
+          files: { kind: :list, items: { kind: :ref, ref: "KnowledgeFileRow" }, required: true }
+        }.freeze,
+        "KnowledgeFileRow" => {
+          path: { kind: :str, required: true },
+          chars: { kind: :int, required: true },
+          chunks: { kind: :int, required: true },
+          pushed_at: { kind: :float, required: true }
+        }.freeze,
+        "KnowledgeFileRead" => {
+          path: { kind: :str, required: true },
+          text: { kind: :str, required: true },
+          chunks: { kind: :int, required: true },
+          pushed_at: { kind: :float, required: true }
+        }.freeze,
+        "KnowledgeFilePut" => {
+          text: { kind: :str, required: true }
+        }.freeze,
+        "KnowledgeFilePushed" => {
+          base: { kind: :str, required: true },
+          path: { kind: :str, required: true },
+          chunks: { kind: :int, required: true },
+          took_ms: { kind: :float, required: true }
+        }.freeze,
         "KnowledgeUses" => {
           bases: { kind: :list, items: { kind: :ref, ref: "KnowledgeUse" }, required: true }
         }.freeze,

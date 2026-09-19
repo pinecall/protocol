@@ -1009,6 +1009,62 @@
         "lexicon": {"anyOf": [{"$ref": "#/$defs/LexiconRow"}, {"type": "null"}], "description": "That version, whole."}
       }
     },
+    "KnowledgeFiles": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/knowledge/{base}: every file of the base, by path, with its size and what it became. Never the text: one file is read at a time.",
+      "required": ["base", "kept", "files"],
+      "properties": {
+        "base": {"type": "string", "description": "The base's name."},
+        "kept": {"type": "boolean", "description": "Whether the base keeps its files. False for a base pushed before files were kept: nothing to read or edit until it is pushed again, or a file is put into it."},
+        "files": {"type": "array", "items": {"$ref": "#/$defs/KnowledgeFileRow"}, "description": "One row per file, by path."}
+      }
+    },
+    "KnowledgeFileRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One file of a base as the list draws it.",
+      "required": ["path", "chars", "chunks", "pushed_at"],
+      "properties": {
+        "path": {"type": "string", "description": "The file's path, as it was pushed: 'faq/horarios.md'."},
+        "chars": {"type": "integer", "description": "How long its text is, in characters."},
+        "chunks": {"type": "integer", "description": "How many chunks it was cut into."},
+        "pushed_at": {"type": "number", "description": "When this file last arrived, unix seconds."}
+      }
+    },
+    "KnowledgeFileRead": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/knowledge/{base}/files/{path}: one file, text and all.",
+      "required": ["path", "text", "chunks", "pushed_at"],
+      "properties": {
+        "path": {"type": "string", "description": "The file's path."},
+        "text": {"type": "string", "description": "Its whole text, as it was pushed."},
+        "chunks": {"type": "integer", "description": "How many chunks it was cut into."},
+        "pushed_at": {"type": "number", "description": "When it last arrived, unix seconds."}
+      }
+    },
+    "KnowledgeFilePut": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/knowledge/{base}/files/{path}, the body: the file's whole text. New under that path, or replaced in place; the base is begun when there is none.",
+      "required": ["text"],
+      "properties": {
+        "text": {"type": "string", "description": "The file's whole text, Markdown."}
+      }
+    },
+    "KnowledgeFilePushed": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/knowledge/{base}/files/{path}, the answer: which file, how many chunks it became, and how long that took.",
+      "required": ["base", "path", "chunks", "took_ms"],
+      "properties": {
+        "base": {"type": "string", "description": "The base's name."},
+        "path": {"type": "string", "description": "The file's path."},
+        "chunks": {"type": "integer", "description": "How many chunks this file was cut into and embedded."},
+        "took_ms": {"type": "number", "description": "How long the put took, chunking and embedding included, in milliseconds."}
+      }
+    },
     "KnowledgeUses": {
       "type": "object",
       "additionalProperties": false,

@@ -908,6 +908,52 @@ class CallTuning(WireModel):
     lexicon: LexiconRow | None
 
 
+class KnowledgeFileRow(WireModel):
+    """One file of a base as the list draws it."""
+
+    path: str
+    chars: int
+    chunks: int
+    pushed_at: float
+
+
+# GET /v1/knowledge/{base}: every file of the base, by path, with its size and what it became. Never
+# the text: one file is read at a time.
+class KnowledgeFiles(WireModel):
+    """GET /v1/knowledge/{base}."""
+
+    base: str
+    kept: bool
+    files: list[KnowledgeFileRow]
+
+
+class KnowledgeFileRead(WireModel):
+    """GET /v1/knowledge/{base}/files/{path}: one file, text and all."""
+
+    path: str
+    text: str
+    chunks: int
+    pushed_at: float
+
+
+# New under that path, or replaced in place; the base is begun when there is none.
+class KnowledgeFilePut(WireModel):
+    """PUT /v1/knowledge/{base}/files/{path}, the body: the file's whole text."""
+
+    text: str
+
+
+# PUT /v1/knowledge/{base}/files/{path}, the answer: which file, how many chunks it became, and how
+# long that took.
+class KnowledgeFilePushed(WireModel):
+    """PUT /v1/knowledge/{base}/files/{path}, the answer."""
+
+    base: str
+    path: str
+    chunks: int
+    took_ms: float
+
+
 class KnowledgeUse(WireModel):
     """One base and the agents whose settings attach it."""
 

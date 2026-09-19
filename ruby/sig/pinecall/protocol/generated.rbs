@@ -315,6 +315,16 @@ module Pinecall
       type lexicon_history = { world: env, holder: String, rows: Array[lexicon_row] }
       # GET /v1/calls/{call}/settings: the exact tuning and lexicon a call was built on, by the versions its head row recorded.
       type call_tuning = { config_version: Integer?, lexicon_version: Integer?, config: tuning_row?, lexicon: lexicon_row? }
+      # GET /v1/knowledge/{base}: every file of the base, by path, with its size and what it became.
+      type knowledge_files = { base: String, kept: bool, files: Array[knowledge_file_row] }
+      # One file of a base as the list draws it.
+      type knowledge_file_row = { path: String, chars: Integer, chunks: Integer, pushed_at: Float }
+      # GET /v1/knowledge/{base}/files/{path}: one file, text and all.
+      type knowledge_file_read = { path: String, text: String, chunks: Integer, pushed_at: Float }
+      # PUT /v1/knowledge/{base}/files/{path}, the body: the file's whole text.
+      type knowledge_file_put = { text: String }
+      # PUT /v1/knowledge/{base}/files/{path}, the answer: which file, how many chunks it became, and how long that took.
+      type knowledge_file_pushed = { base: String, path: String, chunks: Integer, took_ms: Float }
       # GET /v1/knowledge/attached: which agents read each base, off every agent's newest settings in this world.
       type knowledge_uses = { bases: Array[knowledge_use] }
       # One base and the agents whose settings attach it.
