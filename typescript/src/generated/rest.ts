@@ -508,13 +508,15 @@ export const KnowledgeScoreSchema = z.strictObject({
 export type KnowledgeScore = z.infer<typeof KnowledgeScoreSchema>;
 
 /**
- * PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that
- * took.
+ * PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, how long that took,
+ * and what its whole files weigh on every call.
  */
 export const KnowledgePushedSchema = z.strictObject({
   base: z.string(),
   chunks: z.int(),
   took_ms: z.number(),
+  whole_tokens: z.int().nullish(),
+  notice: z.string().nullable().nullish(),
 });
 export type KnowledgePushed = z.infer<typeof KnowledgePushedSchema>;
 
@@ -692,8 +694,9 @@ export type ExtractionRun = z.infer<typeof ExtractionRunSchema>;
 
 /**
  * POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to
- * run it with. Worker-only; the gateway runs it against its own stores and writes memory.ops or
- * docs.sources on the call's log itself.
+ * run it with. Asked by the worker for the call it serves, and by the app for a call of its own
+ * org — `this.knowledge.search` in a tool; the gateway runs it against its own stores and writes
+ * memory.ops or docs.sources on the call's log itself.
  */
 export const LookupRequestSchema = z.strictObject({
   tool: PlatformToolSchema,
@@ -712,6 +715,23 @@ export const LookupResultSchema = z.strictObject({
   took_ms: z.number(),
 });
 export type LookupResult = z.infer<typeof LookupResultSchema>;
+
+/** One chunk search found: the file it came from, the heading it sits under, and its text. */
+export const FoundChunkSchema = z.strictObject({
+  path: z.string(),
+  heading: z.string().nullable(),
+  text: z.string(),
+});
+export type FoundChunk = z.infer<typeof FoundChunkSchema>;
+
+/**
+ * What search answers in a lookup's output: the best chunks of every base the agent reads, the
+ * best first. The app's `this.knowledge.search` hands the chunks to the tool that asked.
+ */
+export const SearchFoundSchema = z.strictObject({
+  chunks: z.array(FoundChunkSchema),
+});
+export type SearchFound = z.infer<typeof SearchFoundSchema>;
 
 /**
  * POST /v1/calls/{call}/remember, the answer: what the call taught about the contact, counted.
@@ -856,18 +876,6 @@ export const RollbackSchema = z.strictObject({
 export type Rollback = z.infer<typeof RollbackSchema>;
 
 /**
- * POST /v1/agents/{slug}/settings/promote and POST /v1/lexicon/promote, the answer: the version
- * the promotion wrote, and where.
- */
-export const PromotedSchema = z.strictObject({
-  world: EnvSchema,
-  holder: z.string(),
-  version: z.int(),
-  run: z.string().nullable(),
-});
-export type Promoted = z.infer<typeof PromotedSchema>;
-
-/**
  * The org's lexicon: how the voice says the words it would get wrong, and the words the ears must
  * know. Shared by every agent of the org, laid over each one's own says and hears.
  */
@@ -928,28 +936,6 @@ export const CallTuningSchema = z.strictObject({
   lexicon: LexiconRowSchema.nullable(),
 });
 export type CallTuning = z.infer<typeof CallTuningSchema>;
-
-/**
- * POST /v1/knowledge/{base}/promote, the body: the golden the base is held to before it reaches
- * production, when there is one.
- */
-export const KnowledgePromoteSchema = z.strictObject({
-  golden: KnowledgeGoldenSchema.nullish(),
-});
-export type KnowledgePromote = z.infer<typeof KnowledgePromoteSchema>;
-
-/**
- * POST /v1/knowledge/{base}/promote, the answer: the base as production now holds it, and the two
- * recalls that gated it when a golden was sent.
- */
-export const KnowledgePromotedSchema = z.strictObject({
-  base: z.string(),
-  world: EnvSchema,
-  chunks: z.int(),
-  recall_before: z.number().nullable(),
-  recall_after: z.number().nullable(),
-});
-export type KnowledgePromoted = z.infer<typeof KnowledgePromotedSchema>;
 
 /** One base and the agents whose settings attach it. */
 export const KnowledgeUseSchema = z.strictObject({

@@ -481,14 +481,16 @@ class KnowledgeScore(WireModel):
     misses: list[GoldenMiss]
 
 
-# PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that
-# took.
+# PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, how long that took,
+# and what its whole files weigh on every call.
 class KnowledgePushed(WireModel):
     """PUT /v1/knowledge/{base}, the answer."""
 
     base: str
     chunks: int
     took_ms: float
+    whole_tokens: int = 0
+    notice: str | None = None
 
 
 class KnowledgeBase(WireModel):
@@ -649,8 +651,9 @@ class ExtractionRun(WireModel):
 
 
 # POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to run
-# it with. Worker-only; the gateway runs it against its own stores and writes memory.ops or
-# docs.sources on the call's log itself.
+# it with. Asked by the worker for the call it serves, and by the app for a call of its own org —
+# `this.knowledge.search` in a tool; the gateway runs it against its own stores and writes
+# memory.ops or docs.sources on the call's log itself.
 class LookupRequest(WireModel):
     """POST /v1/calls/{call}/lookup, the body."""
 
@@ -667,6 +670,22 @@ class LookupResult(WireModel):
 
     output: dict[str, Any]
     took_ms: float
+
+
+class FoundChunk(WireModel):
+    """One chunk search found: the file it came from, the heading it sits under, and its text."""
+
+    path: str
+    heading: str | None
+    text: str
+
+
+# What search answers in a lookup's output: the best chunks of every base the agent reads, the best
+# first. The app's `this.knowledge.search` hands the chunks to the tool that asked.
+class SearchFound(WireModel):
+    """What search answers in a lookup's output."""
+
+    chunks: list[FoundChunk]
 
 
 # POST /v1/calls/{call}/remember, the answer: what the call taught about the contact, counted.
@@ -799,17 +818,6 @@ class Rollback(WireModel):
     team: bool = False
 
 
-# POST /v1/agents/{slug}/settings/promote and POST /v1/lexicon/promote, the answer: the version the
-# promotion wrote, and where.
-class Promoted(WireModel):
-    """POST /v1/agents/{slug}/settings/promote and POST /v1/lexicon/promote, the answer."""
-
-    world: Env
-    holder: str
-    version: int
-    run: str | None
-
-
 # The org's lexicon: how the voice says the words it would get wrong, and the words the ears must
 # know. Shared by every agent of the org, laid over each one's own says and hears.
 class LexiconBody(WireModel):
@@ -868,26 +876,6 @@ class CallTuning(WireModel):
     lexicon_version: int | None
     config: TuningRow | None
     lexicon: LexiconRow | None
-
-
-# POST /v1/knowledge/{base}/promote, the body: the golden the base is held to before it reaches
-# production, when there is one.
-class KnowledgePromote(WireModel):
-    """POST /v1/knowledge/{base}/promote, the body."""
-
-    golden: KnowledgeGolden | None = None
-
-
-# POST /v1/knowledge/{base}/promote, the answer: the base as production now holds it, and the two
-# recalls that gated it when a golden was sent.
-class KnowledgePromoted(WireModel):
-    """POST /v1/knowledge/{base}/promote, the answer."""
-
-    base: str
-    world: Env
-    chunks: int
-    recall_before: float | None
-    recall_after: float | None
 
 
 class KnowledgeUse(WireModel):

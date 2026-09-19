@@ -233,8 +233,8 @@ module Pinecall
       type golden_miss = { asks: String, expects: String, found: Array[String] }
       # POST /v1/knowledge/{base}/eval, the answer: how the index did on its own golden.
       type knowledge_score = { base: String, model: String, questions: Integer, k: Integer, recall_at_k: Float, ndcg_at_10: Float, took_ms: Float, misses: Array[golden_miss] }
-      # PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that took.
-      type knowledge_pushed = { base: String, chunks: Integer, took_ms: Float }
+      # PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, how long that took, and what its whole files weigh on every call.
+      type knowledge_pushed = { base: String, chunks: Integer, took_ms: Float, ?whole_tokens: Integer, ?notice: String? }
       # One knowledge base as the list draws it: its name, its size, and when it was last pushed.
       type knowledge_base = { base: String, chunks: Integer, model: String, pushed_at: Float }
       # GET /v1/knowledge: every base this org has pushed.
@@ -269,6 +269,10 @@ module Pinecall
       type lookup_request = { tool: platform_tool, input: Hash[Symbol, untyped], ?speech_id: String }
       # POST /v1/calls/{call}/lookup, the answer: what the tool found, and how long finding it took.
       type lookup_result = { output: Hash[Symbol, untyped], took_ms: Float }
+      # What search answers in a lookup's output: the best chunks of every base the agent reads, the best first.
+      type search_found = { chunks: Array[found_chunk] }
+      # One chunk search found: the file it came from, the heading it sits under, and its text.
+      type found_chunk = { path: String, heading: String?, text: String }
       # POST /v1/calls/{call}/remember, the answer: what the call taught about the contact, counted.
       type remembered = { ops: Integer, took_ms: Float }
       # POST /v1/agents/{slug}/dial, the answer: the call a dial became, accepted before the far end has heard anything ring.
@@ -293,8 +297,6 @@ module Pinecall
       type tuning_diff = { ours: tuning_row?, theirs: tuning_row?, changed: Array[String] }
       # POST /v1/agents/{slug}/settings/rollback, the body: which version to bring back.
       type rollback = { version: Integer, ?team: bool }
-      # POST /v1/agents/{slug}/settings/promote and POST /v1/lexicon/promote, the answer: the version the promotion wrote, and where.
-      type promoted = { world: env, holder: String, version: Integer, run: String? }
       # The org's lexicon: how the voice says the words it would get wrong, and the words the ears must know.
       type lexicon_body = { said: Array[pronunciation], heard: Array[String] }
       # One kept version of the org's lexicon.
@@ -307,10 +309,6 @@ module Pinecall
       type lexicon_history = { world: env, holder: String, rows: Array[lexicon_row] }
       # GET /v1/calls/{call}/settings: the exact tuning and lexicon a call was built on, by the versions its head row recorded.
       type call_tuning = { config_version: Integer?, lexicon_version: Integer?, config: tuning_row?, lexicon: lexicon_row? }
-      # POST /v1/knowledge/{base}/promote, the body: the golden the base is held to before it reaches production, when there is one.
-      type knowledge_promote = { ?golden: knowledge_golden }
-      # POST /v1/knowledge/{base}/promote, the answer: the base as production now holds it, and the two recalls that gated it when a golden was sent.
-      type knowledge_promoted = { base: String, world: env, chunks: Integer, recall_before: Float?, recall_after: Float? }
       # GET /v1/knowledge/attached: which agents read each base, off every agent's newest settings in this world.
       type knowledge_uses = { bases: Array[knowledge_use] }
       # One base and the agents whose settings attach it.

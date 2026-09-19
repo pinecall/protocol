@@ -534,12 +534,14 @@
     "KnowledgePushed": {
       "type": "object",
       "additionalProperties": false,
-      "description": "PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, and how long that took.",
+      "description": "PUT /v1/knowledge/{base}, the answer: which base, how many chunks it became, how long that took, and what its whole files weigh on every call.",
       "required": ["base", "chunks", "took_ms"],
       "properties": {
         "base": {"type": "string", "description": "The base's name, as the path named it."},
         "chunks": {"type": "integer", "description": "How many chunks the files were cut into and embedded."},
-        "took_ms": {"type": "number", "description": "How long the push took, chunking and embedding included, in milliseconds."}
+        "took_ms": {"type": "number", "description": "How long the push took, chunking and embedding included, in milliseconds."},
+        "whole_tokens": {"type": "integer", "minimum": 0, "default": 0, "description": "About how many tokens the files kept whole come to: what every call of an agent reading this base carries in its prompt. 0 when no file was kept whole."},
+        "notice": {"type": ["string", "null"], "description": "Said when the whole files weigh past what the gateway calls heavy, with the figure and what to do about it. The push landed all the same: it is a notice, never a refusal."}
       }
     },
     "KnowledgeBase": {
@@ -716,7 +718,7 @@
     "LookupRequest": {
       "type": "object",
       "additionalProperties": false,
-      "description": "POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to run it with. Worker-only; the gateway runs it against its own stores and writes memory.ops or docs.sources on the call's log itself.",
+      "description": "POST /v1/calls/{call}/lookup, the body: which platform tool to run for this turn, and what to run it with. Asked by the worker for the call it serves, and by the app for a call of its own org — `this.knowledge.search` in a tool; the gateway runs it against its own stores and writes memory.ops or docs.sources on the call's log itself.",
       "required": ["tool", "input"],
       "properties": {
         "tool": {"$ref": "defs.json#/$defs/PlatformTool"},
@@ -730,8 +732,28 @@
       "description": "POST /v1/calls/{call}/lookup, the answer: what the tool found, and how long finding it took. The output is JSON-encoded into a tool_result block, which is where everything from outside the conversation goes and the only place it goes.",
       "required": ["output", "took_ms"],
       "properties": {
-        "output": {"type": "object", "additionalProperties": true, "description": "What the tool answered, whole and unread: the wire carries the object and never looks inside it, because the shapes recall and search answer in are the runtime's and are documented in the runtime's own docs, not here."},
+        "output": {"type": "object", "additionalProperties": true, "description": "What the tool answered, whole: search answers a SearchFound, which the app reads back; what recall answers is the runtime's shape, read by the model alone, and documented in the runtime's own docs."},
         "took_ms": {"type": "number", "description": "How long the lookup took, the search and the embedding included, in milliseconds. The worker's budget is 250."}
+      }
+    },
+    "SearchFound": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What search answers in a lookup's output: the best chunks of every base the agent reads, the best first. The app's `this.knowledge.search` hands the chunks to the tool that asked.",
+      "required": ["chunks"],
+      "properties": {
+        "chunks": {"type": "array", "items": {"$ref": "#/$defs/FoundChunk"}, "description": "The chunks found, best match first; empty when nothing reached the model."}
+      }
+    },
+    "FoundChunk": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One chunk search found: the file it came from, the heading it sits under, and its text.",
+      "required": ["path", "heading", "text"],
+      "properties": {
+        "path": {"type": "string", "description": "The file the chunk was cut from, as it was pushed: 'docs/horarios.md'."},
+        "heading": {"type": ["string", "null"], "description": "The heading the chunk sits under, or null for text above the first one."},
+        "text": {"type": "string", "description": "The chunk's text, its heading left out."}
       }
     },
     "Remembered": {
@@ -882,18 +904,6 @@
         "team": {"type": "boolean", "default": false, "description": "In the org's own corner of the sandbox rather than your own."}
       }
     },
-    "Promoted": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "POST /v1/agents/{slug}/settings/promote and POST /v1/lexicon/promote, the answer: the version the promotion wrote, and where.",
-      "required": ["world", "holder", "version", "run"],
-      "properties": {
-        "world": {"$ref": "defs.json#/$defs/Env"},
-        "holder": {"type": "string", "description": "The corner written: always the org's own, the empty string."},
-        "version": {"type": "integer", "description": "The new version in that corner."},
-        "run": {"type": ["string", "null"], "description": "The id of the eval run that gated a promotion to production, readable at GET /v1/evals/runs/{id}; null when no goldens ran."}
-      }
-    },
     "LexiconBody": {
       "type": "object",
       "additionalProperties": false,
@@ -963,27 +973,6 @@
         "lexicon_version": {"type": ["integer", "null"], "description": "The lexicon version the call ran on; null when its corner had set nothing."},
         "config": {"anyOf": [{"$ref": "#/$defs/TuningRow"}, {"type": "null"}], "description": "That version, whole."},
         "lexicon": {"anyOf": [{"$ref": "#/$defs/LexiconRow"}, {"type": "null"}], "description": "That version, whole."}
-      }
-    },
-    "KnowledgePromote": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "POST /v1/knowledge/{base}/promote, the body: the golden the base is held to before it reaches production, when there is one.",
-      "properties": {
-        "golden": {"$ref": "#/$defs/KnowledgeGolden"}
-      }
-    },
-    "KnowledgePromoted": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "POST /v1/knowledge/{base}/promote, the answer: the base as production now holds it, and the two recalls that gated it when a golden was sent.",
-      "required": ["base", "world", "chunks", "recall_before", "recall_after"],
-      "properties": {
-        "base": {"type": "string", "description": "The base's name."},
-        "world": {"$ref": "defs.json#/$defs/Env"},
-        "chunks": {"type": "integer", "description": "How many chunks production holds now."},
-        "recall_before": {"type": ["number", "null"], "description": "recall@k of the golden over production's base before the copy; null when production had none, or no golden was sent."},
-        "recall_after": {"type": ["number", "null"], "description": "recall@k of the golden over the base promoted; null when no golden was sent."}
       }
     },
     "KnowledgeUses": {

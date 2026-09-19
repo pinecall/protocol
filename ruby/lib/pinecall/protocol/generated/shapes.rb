@@ -650,7 +650,9 @@ module Pinecall
         "KnowledgePushed" => {
           base: { kind: :str, required: true },
           chunks: { kind: :int, required: true },
-          took_ms: { kind: :float, required: true }
+          took_ms: { kind: :float, required: true },
+          whole_tokens: { kind: :int, default: 0 },
+          notice: { kind: :str, null: true }
         }.freeze,
         "KnowledgeBase" => {
           base: { kind: :str, required: true },
@@ -743,6 +745,14 @@ module Pinecall
           output: { kind: :json, required: true },
           took_ms: { kind: :float, required: true }
         }.freeze,
+        "SearchFound" => {
+          chunks: { kind: :list, items: { kind: :ref, ref: "FoundChunk" }, required: true }
+        }.freeze,
+        "FoundChunk" => {
+          path: { kind: :str, required: true },
+          heading: { kind: :str, null: true, required: true },
+          text: { kind: :str, required: true }
+        }.freeze,
         "Remembered" => {
           ops: { kind: :int, required: true },
           took_ms: { kind: :float, required: true }
@@ -820,12 +830,6 @@ module Pinecall
           version: { kind: :int, required: true },
           team: { kind: :bool, default: false }
         }.freeze,
-        "Promoted" => {
-          world: { kind: :ref, ref: "Env", required: true },
-          holder: { kind: :str, required: true },
-          version: { kind: :int, required: true },
-          run: { kind: :str, null: true, required: true }
-        }.freeze,
         "LexiconBody" => {
           said: { kind: :list, items: { kind: :ref, ref: "Pronunciation" }, required: true },
           heard: { kind: :list, items: { kind: :str }, required: true }
@@ -860,16 +864,6 @@ module Pinecall
           lexicon_version: { kind: :int, null: true, required: true },
           config: { kind: :ref, null: true, ref: "TuningRow", required: true },
           lexicon: { kind: :ref, null: true, ref: "LexiconRow", required: true }
-        }.freeze,
-        "KnowledgePromote" => {
-          golden: { kind: :ref, ref: "KnowledgeGolden" }
-        }.freeze,
-        "KnowledgePromoted" => {
-          base: { kind: :str, required: true },
-          world: { kind: :ref, ref: "Env", required: true },
-          chunks: { kind: :int, required: true },
-          recall_before: { kind: :float, null: true, required: true },
-          recall_after: { kind: :float, null: true, required: true }
         }.freeze,
         "KnowledgeUses" => {
           bases: { kind: :list, items: { kind: :ref, ref: "KnowledgeUse" }, required: true }
