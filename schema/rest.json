@@ -794,6 +794,176 @@
         "trunk": {"type": "string", "description": "The SFU's own id for the org's outbound trunk, once there is one."},
         "address": {"type": "string", "description": "Where the box sends a call it places through this trunk."}
       }
+    },
+    "TuningBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "An agent's tuning: what the org set over what the app declared, per world and per corner. Every field is optional; one left out is not set, and what the app declared — or the runtime's own default — stands for it.",
+      "properties": {
+        "voice": {"type": "string", "description": "The voice that speaks: a curated name, or the vendor's own id when `tts` names the vendor."},
+        "tts": {"type": "string", "description": "The vendor that speaks, `cartesia` or `cartesia/sonic-3`: a bare vendor keeps its own default model."},
+        "tts_model": {"type": "string", "description": "The model the voice speaks with; wins over a model named in `tts`."},
+        "stt": {"type": "string", "description": "The ears: `vendor/model`, a vendor alone, or a model alone on whichever vendor is in use."},
+        "llm": {"type": "string", "description": "The model that decides: `vendor/model`, a vendor alone, or a model alone on whichever vendor is in use."},
+        "greeting": {"$ref": "defs.json#/$defs/GreetingConfig"},
+        "hangup": {"$ref": "defs.json#/$defs/HangupConfig"},
+        "turn": {"$ref": "defs.json#/$defs/TurnConfig"},
+        "memory": {"$ref": "defs.json#/$defs/MemoryConfig"},
+        "knowledge": {"type": "array", "items": {"$ref": "defs.json#/$defs/DocsConfig"}, "description": "The knowledge bases the agent answers from, each with how its chunks reach the model. The first is the one a turn retrieves from today."}
+      }
+    },
+    "TuningRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One kept version of an agent's tuning: whose corner, which version, who set it and when, and what it says.",
+      "required": ["holder", "version", "author", "note", "set_at", "config"],
+      "properties": {
+        "holder": {"type": "string", "description": "Whose corner: a member's id in the sandbox, or the empty string for the org's own."},
+        "version": {"type": "integer", "description": "This corner's version number, from 1, never reused."},
+        "author": {"type": "string", "description": "Who set it: the member, else the key's id; `migration` for a row the schema itself wrote."},
+        "note": {"type": ["string", "null"], "description": "Why, in the author's words, when they said."},
+        "set_at": {"type": "number", "description": "When it was set, unix seconds."},
+        "config": {"$ref": "#/$defs/TuningBody"}
+      }
+    },
+    "TuningAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/agents/{slug}/settings: the agent's tuning as this key sees it — its own corner's, the team's and production's, each corner's own newest row, or null when that corner set nothing.",
+      "required": ["world", "yours", "team", "production"],
+      "properties": {
+        "world": {"$ref": "defs.json#/$defs/Env"},
+        "yours": {"anyOf": [{"$ref": "#/$defs/TuningRow"}, {"type": "null"}], "description": "Your own sandbox corner's newest; null when you set nothing there, or the key holds no corner of its own."},
+        "team": {"anyOf": [{"$ref": "#/$defs/TuningRow"}, {"type": "null"}], "description": "The org's own corner of the key's world."},
+        "production": {"anyOf": [{"$ref": "#/$defs/TuningRow"}, {"type": "null"}], "description": "The org's own corner of production."}
+      }
+    },
+    "TuningPut": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/agents/{slug}/settings, the body: the whole set, the version it was read at, why, and whose corner.",
+      "required": ["config"],
+      "properties": {
+        "config": {"$ref": "#/$defs/TuningBody"},
+        "if_version": {"type": ["integer", "null"], "description": "The corner's version this set was written over; 409 when the corner has moved on since. Null skips the check."},
+        "note": {"type": ["string", "null"], "description": "Why, for the history."},
+        "team": {"type": "boolean", "default": false, "description": "Write the org's own corner of the sandbox rather than your own."}
+      }
+    },
+    "TuningHistory": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/agents/{slug}/settings/history: one corner's versions, newest first.",
+      "required": ["world", "holder", "rows"],
+      "properties": {
+        "world": {"$ref": "defs.json#/$defs/Env"},
+        "holder": {"type": "string", "description": "Whose corner the rows are: a member's id, or the empty string for the org's own."},
+        "rows": {"type": "array", "items": {"$ref": "#/$defs/TuningRow"}, "description": "Every version this corner kept, newest first."}
+      }
+    },
+    "TuningDiff": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/agents/{slug}/settings/diff: what this key's corner reads against another corner's newest, and which fields differ.",
+      "required": ["ours", "theirs", "changed"],
+      "properties": {
+        "ours": {"anyOf": [{"$ref": "#/$defs/TuningRow"}, {"type": "null"}], "description": "What the key's corner reads: its own newest, else the org's own."},
+        "theirs": {"anyOf": [{"$ref": "#/$defs/TuningRow"}, {"type": "null"}], "description": "The corner compared against."},
+        "changed": {"type": "array", "items": {"type": "string"}, "description": "The fields whose values differ, by name."}
+      }
+    },
+    "Rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/agents/{slug}/settings/rollback, the body: which version to bring back. It comes back as a NEW version; nothing is deleted.",
+      "required": ["version"],
+      "properties": {
+        "version": {"type": "integer", "description": "The version to copy forward."},
+        "team": {"type": "boolean", "default": false, "description": "In the org's own corner of the sandbox rather than your own."}
+      }
+    },
+    "Promoted": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/agents/{slug}/settings/promote and POST /v1/lexicon/promote, the answer: the version the promotion wrote, and where.",
+      "required": ["world", "holder", "version", "run"],
+      "properties": {
+        "world": {"$ref": "defs.json#/$defs/Env"},
+        "holder": {"type": "string", "description": "The corner written: always the org's own, the empty string."},
+        "version": {"type": "integer", "description": "The new version in that corner."},
+        "run": {"type": ["string", "null"], "description": "The id of the eval run that gated a promotion to production, readable at GET /v1/evals/runs/{id}; null when no goldens ran."}
+      }
+    },
+    "LexiconBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The org's lexicon: how the voice says the words it would get wrong, and the words the ears must know. Shared by every agent of the org, laid over each one's own says and hears.",
+      "required": ["said", "heard"],
+      "properties": {
+        "said": {"type": "array", "items": {"$ref": "defs.json#/$defs/Pronunciation"}, "description": "How each word is said: a brand, a surname, an acronym."},
+        "heard": {"type": "array", "items": {"type": "string"}, "description": "The words the ears must know, given to the STT as keyterms."}
+      }
+    },
+    "LexiconRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One kept version of the org's lexicon.",
+      "required": ["holder", "version", "author", "note", "set_at", "lexicon"],
+      "properties": {
+        "holder": {"type": "string", "description": "Whose corner: a member's id in the sandbox, or the empty string for the org's own."},
+        "version": {"type": "integer", "description": "This corner's version number, from 1, never reused."},
+        "author": {"type": "string", "description": "Who set it: the member, else the key's id."},
+        "note": {"type": ["string", "null"], "description": "Why, when they said."},
+        "set_at": {"type": "number", "description": "When it was set, unix seconds."},
+        "lexicon": {"$ref": "#/$defs/LexiconBody"}
+      }
+    },
+    "LexiconAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/lexicon: the org's words as this key sees them — its own corner's, the team's and production's, each corner's own newest, or null.",
+      "required": ["world", "yours", "team", "production"],
+      "properties": {
+        "world": {"$ref": "defs.json#/$defs/Env"},
+        "yours": {"anyOf": [{"$ref": "#/$defs/LexiconRow"}, {"type": "null"}], "description": "Your own sandbox corner's newest, or null."},
+        "team": {"anyOf": [{"$ref": "#/$defs/LexiconRow"}, {"type": "null"}], "description": "The org's own corner of the key's world."},
+        "production": {"anyOf": [{"$ref": "#/$defs/LexiconRow"}, {"type": "null"}], "description": "The org's own corner of production."}
+      }
+    },
+    "LexiconPut": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/lexicon, the body: the whole lexicon, the version it was read at, why, and whose corner.",
+      "required": ["lexicon"],
+      "properties": {
+        "lexicon": {"$ref": "#/$defs/LexiconBody"},
+        "if_version": {"type": ["integer", "null"], "description": "The corner's version this was written over; 409 when it moved on. Null skips the check."},
+        "note": {"type": ["string", "null"], "description": "Why, for the history."},
+        "team": {"type": "boolean", "default": false, "description": "Write the org's own corner of the sandbox rather than your own."}
+      }
+    },
+    "LexiconHistory": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/lexicon/history: one corner's versions, newest first.",
+      "required": ["world", "holder", "rows"],
+      "properties": {
+        "world": {"$ref": "defs.json#/$defs/Env"},
+        "holder": {"type": "string", "description": "Whose corner the rows are."},
+        "rows": {"type": "array", "items": {"$ref": "#/$defs/LexiconRow"}, "description": "Every version this corner kept, newest first."}
+      }
+    },
+    "CallTuning": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/calls/{call}/settings: the exact tuning and lexicon a call was built on, by the versions its head row recorded.",
+      "required": ["config_version", "lexicon_version", "config", "lexicon"],
+      "properties": {
+        "config_version": {"type": ["integer", "null"], "description": "The tuning version the call ran on; null when its corner had set nothing."},
+        "lexicon_version": {"type": ["integer", "null"], "description": "The lexicon version the call ran on; null when its corner had set nothing."},
+        "config": {"anyOf": [{"$ref": "#/$defs/TuningRow"}, {"type": "null"}], "description": "That version, whole."},
+        "lexicon": {"anyOf": [{"$ref": "#/$defs/LexiconRow"}, {"type": "null"}], "description": "That version, whole."}
+      }
     }
   }
 }

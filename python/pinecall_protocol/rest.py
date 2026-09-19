@@ -10,10 +10,16 @@ from pinecall_protocol.defs import (
     Contact,
     Cost,
     Direction,
+    DocsConfig,
     EndReason,
     Env,
+    GreetingConfig,
+    HangupConfig,
     KnowledgeFile,
+    MemoryConfig,
     PlatformTool,
+    Pronunciation,
+    TurnConfig,
 )
 from pinecall_protocol.envelope import Entry
 from pinecall_protocol.state import CallStatus, State
@@ -713,3 +719,152 @@ class OutboundProvisioned(WireModel):
     ready: bool
     trunk: str | None = None
     address: str | None = None
+
+
+# Every field is optional; one left out is not set, and what the app declared — or the runtime's own
+# default — stands for it.
+class TuningBody(WireModel):
+    """An agent's tuning: what the org set over what the app declared, per world and per corner."""
+
+    voice: str | None = None
+    tts: str | None = None
+    tts_model: str | None = None
+    stt: str | None = None
+    llm: str | None = None
+    greeting: GreetingConfig | None = None
+    hangup: HangupConfig | None = None
+    turn: TurnConfig | None = None
+    memory: MemoryConfig | None = None
+    knowledge: list[DocsConfig] | None = None
+
+
+# One kept version of an agent's tuning: whose corner, which version, who set it and when, and what
+# it says.
+class TuningRow(WireModel):
+    """One kept version of an agent's tuning."""
+
+    holder: str
+    version: int
+    author: str
+    note: str | None
+    set_at: float
+    config: TuningBody
+
+
+# GET /v1/agents/{slug}/settings: the agent's tuning as this key sees it — its own corner's, the
+# team's and production's, each corner's own newest row, or null when that corner set nothing.
+class TuningAnswer(WireModel):
+    """GET /v1/agents/{slug}/settings."""
+
+    world: Env
+    yours: TuningRow | None
+    team: TuningRow | None
+    production: TuningRow | None
+
+
+# PUT /v1/agents/{slug}/settings, the body: the whole set, the version it was read at, why, and
+# whose corner.
+class TuningPut(WireModel):
+    """PUT /v1/agents/{slug}/settings, the body."""
+
+    config: TuningBody
+    if_version: int | None = None
+    note: str | None = None
+    team: bool = False
+
+
+class TuningHistory(WireModel):
+    """GET /v1/agents/{slug}/settings/history: one corner's versions, newest first."""
+
+    world: Env
+    holder: str
+    rows: list[TuningRow]
+
+
+# GET /v1/agents/{slug}/settings/diff: what this key's corner reads against another corner's newest,
+# and which fields differ.
+class TuningDiff(WireModel):
+    """GET /v1/agents/{slug}/settings/diff."""
+
+    ours: TuningRow | None
+    theirs: TuningRow | None
+    changed: list[str]
+
+
+# It comes back as a NEW version; nothing is deleted.
+class Rollback(WireModel):
+    """POST /v1/agents/{slug}/settings/rollback, the body: which version to bring back."""
+
+    version: int
+    team: bool = False
+
+
+# POST /v1/agents/{slug}/settings/promote and POST /v1/lexicon/promote, the answer: the version the
+# promotion wrote, and where.
+class Promoted(WireModel):
+    """POST /v1/agents/{slug}/settings/promote and POST /v1/lexicon/promote, the answer."""
+
+    world: Env
+    holder: str
+    version: int
+    run: str | None
+
+
+# The org's lexicon: how the voice says the words it would get wrong, and the words the ears must
+# know. Shared by every agent of the org, laid over each one's own says and hears.
+class LexiconBody(WireModel):
+    """The org's lexicon."""
+
+    said: list[Pronunciation]
+    heard: list[str]
+
+
+class LexiconRow(WireModel):
+    """One kept version of the org's lexicon."""
+
+    holder: str
+    version: int
+    author: str
+    note: str | None
+    set_at: float
+    lexicon: LexiconBody
+
+
+# GET /v1/lexicon: the org's words as this key sees them — its own corner's, the team's and
+# production's, each corner's own newest, or null.
+class LexiconAnswer(WireModel):
+    """GET /v1/lexicon."""
+
+    world: Env
+    yours: LexiconRow | None
+    team: LexiconRow | None
+    production: LexiconRow | None
+
+
+# PUT /v1/lexicon, the body: the whole lexicon, the version it was read at, why, and whose corner.
+class LexiconPut(WireModel):
+    """PUT /v1/lexicon, the body."""
+
+    lexicon: LexiconBody
+    if_version: int | None = None
+    note: str | None = None
+    team: bool = False
+
+
+class LexiconHistory(WireModel):
+    """GET /v1/lexicon/history: one corner's versions, newest first."""
+
+    world: Env
+    holder: str
+    rows: list[LexiconRow]
+
+
+# GET /v1/calls/{call}/settings: the exact tuning and lexicon a call was built on, by the versions
+# its head row recorded.
+class CallTuning(WireModel):
+    """GET /v1/calls/{call}/settings."""
+
+    config_version: int | None
+    lexicon_version: int | None
+    config: TuningRow | None
+    lexicon: LexiconRow | None

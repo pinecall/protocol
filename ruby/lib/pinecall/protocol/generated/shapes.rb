@@ -772,6 +772,93 @@ module Pinecall
           trunk: { kind: :str },
           address: { kind: :str }
         }.freeze,
+        "TuningBody" => {
+          voice: { kind: :str },
+          tts: { kind: :str },
+          tts_model: { kind: :str },
+          stt: { kind: :str },
+          llm: { kind: :str },
+          greeting: { kind: :ref, ref: "GreetingConfig" },
+          hangup: { kind: :ref, ref: "HangupConfig" },
+          turn: { kind: :ref, ref: "TurnConfig" },
+          memory: { kind: :ref, ref: "MemoryConfig" },
+          knowledge: { kind: :list, items: { kind: :ref, ref: "DocsConfig" } }
+        }.freeze,
+        "TuningRow" => {
+          holder: { kind: :str, required: true },
+          version: { kind: :int, required: true },
+          author: { kind: :str, required: true },
+          note: { kind: :str, null: true, required: true },
+          set_at: { kind: :float, required: true },
+          config: { kind: :ref, ref: "TuningBody", required: true }
+        }.freeze,
+        "TuningAnswer" => {
+          world: { kind: :ref, ref: "Env", required: true },
+          yours: { kind: :ref, null: true, ref: "TuningRow", required: true },
+          team: { kind: :ref, null: true, ref: "TuningRow", required: true },
+          production: { kind: :ref, null: true, ref: "TuningRow", required: true }
+        }.freeze,
+        "TuningPut" => {
+          config: { kind: :ref, ref: "TuningBody", required: true },
+          if_version: { kind: :int, null: true },
+          note: { kind: :str, null: true },
+          team: { kind: :bool, default: false }
+        }.freeze,
+        "TuningHistory" => {
+          world: { kind: :ref, ref: "Env", required: true },
+          holder: { kind: :str, required: true },
+          rows: { kind: :list, items: { kind: :ref, ref: "TuningRow" }, required: true }
+        }.freeze,
+        "TuningDiff" => {
+          ours: { kind: :ref, null: true, ref: "TuningRow", required: true },
+          theirs: { kind: :ref, null: true, ref: "TuningRow", required: true },
+          changed: { kind: :list, items: { kind: :str }, required: true }
+        }.freeze,
+        "Rollback" => {
+          version: { kind: :int, required: true },
+          team: { kind: :bool, default: false }
+        }.freeze,
+        "Promoted" => {
+          world: { kind: :ref, ref: "Env", required: true },
+          holder: { kind: :str, required: true },
+          version: { kind: :int, required: true },
+          run: { kind: :str, null: true, required: true }
+        }.freeze,
+        "LexiconBody" => {
+          said: { kind: :list, items: { kind: :ref, ref: "Pronunciation" }, required: true },
+          heard: { kind: :list, items: { kind: :str }, required: true }
+        }.freeze,
+        "LexiconRow" => {
+          holder: { kind: :str, required: true },
+          version: { kind: :int, required: true },
+          author: { kind: :str, required: true },
+          note: { kind: :str, null: true, required: true },
+          set_at: { kind: :float, required: true },
+          lexicon: { kind: :ref, ref: "LexiconBody", required: true }
+        }.freeze,
+        "LexiconAnswer" => {
+          world: { kind: :ref, ref: "Env", required: true },
+          yours: { kind: :ref, null: true, ref: "LexiconRow", required: true },
+          team: { kind: :ref, null: true, ref: "LexiconRow", required: true },
+          production: { kind: :ref, null: true, ref: "LexiconRow", required: true }
+        }.freeze,
+        "LexiconPut" => {
+          lexicon: { kind: :ref, ref: "LexiconBody", required: true },
+          if_version: { kind: :int, null: true },
+          note: { kind: :str, null: true },
+          team: { kind: :bool, default: false }
+        }.freeze,
+        "LexiconHistory" => {
+          world: { kind: :ref, ref: "Env", required: true },
+          holder: { kind: :str, required: true },
+          rows: { kind: :list, items: { kind: :ref, ref: "LexiconRow" }, required: true }
+        }.freeze,
+        "CallTuning" => {
+          config_version: { kind: :int, null: true, required: true },
+          lexicon_version: { kind: :int, null: true, required: true },
+          config: { kind: :ref, null: true, ref: "TuningRow", required: true },
+          lexicon: { kind: :ref, null: true, ref: "LexiconRow", required: true }
+        }.freeze,
         "RoomOpened" => {
           name: { kind: :str, required: true },
           sid: { kind: :str, required: true },

@@ -279,6 +279,34 @@ module Pinecall
       type carrier_outbound = { ready: bool, kind: String?, from_numbers: Array[String], steps_missing: Array[String], guards: dial_guards }
       # POST /v1/carrier/outbound, the answer: the plan, and whether it was carried out.
       type outbound_provisioned = { steps: Array[String], dry_run: bool, ready: bool, ?trunk: String, ?address: String }
+      # An agent's tuning: what the org set over what the app declared, per world and per corner.
+      type tuning_body = { ?voice: String, ?tts: String, ?tts_model: String, ?stt: String, ?llm: String, ?greeting: greeting_config, ?hangup: hangup_config, ?turn: turn_config, ?memory: memory_config, ?knowledge: Array[docs_config] }
+      # One kept version of an agent's tuning: whose corner, which version, who set it and when, and what it says.
+      type tuning_row = { holder: String, version: Integer, author: String, note: String?, set_at: Float, config: tuning_body }
+      # GET /v1/agents/{slug}/settings: the agent's tuning as this key sees it — its own corner's, the team's and production's, each corner's own newest row, or null when that corner set nothing.
+      type tuning_answer = { world: env, yours: tuning_row?, team: tuning_row?, production: tuning_row? }
+      # PUT /v1/agents/{slug}/settings, the body: the whole set, the version it was read at, why, and whose corner.
+      type tuning_put = { config: tuning_body, ?if_version: Integer?, ?note: String?, ?team: bool }
+      # GET /v1/agents/{slug}/settings/history: one corner's versions, newest first.
+      type tuning_history = { world: env, holder: String, rows: Array[tuning_row] }
+      # GET /v1/agents/{slug}/settings/diff: what this key's corner reads against another corner's newest, and which fields differ.
+      type tuning_diff = { ours: tuning_row?, theirs: tuning_row?, changed: Array[String] }
+      # POST /v1/agents/{slug}/settings/rollback, the body: which version to bring back.
+      type rollback = { version: Integer, ?team: bool }
+      # POST /v1/agents/{slug}/settings/promote and POST /v1/lexicon/promote, the answer: the version the promotion wrote, and where.
+      type promoted = { world: env, holder: String, version: Integer, run: String? }
+      # The org's lexicon: how the voice says the words it would get wrong, and the words the ears must know.
+      type lexicon_body = { said: Array[pronunciation], heard: Array[String] }
+      # One kept version of the org's lexicon.
+      type lexicon_row = { holder: String, version: Integer, author: String, note: String?, set_at: Float, lexicon: lexicon_body }
+      # GET /v1/lexicon: the org's words as this key sees them — its own corner's, the team's and production's, each corner's own newest, or null.
+      type lexicon_answer = { world: env, yours: lexicon_row?, team: lexicon_row?, production: lexicon_row? }
+      # PUT /v1/lexicon, the body: the whole lexicon, the version it was read at, why, and whose corner.
+      type lexicon_put = { lexicon: lexicon_body, ?if_version: Integer?, ?note: String?, ?team: bool }
+      # GET /v1/lexicon/history: one corner's versions, newest first.
+      type lexicon_history = { world: env, holder: String, rows: Array[lexicon_row] }
+      # GET /v1/calls/{call}/settings: the exact tuning and lexicon a call was built on, by the versions its head row recorded.
+      type call_tuning = { config_version: Integer?, lexicon_version: Integer?, config: tuning_row?, lexicon: lexicon_row? }
       # The LiveKit room exists and the call lives in it.
       type room_opened = { name: String, sid: String, channel: channel }
       # Somebody joined the room: the caller over SIP or the widget, the agent, a supervisor, a listener, or a second SIP leg.

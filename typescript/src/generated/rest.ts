@@ -6,10 +6,16 @@ import {
   ContactSchema,
   CostSchema,
   DirectionSchema,
+  DocsConfigSchema,
   EndReasonSchema,
   EnvSchema,
+  GreetingConfigSchema,
+  HangupConfigSchema,
   KnowledgeFileSchema,
+  MemoryConfigSchema,
   PlatformToolSchema,
+  PronunciationSchema,
+  TurnConfigSchema,
 } from "./defs.js";
 import { EntrySchema } from "./envelope.js";
 import { CallStatusSchema, StateSchema } from "./state.js";
@@ -762,3 +768,163 @@ export const OutboundProvisionedSchema = z.strictObject({
   address: z.string().nullish(),
 });
 export type OutboundProvisioned = z.infer<typeof OutboundProvisionedSchema>;
+
+/**
+ * An agent's tuning: what the org set over what the app declared, per world and per corner. Every
+ * field is optional; one left out is not set, and what the app declared — or the runtime's own
+ * default — stands for it.
+ */
+export const TuningBodySchema = z.strictObject({
+  voice: z.string().nullish(),
+  tts: z.string().nullish(),
+  tts_model: z.string().nullish(),
+  stt: z.string().nullish(),
+  llm: z.string().nullish(),
+  greeting: GreetingConfigSchema.nullish(),
+  hangup: HangupConfigSchema.nullish(),
+  turn: TurnConfigSchema.nullish(),
+  memory: MemoryConfigSchema.nullish(),
+  knowledge: z.array(DocsConfigSchema).nullish(),
+});
+export type TuningBody = z.infer<typeof TuningBodySchema>;
+
+/**
+ * One kept version of an agent's tuning: whose corner, which version, who set it and when, and
+ * what it says.
+ */
+export const TuningRowSchema = z.strictObject({
+  holder: z.string(),
+  version: z.int(),
+  author: z.string(),
+  note: z.string().nullable(),
+  set_at: z.number(),
+  config: TuningBodySchema,
+});
+export type TuningRow = z.infer<typeof TuningRowSchema>;
+
+/**
+ * GET /v1/agents/{slug}/settings: the agent's tuning as this key sees it — its own corner's, the
+ * team's and production's, each corner's own newest row, or null when that corner set nothing.
+ */
+export const TuningAnswerSchema = z.strictObject({
+  world: EnvSchema,
+  yours: TuningRowSchema.nullable(),
+  team: TuningRowSchema.nullable(),
+  production: TuningRowSchema.nullable(),
+});
+export type TuningAnswer = z.infer<typeof TuningAnswerSchema>;
+
+/**
+ * PUT /v1/agents/{slug}/settings, the body: the whole set, the version it was read at, why, and
+ * whose corner.
+ */
+export const TuningPutSchema = z.strictObject({
+  config: TuningBodySchema,
+  if_version: z.int().nullable().nullish(),
+  note: z.string().nullable().nullish(),
+  team: z.boolean().nullish(),
+});
+export type TuningPut = z.infer<typeof TuningPutSchema>;
+
+/** GET /v1/agents/{slug}/settings/history: one corner's versions, newest first. */
+export const TuningHistorySchema = z.strictObject({
+  world: EnvSchema,
+  holder: z.string(),
+  rows: z.array(TuningRowSchema),
+});
+export type TuningHistory = z.infer<typeof TuningHistorySchema>;
+
+/**
+ * GET /v1/agents/{slug}/settings/diff: what this key's corner reads against another corner's
+ * newest, and which fields differ.
+ */
+export const TuningDiffSchema = z.strictObject({
+  ours: TuningRowSchema.nullable(),
+  theirs: TuningRowSchema.nullable(),
+  changed: z.array(z.string()),
+});
+export type TuningDiff = z.infer<typeof TuningDiffSchema>;
+
+/**
+ * POST /v1/agents/{slug}/settings/rollback, the body: which version to bring back. It comes back
+ * as a NEW version; nothing is deleted.
+ */
+export const RollbackSchema = z.strictObject({
+  version: z.int(),
+  team: z.boolean().nullish(),
+});
+export type Rollback = z.infer<typeof RollbackSchema>;
+
+/**
+ * POST /v1/agents/{slug}/settings/promote and POST /v1/lexicon/promote, the answer: the version
+ * the promotion wrote, and where.
+ */
+export const PromotedSchema = z.strictObject({
+  world: EnvSchema,
+  holder: z.string(),
+  version: z.int(),
+  run: z.string().nullable(),
+});
+export type Promoted = z.infer<typeof PromotedSchema>;
+
+/**
+ * The org's lexicon: how the voice says the words it would get wrong, and the words the ears must
+ * know. Shared by every agent of the org, laid over each one's own says and hears.
+ */
+export const LexiconBodySchema = z.strictObject({
+  said: z.array(PronunciationSchema),
+  heard: z.array(z.string()),
+});
+export type LexiconBody = z.infer<typeof LexiconBodySchema>;
+
+/** One kept version of the org's lexicon. */
+export const LexiconRowSchema = z.strictObject({
+  holder: z.string(),
+  version: z.int(),
+  author: z.string(),
+  note: z.string().nullable(),
+  set_at: z.number(),
+  lexicon: LexiconBodySchema,
+});
+export type LexiconRow = z.infer<typeof LexiconRowSchema>;
+
+/**
+ * GET /v1/lexicon: the org's words as this key sees them — its own corner's, the team's and
+ * production's, each corner's own newest, or null.
+ */
+export const LexiconAnswerSchema = z.strictObject({
+  world: EnvSchema,
+  yours: LexiconRowSchema.nullable(),
+  team: LexiconRowSchema.nullable(),
+  production: LexiconRowSchema.nullable(),
+});
+export type LexiconAnswer = z.infer<typeof LexiconAnswerSchema>;
+
+/** PUT /v1/lexicon, the body: the whole lexicon, the version it was read at, why, and whose corner. */
+export const LexiconPutSchema = z.strictObject({
+  lexicon: LexiconBodySchema,
+  if_version: z.int().nullable().nullish(),
+  note: z.string().nullable().nullish(),
+  team: z.boolean().nullish(),
+});
+export type LexiconPut = z.infer<typeof LexiconPutSchema>;
+
+/** GET /v1/lexicon/history: one corner's versions, newest first. */
+export const LexiconHistorySchema = z.strictObject({
+  world: EnvSchema,
+  holder: z.string(),
+  rows: z.array(LexiconRowSchema),
+});
+export type LexiconHistory = z.infer<typeof LexiconHistorySchema>;
+
+/**
+ * GET /v1/calls/{call}/settings: the exact tuning and lexicon a call was built on, by the versions
+ * its head row recorded.
+ */
+export const CallTuningSchema = z.strictObject({
+  config_version: z.int().nullable(),
+  lexicon_version: z.int().nullable(),
+  config: TuningRowSchema.nullable(),
+  lexicon: LexiconRowSchema.nullable(),
+});
+export type CallTuning = z.infer<typeof CallTuningSchema>;
