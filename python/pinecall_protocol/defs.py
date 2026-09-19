@@ -341,6 +341,7 @@ class KnowledgeFile(WireModel):
 
     path: str
     text: str
+    mode: Literal["retrieved", "whole"] = "retrieved"
 
 
 # It is named by the base it was pushed under, with PUT /v1/knowledge/{base}.
@@ -403,5 +404,6 @@ class AgentConfig(WireModel):
     memory: MemoryConfig | None = None
     hangup: HangupConfig | None = None
     tools: list[ToolSpec] | None = None
+    uses_knowledge: bool = False
     state_fields: list[StateFieldSpec] | None = None
     events: list[EventSpec] | None = None

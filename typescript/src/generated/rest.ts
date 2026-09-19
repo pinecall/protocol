@@ -928,3 +928,41 @@ export const CallTuningSchema = z.strictObject({
   lexicon: LexiconRowSchema.nullable(),
 });
 export type CallTuning = z.infer<typeof CallTuningSchema>;
+
+/**
+ * POST /v1/knowledge/{base}/promote, the body: the golden the base is held to before it reaches
+ * production, when there is one.
+ */
+export const KnowledgePromoteSchema = z.strictObject({
+  golden: KnowledgeGoldenSchema.nullish(),
+});
+export type KnowledgePromote = z.infer<typeof KnowledgePromoteSchema>;
+
+/**
+ * POST /v1/knowledge/{base}/promote, the answer: the base as production now holds it, and the two
+ * recalls that gated it when a golden was sent.
+ */
+export const KnowledgePromotedSchema = z.strictObject({
+  base: z.string(),
+  world: EnvSchema,
+  chunks: z.int(),
+  recall_before: z.number().nullable(),
+  recall_after: z.number().nullable(),
+});
+export type KnowledgePromoted = z.infer<typeof KnowledgePromotedSchema>;
+
+/** One base and the agents whose settings attach it. */
+export const KnowledgeUseSchema = z.strictObject({
+  base: z.string(),
+  agents: z.array(z.string()),
+});
+export type KnowledgeUse = z.infer<typeof KnowledgeUseSchema>;
+
+/**
+ * GET /v1/knowledge/attached: which agents read each base, off every agent's newest settings in
+ * this world.
+ */
+export const KnowledgeUsesSchema = z.strictObject({
+  bases: z.array(KnowledgeUseSchema),
+});
+export type KnowledgeUses = z.infer<typeof KnowledgeUsesSchema>;

@@ -354,6 +354,7 @@ One file of knowledge, sent whole: its path as the tenant keeps it, and its text
 |---|---|---|---|
 | `path` | `string` | yes | The file's path as the tenant keeps it, relative to the agent: 'knowledge/clinica.md', 'faq/horarios.md'. |
 | `text` | `string` | yes | The file's whole text, as the app read it from disk. |
+| `mode` | `"retrieved" | "whole"` | no | How the file reaches the model: retrieved, cut into chunks a turn searches; or whole, put entire into the static knowledge block of every call, cached ahead of everything. A base may hold both kinds. |
 
 ### `DocsConfig`
 
@@ -413,6 +414,7 @@ What an app declares about its agent: the voice, the models, the language, the g
 | `memory` | `MemoryConfig` | no | What memory keeps about a contact across calls, in the tenant's words, and what it must never keep. |
 | `hangup` | `HangupConfig` | no | Whether the model may end the call itself, and when. Absent: it may not, and only the caller or a supervisor ends a call. |
 | `tools` | `ToolSpec[]` | no | Every tool the agent may ever see. Which ones are visible now is tools.set. |
+| `uses_knowledge` | `boolean` | no | Whether the class searches the knowledge base itself (this.knowledge.search). A world with no base attached to the agent refuses the registration, so a tool that would find nothing is refused at boot and not on a call. |
 | `state_fields` | `StateFieldSpec[]` | no | Who may see each field of the app's state. A field not listed is tenant: seen by the tenant's readers, never by the public. |
 | `events` | `EventSpec[]` | no | The outside events this agent accepts and from whom. Anything else is refused before it touches the log. |
 

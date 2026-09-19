@@ -340,6 +340,7 @@ export type EventSpec = z.infer<typeof EventSpecSchema>;
 export const KnowledgeFileSchema = z.strictObject({
   path: z.string(),
   text: z.string(),
+  mode: z.enum(["retrieved", "whole"]).nullish(),
 });
 export type KnowledgeFile = z.infer<typeof KnowledgeFileSchema>;
 
@@ -411,6 +412,7 @@ export const AgentConfigSchema = z.strictObject({
   memory: MemoryConfigSchema.nullish(),
   hangup: HangupConfigSchema.nullish(),
   tools: z.array(ToolSpecSchema).nullish(),
+  uses_knowledge: z.boolean().nullish(),
   state_fields: z.array(StateFieldSpecSchema).nullish(),
   events: z.array(EventSpecSchema).nullish(),
 });

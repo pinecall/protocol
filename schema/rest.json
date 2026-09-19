@@ -964,6 +964,46 @@
         "config": {"anyOf": [{"$ref": "#/$defs/TuningRow"}, {"type": "null"}], "description": "That version, whole."},
         "lexicon": {"anyOf": [{"$ref": "#/$defs/LexiconRow"}, {"type": "null"}], "description": "That version, whole."}
       }
+    },
+    "KnowledgePromote": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/knowledge/{base}/promote, the body: the golden the base is held to before it reaches production, when there is one.",
+      "properties": {
+        "golden": {"$ref": "#/$defs/KnowledgeGolden"}
+      }
+    },
+    "KnowledgePromoted": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/knowledge/{base}/promote, the answer: the base as production now holds it, and the two recalls that gated it when a golden was sent.",
+      "required": ["base", "world", "chunks", "recall_before", "recall_after"],
+      "properties": {
+        "base": {"type": "string", "description": "The base's name."},
+        "world": {"$ref": "defs.json#/$defs/Env"},
+        "chunks": {"type": "integer", "description": "How many chunks production holds now."},
+        "recall_before": {"type": ["number", "null"], "description": "recall@k of the golden over production's base before the copy; null when production had none, or no golden was sent."},
+        "recall_after": {"type": ["number", "null"], "description": "recall@k of the golden over the base promoted; null when no golden was sent."}
+      }
+    },
+    "KnowledgeUses": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/knowledge/attached: which agents read each base, off every agent's newest settings in this world.",
+      "required": ["bases"],
+      "properties": {
+        "bases": {"type": "array", "items": {"$ref": "#/$defs/KnowledgeUse"}, "description": "One row per base any agent reads."}
+      }
+    },
+    "KnowledgeUse": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One base and the agents whose settings attach it.",
+      "required": ["base", "agents"],
+      "properties": {
+        "base": {"type": "string", "description": "The base's name."},
+        "agents": {"type": "array", "items": {"type": "string"}, "description": "The agents that read it, by slug."}
+      }
     }
   }
 }

@@ -82,7 +82,7 @@ module Pinecall
       # One outside event the agent accepts, and from whom.
       type event_spec = { name: String, from: Array[event_source] }
       # One file of knowledge, sent whole: its path as the tenant keeps it, and its text.
-      type knowledge_file = { path: String, text: String }
+      type knowledge_file = { path: String, text: String, ?mode: "retrieved" | "whole" }
       # The knowledge base the agent answers from, and how its chunks reach the model.
       type docs_config = { base: String, ?mode: docs_mode, ?k: Integer, ?min_score: Float }
       # How the agent opens a call, before the caller has said anything.
@@ -92,7 +92,7 @@ module Pinecall
       # What memory keeps about a contact across calls, and what it must never keep.
       type memory_config = { ?remember: Array[String], ?forget: Array[String] }
       # What an app declares about its agent: the voice, the models, the language, the greeting, the tools, and who may see and send what.
-      type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: greeting_config, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?knowledge: knowledge_file, ?docs: docs_config, ?memory: memory_config, ?hangup: hangup_config, ?tools: Array[tool_spec], ?state_fields: Array[state_field_spec], ?events: Array[event_spec] }
+      type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: greeting_config, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?knowledge: knowledge_file, ?docs: docs_config, ?memory: memory_config, ?hangup: hangup_config, ?tools: Array[tool_spec], ?uses_knowledge: bool, ?state_fields: Array[state_field_spec], ?events: Array[event_spec] }
       # One line of a call's log, or of an agent's log when call is null.
       type entry = { seq: Integer, ts: Float, call: String?, agent: String, type: String, ephemeral: bool, data: Hash[Symbol, untyped] }
       # One instruction from an app to the gateway over its WebSocket.
@@ -307,6 +307,14 @@ module Pinecall
       type lexicon_history = { world: env, holder: String, rows: Array[lexicon_row] }
       # GET /v1/calls/{call}/settings: the exact tuning and lexicon a call was built on, by the versions its head row recorded.
       type call_tuning = { config_version: Integer?, lexicon_version: Integer?, config: tuning_row?, lexicon: lexicon_row? }
+      # POST /v1/knowledge/{base}/promote, the body: the golden the base is held to before it reaches production, when there is one.
+      type knowledge_promote = { ?golden: knowledge_golden }
+      # POST /v1/knowledge/{base}/promote, the answer: the base as production now holds it, and the two recalls that gated it when a golden was sent.
+      type knowledge_promoted = { base: String, world: env, chunks: Integer, recall_before: Float?, recall_after: Float? }
+      # GET /v1/knowledge/attached: which agents read each base, off every agent's newest settings in this world.
+      type knowledge_uses = { bases: Array[knowledge_use] }
+      # One base and the agents whose settings attach it.
+      type knowledge_use = { base: String, agents: Array[String] }
       # The LiveKit room exists and the call lives in it.
       type room_opened = { name: String, sid: String, channel: channel }
       # Somebody joined the room: the caller over SIP or the widget, the agent, a supervisor, a listener, or a second SIP leg.

@@ -120,7 +120,8 @@ module Pinecall
         }.freeze,
         "KnowledgeFile" => {
           path: { kind: :str, required: true },
-          text: { kind: :str, required: true }
+          text: { kind: :str, required: true },
+          mode: { kind: :enum, values: %w[retrieved whole], default: "retrieved" }
         }.freeze,
         "DocsConfig" => {
           base: { kind: :str, required: true },
@@ -155,6 +156,7 @@ module Pinecall
           memory: { kind: :ref, ref: "MemoryConfig" },
           hangup: { kind: :ref, ref: "HangupConfig" },
           tools: { kind: :list, items: { kind: :ref, ref: "ToolSpec" } },
+          uses_knowledge: { kind: :bool, default: false },
           state_fields: { kind: :list, items: { kind: :ref, ref: "StateFieldSpec" } },
           events: { kind: :list, items: { kind: :ref, ref: "EventSpec" } }
         }.freeze,
@@ -858,6 +860,23 @@ module Pinecall
           lexicon_version: { kind: :int, null: true, required: true },
           config: { kind: :ref, null: true, ref: "TuningRow", required: true },
           lexicon: { kind: :ref, null: true, ref: "LexiconRow", required: true }
+        }.freeze,
+        "KnowledgePromote" => {
+          golden: { kind: :ref, ref: "KnowledgeGolden" }
+        }.freeze,
+        "KnowledgePromoted" => {
+          base: { kind: :str, required: true },
+          world: { kind: :ref, ref: "Env", required: true },
+          chunks: { kind: :int, required: true },
+          recall_before: { kind: :float, null: true, required: true },
+          recall_after: { kind: :float, null: true, required: true }
+        }.freeze,
+        "KnowledgeUses" => {
+          bases: { kind: :list, items: { kind: :ref, ref: "KnowledgeUse" }, required: true }
+        }.freeze,
+        "KnowledgeUse" => {
+          base: { kind: :str, required: true },
+          agents: { kind: :list, items: { kind: :str }, required: true }
         }.freeze,
         "RoomOpened" => {
           name: { kind: :str, required: true },

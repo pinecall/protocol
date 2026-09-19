@@ -868,3 +868,38 @@ class CallTuning(WireModel):
     lexicon_version: int | None
     config: TuningRow | None
     lexicon: LexiconRow | None
+
+
+# POST /v1/knowledge/{base}/promote, the body: the golden the base is held to before it reaches
+# production, when there is one.
+class KnowledgePromote(WireModel):
+    """POST /v1/knowledge/{base}/promote, the body."""
+
+    golden: KnowledgeGolden | None = None
+
+
+# POST /v1/knowledge/{base}/promote, the answer: the base as production now holds it, and the two
+# recalls that gated it when a golden was sent.
+class KnowledgePromoted(WireModel):
+    """POST /v1/knowledge/{base}/promote, the answer."""
+
+    base: str
+    world: Env
+    chunks: int
+    recall_before: float | None
+    recall_after: float | None
+
+
+class KnowledgeUse(WireModel):
+    """One base and the agents whose settings attach it."""
+
+    base: str
+    agents: list[str]
+
+
+# GET /v1/knowledge/attached: which agents read each base, off every agent's newest settings in this
+# world.
+class KnowledgeUses(WireModel):
+    """GET /v1/knowledge/attached."""
+
+    bases: list[KnowledgeUse]
