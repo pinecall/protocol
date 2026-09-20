@@ -28,11 +28,11 @@ export type Env = z.infer<typeof EnvSchema>;
  * What a console may ask of the process standing in the agent's directory, relayed by the gateway:
  * a written call to the class mounted there (chat), a simulated caller put on the class it holds,
  * its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory
- * goldens, a call promoted to a candidate file, the drift of the last two windows, and the
- * reproductions a broken run left on that disk. Everything else a console needs is a door of the
- * gateway.
+ * goldens, the panel it draws beside a conversation (view), a call promoted to a candidate file,
+ * the drift of the last two windows, and the reproductions a broken run left on that disk.
+ * Everything else a console needs is a door of the gateway.
  */
-export const DevVerbSchema = z.enum(["chat.roster", "chat.start", "chat.say", "chat.end", "simulate.start", "goldens.roster", "goldens.run", "knowledge.roster", "knowledge.push", "knowledge.eval", "memory.roster", "memory.eval", "memory.extraction", "promote.roster", "promote.write", "drift.read", "reproductions.roster", "reproductions.read"]);
+export const DevVerbSchema = z.enum(["chat.roster", "chat.start", "chat.say", "chat.end", "view.render", "simulate.start", "goldens.roster", "goldens.run", "knowledge.roster", "knowledge.push", "knowledge.eval", "memory.roster", "memory.eval", "memory.extraction", "promote.roster", "promote.write", "drift.read", "reproductions.roster", "reproductions.read"]);
 export type DevVerb = z.infer<typeof DevVerbSchema>;
 
 /**
@@ -328,6 +328,17 @@ export const StateFieldSpecSchema = z.strictObject({
 export type StateFieldSpec = z.infer<typeof StateFieldSpecSchema>;
 
 /**
+ * The panel the agent draws beside a conversation: it is declared here so a console knows the
+ * agent has one before it asks for it, and draws its own about the contact when it has not. What
+ * the panel CONTAINS never comes this way — it is asked for a conversation at a time, through the
+ * view.render dev verb.
+ */
+export const ViewSpecSchema = z.strictObject({
+  name: z.string(),
+});
+export type ViewSpec = z.infer<typeof ViewSpecSchema>;
+
+/**
  * One outside event the agent accepts, and from whom. An event nobody declared is refused before
  * it touches the log.
  */
@@ -416,6 +427,7 @@ export const AgentConfigSchema = z.strictObject({
   tools: z.array(ToolSpecSchema).nullish(),
   uses_knowledge: z.boolean().nullish(),
   state_fields: z.array(StateFieldSpecSchema).nullish(),
+  view: ViewSpecSchema.nullish(),
   events: z.array(EventSpecSchema).nullish(),
 });
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;

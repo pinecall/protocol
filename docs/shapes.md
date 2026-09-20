@@ -49,9 +49,9 @@ One of: `production`, `sandbox`.
 
 ### `DevVerb`
 
-What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller put on the class it holds, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk. Everything else a console needs is a door of the gateway.
+What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller put on the class it holds, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, the panel it draws beside a conversation (view), a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk. Everything else a console needs is a door of the gateway.
 
-One of: `chat.roster`, `chat.start`, `chat.say`, `chat.end`, `simulate.start`, `goldens.roster`, `goldens.run`, `knowledge.roster`, `knowledge.push`, `knowledge.eval`, `memory.roster`, `memory.eval`, `memory.extraction`, `promote.roster`, `promote.write`, `drift.read`, `reproductions.roster`, `reproductions.read`.
+One of: `chat.roster`, `chat.start`, `chat.say`, `chat.end`, `view.render`, `simulate.start`, `goldens.roster`, `goldens.run`, `knowledge.roster`, `knowledge.push`, `knowledge.eval`, `memory.roster`, `memory.eval`, `memory.extraction`, `promote.roster`, `promote.write`, `drift.read`, `reproductions.roster`, `reproductions.read`.
 
 ### `EndReason`
 
@@ -338,6 +338,14 @@ What the app declares about one field of its state: who may see it. A field neve
 | `name` | `string` | yes | The field's name in the app's state, as state.set sends it: patient, slots. |
 | `visibility` | `Visibility` | yes | Who may see a field of the app's state: everyone in the call (public), the tenant's own readers (tenant, the default for a field never declared), or nobody without masking (pii). |
 
+### `ViewSpec`
+
+The panel the agent draws beside a conversation: it is declared here so a console knows the agent has one before it asks for it, and draws its own about the contact when it has not. What the panel CONTAINS never comes this way — it is asked for a conversation at a time, through the view.render dev verb.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `name` | `string` | yes | What the panel is called over its first section: Customer, Order, Patient. |
+
 ### `EventSpec`
 
 One outside event the agent accepts, and from whom. An event nobody declared is refused before it touches the log.
@@ -416,6 +424,7 @@ What an app declares about its agent: the prompt's layout, the language, the too
 | `tools` | `ToolSpec[]` | no | Every tool the agent may ever see. Which ones are visible now is tools.set. |
 | `uses_knowledge` | `boolean` | no | Whether the class searches the knowledge base itself (this.knowledge.search). A world with no base attached to the agent refuses the registration, so a tool that would find nothing is refused at boot and not on a call. |
 | `state_fields` | `StateFieldSpec[]` | no | Who may see each field of the app's state. A field not listed is tenant: seen by the tenant's readers, never by the public. |
+| `view` | `ViewSpec` | no | The panel this agent draws beside a conversation, or absent when it draws none. |
 | `events` | `EventSpec[]` | no | The outside events this agent accepts and from whom. Anything else is refused before it touches the log. |
 
 <!-- generated:end -->

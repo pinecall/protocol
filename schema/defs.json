@@ -7,7 +7,7 @@
     "Channel": {"type": "string", "enum": ["phone", "web", "whatsapp"], "description": "The door the public came through: a phone call over SIP, the browser widget over WebRTC, or WhatsApp text."},
     "Direction": {"type": "string", "enum": ["inbound", "outbound"], "description": "Inbound: the public reached the agent. Outbound: the agent reached out (a dial)."},
     "Env": {"type": "string", "enum": ["production", "sandbox"], "description": "Which of the two worlds a key opens, and so which world an agent is held in and a call ran in. A key is issued into one; an agent registered on it and every call it takes carry that one; a door claimed in one is refused to a key of the other. `sandbox` is where things are written and `production` is what the public reaches \u2014 and whether a sandbox agent is one PERSON's copy or the team's shared one is not this field: it is whether the key that registered it names a person. Every key issued before the field existed is production."},
-    "DevVerb": {"type": "string", "enum": ["chat.roster", "chat.start", "chat.say", "chat.end", "simulate.start", "goldens.roster", "goldens.run", "knowledge.roster", "knowledge.push", "knowledge.eval", "memory.roster", "memory.eval", "memory.extraction", "promote.roster", "promote.write", "drift.read", "reproductions.roster", "reproductions.read"], "description": "What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller put on the class it holds, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk. Everything else a console needs is a door of the gateway."},
+    "DevVerb": {"type": "string", "enum": ["chat.roster", "chat.start", "chat.say", "chat.end", "view.render", "simulate.start", "goldens.roster", "goldens.run", "knowledge.roster", "knowledge.push", "knowledge.eval", "memory.roster", "memory.eval", "memory.extraction", "promote.roster", "promote.write", "drift.read", "reproductions.roster", "reproductions.read"], "description": "What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller put on the class it holds, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, the panel it draws beside a conversation (view), a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk. Everything else a console needs is a door of the gateway."},
     "EndReason": {"type": "string", "enum": ["caller_hung_up", "agent_hung_up", "supervisor_ended", "transferred", "no_answer", "busy", "dial_failed", "timeout", "drained", "app_detached", "error"], "description": "Why the call is over. Who hung up, what failed before anybody could, drained: the platform took the worker down (a deploy, a stop) with the call still on it, or app_detached: the app holding the agent closed its socket mid-call, so nothing was rendering the prompt or answering a tool — both are nobody's fault and neither is an error."},
     "EndedBy": {"type": "string", "enum": ["caller", "agent", "supervisor", "platform"], "description": "Whose action ended the call. platform covers timeouts, errors and a drained worker."},
     "ScoreVerdict": {"type": "string", "enum": ["held", "broken", "deferred", "skipped"], "description": "What one judge answered about a finished call. Held: the rule held. Broken: it did not, and the reason names the evidence. Deferred: the judge was asked and could not settle it. Skipped: nobody asked it — no model was reachable inside the call's judging budget."},
@@ -233,6 +233,15 @@
       "required": ["name", "visibility"],
       "additionalProperties": false
     },
+    "ViewSpec": {
+      "type": "object",
+      "description": "The panel the agent draws beside a conversation: it is declared here so a console knows the agent has one before it asks for it, and draws its own about the contact when it has not. What the panel CONTAINS never comes this way \u2014 it is asked for a conversation at a time, through the view.render dev verb.",
+      "properties": {
+        "name": {"type": "string", "description": "What the panel is called over its first section: Customer, Order, Patient."}
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
     "EventSpec": {
       "type": "object",
       "description": "One outside event the agent accepts, and from whom. An event nobody declared is refused before it touches the log.",
@@ -312,6 +321,7 @@
         "tools": {"type": "array", "items": {"$ref": "#/$defs/ToolSpec"}, "description": "Every tool the agent may ever see. Which ones are visible now is tools.set."},
         "uses_knowledge": {"type": "boolean", "default": false, "description": "Whether the class searches the knowledge base itself (this.knowledge.search). A world with no base attached to the agent refuses the registration, so a tool that would find nothing is refused at boot and not on a call."},
         "state_fields": {"type": "array", "items": {"$ref": "#/$defs/StateFieldSpec"}, "description": "Who may see each field of the app's state. A field not listed is tenant: seen by the tenant's readers, never by the public."},
+        "view": {"$ref": "#/$defs/ViewSpec", "description": "The panel this agent draws beside a conversation, or absent when it draws none."},
         "events": {"type": "array", "items": {"$ref": "#/$defs/EventSpec"}, "description": "The outside events this agent accepts and from whom. Anything else is refused before it touches the log."}
       },
       "additionalProperties": false

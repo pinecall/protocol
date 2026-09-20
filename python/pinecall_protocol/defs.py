@@ -27,13 +27,15 @@ type Env = Literal["production", "sandbox"]
 # What a console may ask of the process standing in the agent's directory, relayed by the gateway: a
 # written call to the class mounted there (chat), a simulated caller put on the class it holds, its
 # goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens,
-# a call promoted to a candidate file, the drift of the last two windows, and the reproductions a
-# broken run left on that disk. Everything else a console needs is a door of the gateway.
+# the panel it draws beside a conversation (view), a call promoted to a candidate file, the drift of
+# the last two windows, and the reproductions a broken run left on that disk. Everything else a
+# console needs is a door of the gateway.
 type DevVerb = Literal[
     "chat.roster",
     "chat.start",
     "chat.say",
     "chat.end",
+    "view.render",
     "simulate.start",
     "goldens.roster",
     "goldens.run",
@@ -328,6 +330,16 @@ class StateFieldSpec(WireModel):
     visibility: Visibility
 
 
+# The panel the agent draws beside a conversation: it is declared here so a console knows the agent
+# has one before it asks for it, and draws its own about the contact when it has not. What the panel
+# CONTAINS never comes this way — it is asked for a conversation at a time, through the view.render
+# dev verb.
+class ViewSpec(WireModel):
+    """The panel the agent draws beside a conversation."""
+
+    name: str
+
+
 # An event nobody declared is refused before it touches the log.
 class EventSpec(WireModel):
     """One outside event the agent accepts, and from whom."""
@@ -408,4 +420,5 @@ class AgentConfig(WireModel):
     tools: list[ToolSpec] | None = None
     uses_knowledge: bool = False
     state_fields: list[StateFieldSpec] | None = None
+    view: ViewSpec | None = None
     events: list[EventSpec] | None = None

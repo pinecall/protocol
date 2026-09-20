@@ -11,8 +11,8 @@ module Pinecall
       type direction = "inbound" | "outbound"
       # Which of the two worlds a key opens, and so which world an agent is held in and a call ran in.
       type env = "production" | "sandbox"
-      # What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller put on the class it holds, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk.
-      type dev_verb = "chat.roster" | "chat.start" | "chat.say" | "chat.end" | "simulate.start" | "goldens.roster" | "goldens.run" | "knowledge.roster" | "knowledge.push" | "knowledge.eval" | "memory.roster" | "memory.eval" | "memory.extraction" | "promote.roster" | "promote.write" | "drift.read" | "reproductions.roster" | "reproductions.read"
+      # What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller put on the class it holds, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, the panel it draws beside a conversation (view), a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk.
+      type dev_verb = "chat.roster" | "chat.start" | "chat.say" | "chat.end" | "view.render" | "simulate.start" | "goldens.roster" | "goldens.run" | "knowledge.roster" | "knowledge.push" | "knowledge.eval" | "memory.roster" | "memory.eval" | "memory.extraction" | "promote.roster" | "promote.write" | "drift.read" | "reproductions.roster" | "reproductions.read"
       # Why the call is over.
       type end_reason = "caller_hung_up" | "agent_hung_up" | "supervisor_ended" | "transferred" | "no_answer" | "busy" | "dial_failed" | "timeout" | "drained" | "app_detached" | "error"
       # Whose action ended the call.
@@ -79,6 +79,8 @@ module Pinecall
       type pronunciation = { word: String, spoken: String }
       # What the app declares about one field of its state: who may see it.
       type state_field_spec = { name: String, visibility: visibility }
+      # The panel the agent draws beside a conversation: it is declared here so a console knows the agent has one before it asks for it, and draws its own about the contact when it has not.
+      type view_spec = { name: String }
       # One outside event the agent accepts, and from whom.
       type event_spec = { name: String, from: Array[event_source] }
       # One file of a base, as a push sends it: its path as the tenant keeps it, and its text.
@@ -92,7 +94,7 @@ module Pinecall
       # What memory keeps about a contact across calls, and what it must never keep.
       type memory_config = { ?remember: Array[String], ?forget: Array[String] }
       # What an app declares about its agent: the prompt's layout, the language, the tools, whether it searches its bases itself, and who may see and send what.
-      type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: greeting_config, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?knowledge: knowledge_file, ?docs: docs_config, ?memory: memory_config, ?hangup: hangup_config, ?tools: Array[tool_spec], ?uses_knowledge: bool, ?state_fields: Array[state_field_spec], ?events: Array[event_spec] }
+      type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: greeting_config, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?knowledge: knowledge_file, ?docs: docs_config, ?memory: memory_config, ?hangup: hangup_config, ?tools: Array[tool_spec], ?uses_knowledge: bool, ?state_fields: Array[state_field_spec], ?view: view_spec, ?events: Array[event_spec] }
       # One line of a call's log, or of an agent's log when call is null.
       type entry = { seq: Integer, ts: Float, call: String?, agent: String, type: String, ephemeral: bool, data: Hash[Symbol, untyped] }
       # One instruction from an app to the gateway over its WebSocket.

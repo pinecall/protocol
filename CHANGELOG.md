@@ -6,6 +6,10 @@ packages from it, and the notes of a GitHub release are the section below it.
 ## Unreleased
 
 ### Added
+- **`AgentConfig.view` and the `view.render` dev verb**: the panel an agent draws beside a
+  conversation. The declaration is one name, so a console knows the agent has a panel before it
+  asks for one and draws its own about the contact when it has not; what the panel CONTAINS is
+  asked for a conversation at a time, through the verb, and never travels in the declaration.
 - **`DocSource.base`**: which knowledge base a retrieved chunk came from. An agent reads every
   base its world attached to it and a turn searches them together, so `docs.sources` was the one
   place that could say which collection answered a question — and it did not. Optional, because a

@@ -115,6 +115,9 @@ module Pinecall
           name: { kind: :str, required: true },
           visibility: { kind: :ref, ref: "Visibility", required: true }
         }.freeze,
+        "ViewSpec" => {
+          name: { kind: :str, required: true }
+        }.freeze,
         "EventSpec" => {
           name: { kind: :str, required: true },
           from: { kind: :list, items: { kind: :ref, ref: "EventSource" }, required: true }
@@ -158,6 +161,7 @@ module Pinecall
           tools: { kind: :list, items: { kind: :ref, ref: "ToolSpec" } },
           uses_knowledge: { kind: :bool, default: false },
           state_fields: { kind: :list, items: { kind: :ref, ref: "StateFieldSpec" } },
+          view: { kind: :ref, ref: "ViewSpec" },
           events: { kind: :list, items: { kind: :ref, ref: "EventSpec" } }
         }.freeze,
         "Entry" => {
