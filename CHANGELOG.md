@@ -3,7 +3,7 @@
 The contract, version by version. A release is a `v*` tag: `release.yml` publishes the three
 packages from it, and the notes of a GitHub release are the section below it.
 
-## Unreleased
+## 0.6.2 — A persona is the org's, and a call says who is playing it
 
 ### Changed
 - **`Persona` is the ORG's, and its doors say so.** The family loses nothing, but the paths do:
