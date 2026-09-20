@@ -5,6 +5,8 @@ packages from it, and the notes of a GitHub release are the section below it.
 
 ## Unreleased
 
+## 0.6.3 — Which base answered, and the panel an agent draws
+
 ### Added
 - **`AgentConfig.view` and the `view.render` dev verb**: the panel an agent draws beside a
   conversation. The declaration is one name, so a console knows the agent has a panel before it

@@ -1,6 +1,6 @@
 {
   "name": "@pinecall/protocol",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "The Pinecall wire: zod schemas and types generated from the protocol schema, and the log reducer",
   "license": "Apache-2.0",
   "author": "Pinecall <hello@pinecall.io>",
