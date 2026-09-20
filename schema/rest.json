@@ -204,7 +204,7 @@
         "call": {"type": "string", "description": "The call it belongs to: its log is the whole of it."},
         "channel": {"$ref": "defs.json#/$defs/Channel"},
         "duration_s": {"type": ["number", "null"], "description": "A spoken call's length, seconds; null while it is live."},
-        "answered": {"type": "boolean", "description": "A spoken call's: whether it ever came up."}
+        "answered": {"type": ["boolean", "null"], "description": "A spoken call's: whether it ever came up. Null on a written message."}
       }
     },
     "Thread": {
@@ -438,7 +438,7 @@
       "properties": {
         "slug": {"type": "string", "description": "The agent's slug, which every other door takes."},
         "channels": {"type": "array", "items": {"$ref": "defs.json#/$defs/Channel"}, "description": "The doors it answers on, sorted."},
-        "holder": {"$ref": "#/$defs/LineHolder", "description": "Whose copy this is: the member holding it in their sandbox, by id and by the address a person reads. Absent for the ORG's \u2014 what a machine key holds, which is production, and which in a sandbox is the team's shared one. A key that opens `team` is shown every member's; every other key is shown its own and the org's."}
+        "holder": {"anyOf": [{"$ref": "#/$defs/LineHolder"}, {"type": "null"}], "description": "Whose copy this is: the member holding it in their sandbox, by id and by the address a person reads. Absent for the ORG's \u2014 what a machine key holds, which is production, and which in a sandbox is the team's shared one. A key that opens `team` is shown every member's; every other key is shown its own and the org's."}
       }
     },
     "AgentList": {
@@ -504,7 +504,7 @@
         "agent": {"type": "string", "description": "The agent whose ringing doors these are."},
         "env": {"$ref": "defs.json#/$defs/Env", "description": "The world. Production has one corner and always holds its own line."},
         "held": {"type": "boolean", "description": "Whether any corner is answering the ring at all. False means a call at the number reaches nobody."},
-        "holding": {"$ref": "#/$defs/LineHolder", "description": "The corner answering it. Absent when nobody is."},
+        "holding": {"anyOf": [{"$ref": "#/$defs/LineHolder"}, {"type": "null"}], "description": "The corner answering it. Null when nobody is."},
         "yours": {"type": "boolean", "description": "Whether the line is this key's corner, so a terminal knows to say 'you' rather than a name."},
         "waiting": {"type": "array", "items": {"$ref": "#/$defs/LineHolder"}, "description": "Every other corner holding this agent that could claim it, newest claim first."},
         "calling": {"type": "array", "items": {"type": "string"}, "description": "The numbers whose calls reach the ASKING corner directly, whoever holds the line. A developer says which phone is theirs once and every call they make lands in their own corner."}

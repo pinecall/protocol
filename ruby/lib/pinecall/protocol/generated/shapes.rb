@@ -487,7 +487,7 @@ module Pinecall
           call: { kind: :str, required: true },
           channel: { kind: :ref, ref: "Channel", required: true },
           duration_s: { kind: :float, null: true },
-          answered: { kind: :bool }
+          answered: { kind: :bool, null: true }
         }.freeze,
         "Thread" => {
           contact: { kind: :str, required: true },
@@ -602,7 +602,7 @@ module Pinecall
         "HeldAgent" => {
           slug: { kind: :str, required: true },
           channels: { kind: :list, items: { kind: :ref, ref: "Channel" }, required: true },
-          holder: { kind: :ref, ref: "LineHolder" }
+          holder: { kind: :ref, null: true, ref: "LineHolder" }
         }.freeze,
         "AgentList" => {
           agents: { kind: :list, items: { kind: :ref, ref: "HeldAgent" }, required: true }
@@ -632,7 +632,7 @@ module Pinecall
           agent: { kind: :str, required: true },
           env: { kind: :ref, ref: "Env", required: true },
           held: { kind: :bool, required: true },
-          holding: { kind: :ref, ref: "LineHolder" },
+          holding: { kind: :ref, null: true, ref: "LineHolder" },
           yours: { kind: :bool, required: true },
           waiting: { kind: :list, items: { kind: :ref, ref: "LineHolder" }, required: true },
           calling: { kind: :list, items: { kind: :str }, required: true }

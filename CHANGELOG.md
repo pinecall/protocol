@@ -3,6 +3,17 @@
 The contract, version by version. A release is a `v*` tag: `release.yml` publishes the three
 packages from it, and the notes of a GitHub release are the section below it.
 
+## Unreleased
+
+### Fixed
+- **Three optional fields say they may be null, because the wire sends null.** `HeldAgent.holder`,
+  `TheLine.holding` and `ThreadMessage.answered` were typed as a bare `$ref` and a bare `boolean`
+  and described as "absent" when unset — and the gateway sends `null` for all three (`GET /v1/agents`
+  for the org's own corner, an unheld agent's line, every written message of a thread). The
+  generated clients already accepted it, because the generator makes every optional field nullish;
+  the SCHEMA was the one document that disagreed with the box, and a stricter client validating
+  against it would have refused a correct answer.
+
 ## 0.6.2 — A persona is the org's, and a call says who is playing it
 
 ### Changed

@@ -195,7 +195,7 @@ export const ThreadMessageSchema = z.strictObject({
   call: z.string(),
   channel: ChannelSchema,
   duration_s: z.number().nullable().nullish(),
-  answered: z.boolean().nullish(),
+  answered: z.boolean().nullable().nullish(),
 });
 export type ThreadMessage = z.infer<typeof ThreadMessageSchema>;
 
@@ -427,7 +427,7 @@ export type LineHolder = z.infer<typeof LineHolderSchema>;
 export const HeldAgentSchema = z.strictObject({
   slug: z.string(),
   channels: z.array(ChannelSchema),
-  holder: LineHolderSchema.nullish(),
+  holder: LineHolderSchema.nullable().nullish(),
 });
 export type HeldAgent = z.infer<typeof HeldAgentSchema>;
 
@@ -480,7 +480,7 @@ export const TheLineSchema = z.strictObject({
   agent: z.string(),
   env: EnvSchema,
   held: z.boolean(),
-  holding: LineHolderSchema.nullish(),
+  holding: LineHolderSchema.nullable().nullish(),
   yours: z.boolean(),
   waiting: z.array(LineHolderSchema),
   calling: z.array(z.string()),
