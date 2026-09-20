@@ -62,7 +62,7 @@ The gateway asks the app process holding the agent to do something only that pro
 | field | type | required | meaning |
 |---|---|---|---|
 | `id` | `string` | yes | The gateway's id for this ask; the dev.answer repeats it. |
-| `verb` | `DevVerb` | yes | What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller from its personas, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk. |
+| `verb` | `DevVerb` | yes | What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller put on the class it holds, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk. |
 | `data` | `object` | yes | What the console asked, as the verb's own body: the persona and the turns, the goldens ticked, the base name, the call to promote. |
 
 ### `error`

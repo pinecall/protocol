@@ -25,16 +25,15 @@ type Env = Literal["production", "sandbox"]
 
 
 # What a console may ask of the process standing in the agent's directory, relayed by the gateway: a
-# written call to the class mounted there (chat), a simulated caller from its personas, its goldens
-# and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, a call
-# promoted to a candidate file, the drift of the last two windows, and the reproductions a broken
-# run left on that disk. Everything else a console needs is a door of the gateway.
+# written call to the class mounted there (chat), a simulated caller put on the class it holds, its
+# goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens,
+# a call promoted to a candidate file, the drift of the last two windows, and the reproductions a
+# broken run left on that disk. Everything else a console needs is a door of the gateway.
 type DevVerb = Literal[
     "chat.roster",
     "chat.start",
     "chat.say",
     "chat.end",
-    "simulate.roster",
     "simulate.start",
     "goldens.roster",
     "goldens.run",

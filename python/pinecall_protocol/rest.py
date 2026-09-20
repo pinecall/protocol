@@ -967,3 +967,37 @@ class KnowledgeUses(WireModel):
     """GET /v1/knowledge/attached."""
 
     bases: list[KnowledgeUse]
+
+
+# One synthetic caller of an agent, kept by the gateway: what they want, how they talk, and what
+# they may state about themselves. A model plays them turn by turn — there is no script — for
+# `pinecall simulate` and the console's Simulations.
+class Persona(WireModel):
+    """One synthetic caller of an agent, kept by the gateway."""
+
+    name: str
+    about: str
+    goal: str
+    style: str
+    facts: dict[str, str]
+    state: dict[str, Any]
+    author: str
+    set_at: float
+
+
+class PersonaList(WireModel):
+    """GET /v1/agents/{slug}/personas: every caller written for this agent, by name."""
+
+    personas: list[Persona]
+
+
+# A name that exists is replaced; `was` renames the caller it names.
+class PersonaPut(WireModel):
+    """PUT /v1/agents/{slug}/personas/{name}, the body: the caller, written whole."""
+
+    about: str | None = None
+    goal: str
+    style: str
+    facts: dict[str, str] | None = None
+    state: dict[str, Any] | None = None
+    was: str | None = None

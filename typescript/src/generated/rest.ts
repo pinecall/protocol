@@ -1035,3 +1035,40 @@ export const KnowledgeUsesSchema = z.strictObject({
   bases: z.array(KnowledgeUseSchema),
 });
 export type KnowledgeUses = z.infer<typeof KnowledgeUsesSchema>;
+
+/**
+ * One synthetic caller of an agent, kept by the gateway: what they want, how they talk, and what
+ * they may state about themselves. A model plays them turn by turn — there is no script — for
+ * `pinecall simulate` and the console's Simulations.
+ */
+export const PersonaSchema = z.strictObject({
+  name: z.string(),
+  about: z.string(),
+  goal: z.string(),
+  style: z.string(),
+  facts: z.record(z.string(), z.string()),
+  state: z.record(z.string(), z.unknown()),
+  author: z.string(),
+  set_at: z.number(),
+});
+export type Persona = z.infer<typeof PersonaSchema>;
+
+/** GET /v1/agents/{slug}/personas: every caller written for this agent, by name. */
+export const PersonaListSchema = z.strictObject({
+  personas: z.array(PersonaSchema),
+});
+export type PersonaList = z.infer<typeof PersonaListSchema>;
+
+/**
+ * PUT /v1/agents/{slug}/personas/{name}, the body: the caller, written whole. A name that exists
+ * is replaced; `was` renames the caller it names.
+ */
+export const PersonaPutSchema = z.strictObject({
+  about: z.string().nullish(),
+  goal: z.string(),
+  style: z.string(),
+  facts: z.record(z.string(), z.string()).nullish(),
+  state: z.record(z.string(), z.unknown()).nullish(),
+  was: z.string().nullish(),
+});
+export type PersonaPut = z.infer<typeof PersonaPutSchema>;

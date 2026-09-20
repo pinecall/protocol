@@ -1074,6 +1074,45 @@
         "bases": {"type": "array", "items": {"$ref": "#/$defs/KnowledgeUse"}, "description": "One row per base any agent reads."}
       }
     },
+    "Persona": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One synthetic caller of an agent, kept by the gateway: what they want, how they talk, and what they may state about themselves. A model plays them turn by turn — there is no script — for `pinecall simulate` and the console's Simulations.",
+      "required": ["name", "about", "goal", "style", "facts", "state", "author", "set_at"],
+      "properties": {
+        "name": {"type": "string", "description": "What names this caller: lower-case words joined by hyphens, as `--persona` takes it."},
+        "about": {"type": "string", "description": "One line about them, for the people reading the list. The model playing them is never told it."},
+        "goal": {"type": "string", "description": "What they are after, in one line. The model pursues it on every turn."},
+        "style": {"type": "string", "description": "How they talk: hurried, polite, switching language mid-sentence. The manner, never the content."},
+        "facts": {"type": "object", "additionalProperties": {"type": "string"}, "description": "The only facts they may state about themselves — their name, their phone — by what each one is. Asked for anything else, they say they do not know."},
+        "state": {"type": "object", "additionalProperties": true, "description": "The state the call opens in, for a caller the business already knows. Empty for a stranger."},
+        "author": {"type": "string", "description": "Who wrote it last, as the key names them."},
+        "set_at": {"type": "number", "description": "When it was last written, in seconds."}
+      }
+    },
+    "PersonaList": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/agents/{slug}/personas: every caller written for this agent, by name.",
+      "required": ["personas"],
+      "properties": {
+        "personas": {"type": "array", "items": {"$ref": "#/$defs/Persona"}, "description": "One row per caller, in the order their names sort."}
+      }
+    },
+    "PersonaPut": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "PUT /v1/agents/{slug}/personas/{name}, the body: the caller, written whole. A name that exists is replaced; `was` renames the caller it names.",
+      "required": ["goal", "style"],
+      "properties": {
+        "about": {"type": "string", "description": "One line about them, for people. The model is never told it."},
+        "goal": {"type": "string", "description": "What they are after, in one line."},
+        "style": {"type": "string", "description": "How they talk."},
+        "facts": {"type": "object", "additionalProperties": {"type": "string"}, "description": "What they may state about themselves, by what each one is."},
+        "state": {"type": "object", "additionalProperties": true, "description": "The state the call opens in; empty for a stranger."},
+        "was": {"type": "string", "description": "The name this caller had, when the write is a rename: that row goes and this one takes its place."}
+      }
+    },
     "KnowledgeUse": {
       "type": "object",
       "additionalProperties": false,

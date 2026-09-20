@@ -11,8 +11,8 @@ module Pinecall
       type direction = "inbound" | "outbound"
       # Which of the two worlds a key opens, and so which world an agent is held in and a call ran in.
       type env = "production" | "sandbox"
-      # What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller from its personas, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk.
-      type dev_verb = "chat.roster" | "chat.start" | "chat.say" | "chat.end" | "simulate.roster" | "simulate.start" | "goldens.roster" | "goldens.run" | "knowledge.roster" | "knowledge.push" | "knowledge.eval" | "memory.roster" | "memory.eval" | "memory.extraction" | "promote.roster" | "promote.write" | "drift.read" | "reproductions.roster" | "reproductions.read"
+      # What a console may ask of the process standing in the agent's directory, relayed by the gateway: a written call to the class mounted there (chat), a simulated caller put on the class it holds, its goldens and a suite of them, its knowledge folder pushed or its golden asked, its memory goldens, a call promoted to a candidate file, the drift of the last two windows, and the reproductions a broken run left on that disk.
+      type dev_verb = "chat.roster" | "chat.start" | "chat.say" | "chat.end" | "simulate.start" | "goldens.roster" | "goldens.run" | "knowledge.roster" | "knowledge.push" | "knowledge.eval" | "memory.roster" | "memory.eval" | "memory.extraction" | "promote.roster" | "promote.write" | "drift.read" | "reproductions.roster" | "reproductions.read"
       # Why the call is over.
       type end_reason = "caller_hung_up" | "agent_hung_up" | "supervisor_ended" | "transferred" | "no_answer" | "busy" | "dial_failed" | "timeout" | "drained" | "app_detached" | "error"
       # Whose action ended the call.
@@ -327,6 +327,12 @@ module Pinecall
       type knowledge_file_pushed = { base: String, path: String, chunks: Integer, took_ms: Float }
       # GET /v1/knowledge/attached: which agents read each base, off every agent's newest settings in this world.
       type knowledge_uses = { bases: Array[knowledge_use] }
+      # One synthetic caller of an agent, kept by the gateway: what they want, how they talk, and what they may state about themselves.
+      type persona = { name: String, about: String, goal: String, style: String, facts: Hash[Symbol, String], state: Hash[Symbol, untyped], author: String, set_at: Float }
+      # GET /v1/agents/{slug}/personas: every caller written for this agent, by name.
+      type persona_list = { personas: Array[persona] }
+      # PUT /v1/agents/{slug}/personas/{name}, the body: the caller, written whole.
+      type persona_put = { ?about: String, goal: String, style: String, ?facts: Hash[Symbol, String], ?state: Hash[Symbol, untyped], ?was: String }
       # One base and the agents whose settings attach it.
       type knowledge_use = { base: String, agents: Array[String] }
       # The LiveKit room exists and the call lives in it.

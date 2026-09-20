@@ -909,6 +909,27 @@ module Pinecall
         "KnowledgeUses" => {
           bases: { kind: :list, items: { kind: :ref, ref: "KnowledgeUse" }, required: true }
         }.freeze,
+        "Persona" => {
+          name: { kind: :str, required: true },
+          about: { kind: :str, required: true },
+          goal: { kind: :str, required: true },
+          style: { kind: :str, required: true },
+          facts: { kind: :map, items: { kind: :str }, required: true },
+          state: { kind: :json, required: true },
+          author: { kind: :str, required: true },
+          set_at: { kind: :float, required: true }
+        }.freeze,
+        "PersonaList" => {
+          personas: { kind: :list, items: { kind: :ref, ref: "Persona" }, required: true }
+        }.freeze,
+        "PersonaPut" => {
+          about: { kind: :str },
+          goal: { kind: :str, required: true },
+          style: { kind: :str, required: true },
+          facts: { kind: :map, items: { kind: :str } },
+          state: { kind: :json },
+          was: { kind: :str }
+        }.freeze,
         "KnowledgeUse" => {
           base: { kind: :str, required: true },
           agents: { kind: :list, items: { kind: :str }, required: true }
