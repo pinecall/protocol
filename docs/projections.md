@@ -13,9 +13,10 @@ golden state.
 | token | projection | reads |
 |---|---|---|
 | `talk` | public | its own call, while connected |
+| `chat` | public | its own call: the room's text streams, which it subscribes to. No microphone |
 | `participate` | public | its own call: the snapshot on join, the stream, a replay; sends `pinecall.event` |
-| `observe` | tenant | the log of the agents in its set |
-| `supervise` | tenant | the same, plus the verbs |
+| `observe` | tenant | **no log at all**: a hidden, silent seat that hears the room and reads nothing |
+| `supervise` | tenant | the one live call it was minted for, and the six verbs |
 | the operator key (`/v1/ops/*`) | tenant | every agent of the runtime |
 
 A projection is a property of the token, decided when the token is minted. Nothing a client sends

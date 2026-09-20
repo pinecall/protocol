@@ -99,13 +99,13 @@ protocol.
 | token | may |
 |---|---|
 | `talk` | connect to ONE agent, once, for 60 s (web widget), and read its own call. Minted at `POST /v1/tokens` — LiveKit's standard token endpoint, in front of our organisation check: `tokens.md`. Its metadata is sealed by the tenant's server; the browser cannot forge it |
-| `chat` | `talk` with audio off both ways: the same room, data only |
-| `observe` | read the log of the agents in its set. Nothing else |
-| `supervise` | read, and send the verbs over `WS /v1/attach` |
+| `chat` | `talk` with no microphone: the same room, and it SUBSCRIBES — LiveKit hands a text stream to subscribers only, so a token that could not would type into the room and never see the reply |
+| `observe` | hear the room, hidden and silent. It reads no log at all |
+| `supervise` | read the one call it was minted for, and send the verbs over `WS /v1/attach` |
 | `participate` | read its own call, through the public projection, and send `pinecall.event` |
 
 What each token sees is a **projection**, applied at the sink and never by a client: `public` for
-`talk` and `participate`, `tenant` for the rest. The contract is `projections.md`.
+`talk`, `chat` and `participate`, `tenant` for `observe` and `supervise`. The contract is `projections.md`.
 
 ## Verbs
 
