@@ -95,6 +95,7 @@ Media is up: the caller and the agent can hear each other, or the text session i
 | `from` | `string` | yes | The calling side, E.164 or a visitor id. |
 | `to` | `string` | yes | The called side. |
 | `run` | `string | null` | no | The eval run that opened this call, when one did: such a call starts mid-conversation, in the golden's state. Absent or null for a person. |
+| `persona` | `string | null` | no | The synthetic caller that opened this call, by name (GET /v1/personas), when a simulation did. Absent or null for a person: nobody is playing anybody. |
 | `caller` | `Contact | null` | yes | Who is on the line, as far as the platform knows now. |
 | `started_at` | `number` | yes | When media came up, unix seconds. |
 | `env` | `Env` | no | The world this call ran in: the one the key that holds its agent opens. Absent on entries written before keys knew where they were, which read as production. |

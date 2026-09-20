@@ -159,6 +159,7 @@ class CallStarted(WireModel):
     from_: str = Field(alias="from")
     to: str
     run: str | None = None
+    persona: str | None = None
     caller: Contact | None
     started_at: float
     env: Env | None = None

@@ -930,6 +930,22 @@ module Pinecall
           state: { kind: :json },
           was: { kind: :str }
         }.freeze,
+        "PersonaRun" => {
+          call: { kind: :str, required: true },
+          agent: { kind: :str, required: true },
+          started_at: { kind: :float, required: true },
+          ended_at: { kind: :float, null: true, required: true },
+          turns: { kind: :int, required: true },
+          end_reason: { kind: :ref, null: true, ref: "EndReason", required: true },
+          outcome: { kind: :str, null: true, required: true },
+          cost_eur: { kind: :float, null: true, required: true },
+          score: { kind: :ref, null: true, ref: "SessionScore", required: true }
+        }.freeze,
+        "PersonaRunList" => {
+          runs: { kind: :list, items: { kind: :ref, ref: "PersonaRun" }, required: true },
+          total: { kind: :int, required: true },
+          next: { kind: :str, null: true, required: true }
+        }.freeze,
         "KnowledgeUse" => {
           base: { kind: :str, required: true },
           agents: { kind: :list, items: { kind: :str }, required: true }
@@ -1304,6 +1320,7 @@ module Pinecall
           from: { kind: :str, required: true },
           to: { kind: :str, required: true },
           run: { kind: :str, null: true },
+          persona: { kind: :str, null: true },
           caller: { kind: :ref, null: true, ref: "Contact", required: true },
           started_at: { kind: :float, required: true },
           env: { kind: :ref, ref: "Env" }

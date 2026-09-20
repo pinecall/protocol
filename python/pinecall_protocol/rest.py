@@ -969,11 +969,12 @@ class KnowledgeUses(WireModel):
     bases: list[KnowledgeUse]
 
 
-# One synthetic caller of an agent, kept by the gateway: what they want, how they talk, and what
-# they may state about themselves. A model plays them turn by turn — there is no script — for
-# `pinecall simulate` and the console's Simulations.
+# One synthetic caller of an ORG, kept by the gateway: what they want, how they talk, and what they
+# may state about themselves. A model plays them turn by turn — there is no script — for `pinecall
+# simulate` and the console's Simulations. A caller is a person on the phone, so who they are does
+# not depend on which of the org's agents answers: every agent of the org calls with the same list.
 class Persona(WireModel):
-    """One synthetic caller of an agent, kept by the gateway."""
+    """One synthetic caller of an ORG, kept by the gateway."""
 
     name: str
     about: str
@@ -985,15 +986,16 @@ class Persona(WireModel):
     set_at: float
 
 
+# The same list for every agent of the org, and the same one in both worlds.
 class PersonaList(WireModel):
-    """GET /v1/agents/{slug}/personas: every caller written for this agent, by name."""
+    """GET /v1/personas: every caller the org wrote, by name."""
 
     personas: list[Persona]
 
 
 # A name that exists is replaced; `was` renames the caller it names.
 class PersonaPut(WireModel):
-    """PUT /v1/agents/{slug}/personas/{name}, the body: the caller, written whole."""
+    """PUT /v1/personas/{name}, the body: the caller, written whole."""
 
     about: str | None = None
     goal: str
@@ -1001,3 +1003,28 @@ class PersonaPut(WireModel):
     facts: dict[str, str] | None = None
     state: dict[str, Any] | None = None
     was: str | None = None
+
+
+# Read off the call index, never off a log — the same row the sessions list is drawn from.
+class PersonaRun(WireModel):
+    """One simulation this caller has run: the call it was, and what the call came to."""
+
+    call: str
+    agent: str
+    started_at: float
+    ended_at: float | None
+    turns: int
+    end_reason: EndReason | None
+    outcome: str | None
+    cost_eur: float | None
+    score: SessionScore | None
+
+
+# GET /v1/personas/{name}/runs, in the key's own world and corner, paged exactly as the sessions
+# list is.
+class PersonaRunList(WireModel):
+    """Every simulation this caller has run, newest first, a page at a time."""
+
+    runs: list[PersonaRun]
+    total: int
+    next: str | None

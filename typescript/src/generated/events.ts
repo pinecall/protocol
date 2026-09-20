@@ -169,6 +169,7 @@ export const CallStartedSchema = z.strictObject({
   from: z.string(),
   to: z.string(),
   run: z.string().nullable().nullish(),
+  persona: z.string().nullable().nullish(),
   caller: ContactSchema.nullable(),
   started_at: z.number(),
   env: EnvSchema.nullish(),

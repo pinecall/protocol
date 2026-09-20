@@ -1037,9 +1037,11 @@ export const KnowledgeUsesSchema = z.strictObject({
 export type KnowledgeUses = z.infer<typeof KnowledgeUsesSchema>;
 
 /**
- * One synthetic caller of an agent, kept by the gateway: what they want, how they talk, and what
+ * One synthetic caller of an ORG, kept by the gateway: what they want, how they talk, and what
  * they may state about themselves. A model plays them turn by turn — there is no script — for
- * `pinecall simulate` and the console's Simulations.
+ * `pinecall simulate` and the console's Simulations. A caller is a person on the phone, so who
+ * they are does not depend on which of the org's agents answers: every agent of the org calls with
+ * the same list.
  */
 export const PersonaSchema = z.strictObject({
   name: z.string(),
@@ -1053,15 +1055,18 @@ export const PersonaSchema = z.strictObject({
 });
 export type Persona = z.infer<typeof PersonaSchema>;
 
-/** GET /v1/agents/{slug}/personas: every caller written for this agent, by name. */
+/**
+ * GET /v1/personas: every caller the org wrote, by name. The same list for every agent of the org,
+ * and the same one in both worlds.
+ */
 export const PersonaListSchema = z.strictObject({
   personas: z.array(PersonaSchema),
 });
 export type PersonaList = z.infer<typeof PersonaListSchema>;
 
 /**
- * PUT /v1/agents/{slug}/personas/{name}, the body: the caller, written whole. A name that exists
- * is replaced; `was` renames the caller it names.
+ * PUT /v1/personas/{name}, the body: the caller, written whole. A name that exists is replaced;
+ * `was` renames the caller it names.
  */
 export const PersonaPutSchema = z.strictObject({
   about: z.string().nullish(),
@@ -1072,3 +1077,32 @@ export const PersonaPutSchema = z.strictObject({
   was: z.string().nullish(),
 });
 export type PersonaPut = z.infer<typeof PersonaPutSchema>;
+
+/**
+ * One simulation this caller has run: the call it was, and what the call came to. Read off the
+ * call index, never off a log — the same row the sessions list is drawn from.
+ */
+export const PersonaRunSchema = z.strictObject({
+  call: z.string(),
+  agent: z.string(),
+  started_at: z.number(),
+  ended_at: z.number().nullable(),
+  turns: z.int(),
+  end_reason: EndReasonSchema.nullable(),
+  outcome: z.string().nullable(),
+  cost_eur: z.number().nullable(),
+  score: SessionScoreSchema.nullable(),
+});
+export type PersonaRun = z.infer<typeof PersonaRunSchema>;
+
+/**
+ * Every simulation this caller has run, newest first, a page at a time. GET
+ * /v1/personas/{name}/runs, in the key's own world and corner, paged exactly as the sessions list
+ * is.
+ */
+export const PersonaRunListSchema = z.strictObject({
+  runs: z.array(PersonaRunSchema),
+  total: z.int(),
+  next: z.string().nullable(),
+});
+export type PersonaRunList = z.infer<typeof PersonaRunListSchema>;

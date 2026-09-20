@@ -1077,7 +1077,7 @@
     "Persona": {
       "type": "object",
       "additionalProperties": false,
-      "description": "One synthetic caller of an agent, kept by the gateway: what they want, how they talk, and what they may state about themselves. A model plays them turn by turn — there is no script — for `pinecall simulate` and the console's Simulations.",
+      "description": "One synthetic caller of an ORG, kept by the gateway: what they want, how they talk, and what they may state about themselves. A model plays them turn by turn — there is no script — for `pinecall simulate` and the console's Simulations. A caller is a person on the phone, so who they are does not depend on which of the org's agents answers: every agent of the org calls with the same list.",
       "required": ["name", "about", "goal", "style", "facts", "state", "author", "set_at"],
       "properties": {
         "name": {"type": "string", "description": "What names this caller: lower-case words joined by hyphens, as `--persona` takes it."},
@@ -1093,7 +1093,7 @@
     "PersonaList": {
       "type": "object",
       "additionalProperties": false,
-      "description": "GET /v1/agents/{slug}/personas: every caller written for this agent, by name.",
+      "description": "GET /v1/personas: every caller the org wrote, by name. The same list for every agent of the org, and the same one in both worlds.",
       "required": ["personas"],
       "properties": {
         "personas": {"type": "array", "items": {"$ref": "#/$defs/Persona"}, "description": "One row per caller, in the order their names sort."}
@@ -1102,7 +1102,7 @@
     "PersonaPut": {
       "type": "object",
       "additionalProperties": false,
-      "description": "PUT /v1/agents/{slug}/personas/{name}, the body: the caller, written whole. A name that exists is replaced; `was` renames the caller it names.",
+      "description": "PUT /v1/personas/{name}, the body: the caller, written whole. A name that exists is replaced; `was` renames the caller it names.",
       "required": ["goal", "style"],
       "properties": {
         "about": {"type": "string", "description": "One line about them, for people. The model is never told it."},
@@ -1111,6 +1111,34 @@
         "facts": {"type": "object", "additionalProperties": {"type": "string"}, "description": "What they may state about themselves, by what each one is."},
         "state": {"type": "object", "additionalProperties": true, "description": "The state the call opens in; empty for a stranger."},
         "was": {"type": "string", "description": "The name this caller had, when the write is a rename: that row goes and this one takes its place."}
+      }
+    },
+    "PersonaRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One simulation this caller has run: the call it was, and what the call came to. Read off the call index, never off a log — the same row the sessions list is drawn from.",
+      "required": ["call", "agent", "started_at", "ended_at", "turns", "end_reason", "outcome", "cost_eur", "score"],
+      "properties": {
+        "call": {"type": "string", "description": "The call id: what the console links into to open the session."},
+        "agent": {"type": "string", "description": "The agent that answered this caller."},
+        "started_at": {"type": "number", "description": "When the call opened, unix seconds. The list is newest first by this."},
+        "ended_at": {"type": ["number", "null"], "description": "When it ended, unix seconds; null while it is still running."},
+        "turns": {"type": "integer", "description": "How many turns the caller took: the lines the model playing them said."},
+        "end_reason": {"anyOf": [{"$ref": "defs.json#/$defs/EndReason"}, {"type": "null"}], "description": "How it ended, once it did."},
+        "outcome": {"type": ["string", "null"], "description": "The one-line outcome from call.summary."},
+        "cost_eur": {"type": ["number", "null"], "description": "What the call cost in provider fees, euros, as call.summary priced it."},
+        "score": {"anyOf": [{"$ref": "#/$defs/SessionScore"}, {"type": "null"}], "description": "How the judges answered at hang-up; null when nobody judged the run."}
+      }
+    },
+    "PersonaRunList": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Every simulation this caller has run, newest first, a page at a time. GET /v1/personas/{name}/runs, in the key's own world and corner, paged exactly as the sessions list is.",
+      "required": ["runs", "total", "next"],
+      "properties": {
+        "runs": {"type": "array", "items": {"$ref": "#/$defs/PersonaRun"}, "description": "One row per simulation, newest first."},
+        "total": {"type": "integer", "description": "How many simulations this caller has run in all, every page together."},
+        "next": {"type": ["string", "null"], "description": "The cursor the next page is asked with as `before`, or null on the last page."}
       }
     },
     "KnowledgeUse": {
