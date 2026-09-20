@@ -234,6 +234,7 @@ class DocSource(WireModel):
     """One chunk of the knowledge base that retrieval put in front of the model for this turn."""
 
     id: str
+    base: str | None = None
     path: str
     heading: str | None = None
     score: float

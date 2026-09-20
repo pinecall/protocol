@@ -60,7 +60,7 @@ module Pinecall
       # One operation against the contact's memory: a recall during the turn, a remember at hangup, or a forget on request.
       type memory_op = { op: "recall" | "remember" | "forget", ?contact: String, ?query: String, facts: Array[memory_fact], took_ms: Float }
       # One chunk of the knowledge base that retrieval put in front of the model for this turn.
-      type doc_source = { id: String, path: String, ?heading: String, score: Float, ?excerpt: String }
+      type doc_source = { id: String, ?base: String, path: String, ?heading: String, score: Float, ?excerpt: String }
       # The exchange rate the cost was computed with, stated so the number can be reproduced.
       type cost_rate = { currency: "EUR", usd_to_eur: Float, as_of: String }
       # One priced line: a model, what was counted, how much, and what it came to.

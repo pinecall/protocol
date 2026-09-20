@@ -5,6 +5,12 @@ packages from it, and the notes of a GitHub release are the section below it.
 
 ## Unreleased
 
+### Added
+- **`DocSource.base`**: which knowledge base a retrieved chunk came from. An agent reads every
+  base its world attached to it and a turn searches them together, so `docs.sources` was the one
+  place that could say which collection answered a question — and it did not. Optional, because a
+  log written before a turn could read more than one base carries no such field.
+
 ### Fixed
 - **Three optional fields say they may be null, because the wire sends null.** `HeldAgent.holder`,
   `TheLine.holding` and `ThreadMessage.answered` were typed as a bare `$ref` and a bare `boolean`

@@ -241,6 +241,7 @@ One chunk of the knowledge base that retrieval put in front of the model for thi
 | field | type | required | meaning |
 |---|---|---|---|
 | `id` | `string` | yes | The chunk's id in the knowledge store. |
+| `base` | `string` | no | The base the chunk came from, since an agent may read several: 'tarifas', 'manual-2026'. Absent on a log written before a turn could read more than one. |
 | `path` | `string` | yes | The document the chunk came from, as the tenant pushed it: 'faq/horarios.md'. |
 | `heading` | `string` | no | The heading the chunk sits under, since chunks are cut by heading. |
 | `score` | `number` | yes | The fused rank score (vector and BM25 through RRF), higher is better. |

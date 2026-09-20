@@ -240,6 +240,7 @@ export type MemoryOp = z.infer<typeof MemoryOpSchema>;
 /** One chunk of the knowledge base that retrieval put in front of the model for this turn. */
 export const DocSourceSchema = z.strictObject({
   id: z.string(),
+  base: z.string().nullish(),
   path: z.string(),
   heading: z.string().nullish(),
   score: z.number(),

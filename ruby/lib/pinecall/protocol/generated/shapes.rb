@@ -63,6 +63,7 @@ module Pinecall
         }.freeze,
         "DocSource" => {
           id: { kind: :str, required: true },
+          base: { kind: :str },
           path: { kind: :str, required: true },
           heading: { kind: :str },
           score: { kind: :float, required: true },

@@ -126,6 +126,7 @@
       "description": "One chunk of the knowledge base that retrieval put in front of the model for this turn.",
       "properties": {
         "id": {"type": "string", "description": "The chunk's id in the knowledge store."},
+        "base": {"type": "string", "description": "The base the chunk came from, since an agent may read several: 'tarifas', 'manual-2026'. Absent on a log written before a turn could read more than one."},
         "path": {"type": "string", "description": "The document the chunk came from, as the tenant pushed it: 'faq/horarios.md'."},
         "heading": {"type": "string", "description": "The heading the chunk sits under, since chunks are cut by heading."},
         "score": {"type": "number", "description": "The fused rank score (vector and BM25 through RRF), higher is better."},
