@@ -58,7 +58,13 @@ jobs:
 
   publish-pypi:
     needs: [guard, gates]
-    if: github.ref_type == 'tag'
+    # PyPI no tiene trusted publisher para `pinecall-protocol`, y un publisher lo da de alta una
+    # PERSONA en pypi.org: no hay API. Hasta entonces este job no corre — un release que se pinta
+    # rojo en un paquete que nadie instala de un registro (el runtime toma `../protocol/python` por
+    # ruta) es un gate que enseña a ignorar el rojo. Para encenderlo: pypi.org → Your projects →
+    # Publishing → pending publisher (owner `pinecall`, repo `protocol`, workflow `release.yml`,
+    # environment `pypi`), y después `gh variable set PUBLISH_PYPI --body true`.
+    if: github.ref_type == 'tag' && vars.PUBLISH_PYPI == 'true'
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
@@ -108,12 +114,25 @@ jobs:
       # `npm publish <tgz>` no reempaqueta nada.
       - run: pnpm pack --pack-destination /tmp/pkg
         working-directory: typescript
-      - run: npm publish --provenance --access public /tmp/pkg/*.tgz
+      # npm nunca toma dos veces el mismo número: si ya está publicado, volver a pedirlo es un run
+      # rojo que no dice nada nuevo. Esto hace que mover un tag — para corregir ESTE archivo, que
+      # es lo único que se corre del ref y no de HEAD — no queme el release entero.
+      - name: publicar, salvo que esta versión ya esté en npm
         working-directory: typescript
+        run: |
+          version="${{ needs.guard.outputs.version }}"
+          if npm view "@pinecall/protocol@$version" version >/dev/null 2>&1; then
+            echo "@pinecall/protocol@$version ya está en npm: el tag sólo lo registra"
+            exit 0
+          fi
+          npm publish --provenance --access public /tmp/pkg/*.tgz
 
   publish-gem:
     needs: [guard, gates]
-    if: github.ref_type == 'tag'
+    # Igual que PyPI: rubygems.org contesta `No trusted publisher configured for this workflow`.
+    # Alta en rubygems.org → perfil → trusted publishers (pending), y `gh variable set PUBLISH_GEM
+    # --body true`. El gem de este repo tampoco lo instala nadie todavía.
+    if: github.ref_type == 'tag' && vars.PUBLISH_GEM == 'true'
     runs-on: ubuntu-latest
     environment: rubygems
     permissions:
