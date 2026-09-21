@@ -307,6 +307,8 @@ export type ModelConfig = z.infer<typeof ModelConfigSchema>;
 export const TurnConfigSchema = z.strictObject({
   min_interruption_words: z.int().nullish(),
   endpointing_ms: z.int().nullish(),
+  eot_threshold: z.number().nullish(),
+  eager_eot_threshold: z.number().nullish(),
 });
 export type TurnConfig = z.infer<typeof TurnConfigSchema>;
 

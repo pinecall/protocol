@@ -312,6 +312,8 @@ class TurnConfig(WireModel):
 
     min_interruption_words: int | None = None
     endpointing_ms: int | None = None
+    eot_threshold: float | None = None
+    eager_eot_threshold: float | None = None
 
 
 # How the voice says one word it would otherwise get wrong: a proper name, a brand, a street.

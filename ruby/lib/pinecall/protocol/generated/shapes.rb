@@ -105,7 +105,9 @@ module Pinecall
         }.freeze,
         "TurnConfig" => {
           min_interruption_words: { kind: :int },
-          endpointing_ms: { kind: :int }
+          endpointing_ms: { kind: :int },
+          eot_threshold: { kind: :float },
+          eager_eot_threshold: { kind: :float }
         }.freeze,
         "Pronunciation" => {
           word: { kind: :str, required: true },

@@ -74,7 +74,7 @@ module Pinecall
       # Which model does a job (the LLM, or the STT), and the one or two knobs worth turning.
       type model_config = { provider: String, model: String, ?temperature: Float }
       # How the session decides that the caller has finished, and when the caller may interrupt.
-      type turn_config = { ?min_interruption_words: Integer, ?endpointing_ms: Integer }
+      type turn_config = { ?min_interruption_words: Integer, ?endpointing_ms: Integer, ?eot_threshold: Float, ?eager_eot_threshold: Float }
       # How the voice says one word it would otherwise get wrong: a proper name, a brand, a street.
       type pronunciation = { word: String, spoken: String }
       # What the app declares about one field of its state: who may see it.

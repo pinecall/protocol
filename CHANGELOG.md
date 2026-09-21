@@ -5,6 +5,15 @@ packages from it, and the notes of a GitHub release are the section below it.
 
 ## Unreleased
 
+### Added
+- **`TurnConfig.eot_threshold` and `eot_threshold`'s eager half.** A recogniser that decides the
+  end of the turn itself — Deepgram Flux — does it on a confidence, and how sure it has to be was
+  the one thing about a turn the wire could not carry: an agent could say how long a silence is,
+  never how certain. Deepgram measures a fifth of the turns ending before the caller has finished
+  at its own default, so it is the knob that decides whether an agent answers half a sentence.
+  `eager_eot_threshold` is the lower bar at which it says the turn MIGHT be over, which is what
+  lets a model start on an answer early without the turn being committed on a guess.
+
 ## 0.6.3 — Which base answered, and the panel an agent draws
 
 ### Added
