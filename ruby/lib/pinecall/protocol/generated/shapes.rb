@@ -160,6 +160,7 @@ module Pinecall
           docs: { kind: :ref, ref: "DocsConfig" },
           memory: { kind: :ref, ref: "MemoryConfig" },
           hangup: { kind: :ref, ref: "HangupConfig" },
+          record: { kind: :bool, default: true },
           tools: { kind: :list, items: { kind: :ref, ref: "ToolSpec" } },
           uses_knowledge: { kind: :bool, default: false },
           state_fields: { kind: :list, items: { kind: :ref, ref: "StateFieldSpec" } },
@@ -815,6 +816,7 @@ module Pinecall
           hangup: { kind: :ref, ref: "HangupConfig" },
           turn: { kind: :ref, ref: "TurnConfig" },
           memory: { kind: :ref, ref: "MemoryConfig" },
+          record: { kind: :bool },
           knowledge: { kind: :str },
           bases: { kind: :list, items: { kind: :ref, ref: "DocsConfig" } }
         }.freeze,

@@ -423,6 +423,7 @@ What an app declares about its agent: the prompt's layout, the language, the too
 | `docs` | `DocsConfig` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
 | `memory` | `MemoryConfig` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
 | `hangup` | `HangupConfig` | no | Ignored: the world's, set in the agent's settings. Kept one release so an app on an older package still registers; removed in the next. |
+| `record` | `boolean` | no | Whether this agent's calls keep their audio. The world's, set in the agent's settings and never in the class: the box records the whole room, so what is kept is what everybody on the call heard. |
 | `tools` | `ToolSpec[]` | no | Every tool the agent may ever see. Which ones are visible now is tools.set. |
 | `uses_knowledge` | `boolean` | no | Whether the class searches the knowledge base itself (this.knowledge.search). A world with no base attached to the agent refuses the registration, so a tool that would find nothing is refused at boot and not on a call. |
 | `state_fields` | `StateFieldSpec[]` | no | Who may see each field of the app's state. A field not listed is tenant: seen by the tenant's readers, never by the public. |

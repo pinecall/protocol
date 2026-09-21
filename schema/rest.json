@@ -864,6 +864,7 @@
         "hangup": {"$ref": "defs.json#/$defs/HangupConfig"},
         "turn": {"$ref": "defs.json#/$defs/TurnConfig"},
         "memory": {"$ref": "defs.json#/$defs/MemoryConfig"},
+        "record": {"type": "boolean", "description": "Whether this agent's calls keep their audio. Unset, they do."},
         "knowledge": {"type": "string", "description": "What the agent knows by heart, in Markdown: the business as the org describes it. Read whole into the static knowledge block of every call, cached ahead of everything. Set by whoever holds `words`."},
         "bases": {"type": "array", "items": {"$ref": "defs.json#/$defs/DocsConfig"}, "description": "The bases the agent reads, each with how a turn reads it: searched before the turn (retrieved) or when the model asks (tool), k chunks, under a score."}
       }

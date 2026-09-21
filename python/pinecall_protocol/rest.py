@@ -783,6 +783,7 @@ class TuningBody(WireModel):
     hangup: HangupConfig | None = None
     turn: TurnConfig | None = None
     memory: MemoryConfig | None = None
+    record: bool | None = None
     knowledge: str | None = None
     bases: list[DocsConfig] | None = None
 

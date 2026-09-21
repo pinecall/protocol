@@ -426,6 +426,7 @@ export const AgentConfigSchema = z.strictObject({
   docs: DocsConfigSchema.nullish(),
   memory: MemoryConfigSchema.nullish(),
   hangup: HangupConfigSchema.nullish(),
+  record: z.boolean().nullish(),
   tools: z.array(ToolSpecSchema).nullish(),
   uses_knowledge: z.boolean().nullish(),
   state_fields: z.array(StateFieldSpecSchema).nullish(),

@@ -13,6 +13,9 @@ packages from it, and the notes of a GitHub release are the section below it.
   at its own default, so it is the knob that decides whether an agent answers half a sentence.
   `eager_eot_threshold` is the lower bar at which it says the turn MIGHT be over, which is what
   lets a model start on an answer early without the turn being committed on a guess.
+- **`TuningBody.record` and `AgentConfig.record`.** Whether an agent's calls keep their audio, as
+  a setting of the agent rather than a switch on the machine: one org may record and another may
+  not, and neither needs a deploy to change its mind. Unset, they are recorded.
 
 ## 0.6.3 — Which base answered, and the panel an agent draws
 

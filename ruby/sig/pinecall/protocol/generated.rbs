@@ -94,7 +94,7 @@ module Pinecall
       # What memory keeps about a contact across calls, and what it must never keep.
       type memory_config = { ?remember: Array[String], ?forget: Array[String] }
       # What an app declares about its agent: the prompt's layout, the language, the tools, whether it searches its bases itself, and who may see and send what.
-      type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: greeting_config, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?knowledge: knowledge_file, ?docs: docs_config, ?memory: memory_config, ?hangup: hangup_config, ?tools: Array[tool_spec], ?uses_knowledge: bool, ?state_fields: Array[state_field_spec], ?view: view_spec, ?events: Array[event_spec] }
+      type agent_config = { ?prompt: Array[prompt_block_spec], ?language: String, ?greeting: greeting_config, ?voice: voice_config, ?llm: model_config, ?stt: model_config, ?turn: turn_config, ?says: Array[pronunciation], ?hears: Array[String], ?knowledge: knowledge_file, ?docs: docs_config, ?memory: memory_config, ?hangup: hangup_config, ?record: bool, ?tools: Array[tool_spec], ?uses_knowledge: bool, ?state_fields: Array[state_field_spec], ?view: view_spec, ?events: Array[event_spec] }
       # One line of a call's log, or of an agent's log when call is null.
       type entry = { seq: Integer, ts: Float, call: String?, agent: String, type: String, ephemeral: bool, data: Hash[Symbol, untyped] }
       # One instruction from an app to the gateway over its WebSocket.
@@ -292,7 +292,7 @@ module Pinecall
       # POST /v1/carrier/outbound, the answer: the plan, and whether it was carried out.
       type outbound_provisioned = { steps: Array[String], dry_run: bool, ready: bool, ?trunk: String, ?address: String }
       # An agent's settings: what the org set, per world and per corner.
-      type tuning_body = { ?voice: String, ?tts: String, ?tts_model: String, ?stt: String, ?llm: String, ?greeting: greeting_config, ?hangup: hangup_config, ?turn: turn_config, ?memory: memory_config, ?knowledge: String, ?bases: Array[docs_config] }
+      type tuning_body = { ?voice: String, ?tts: String, ?tts_model: String, ?stt: String, ?llm: String, ?greeting: greeting_config, ?hangup: hangup_config, ?turn: turn_config, ?memory: memory_config, ?record: bool, ?knowledge: String, ?bases: Array[docs_config] }
       # One kept version of an agent's tuning: whose corner, which version, who set it and when, and what it says.
       type tuning_row = { holder: String, version: Integer, author: String, note: String?, set_at: Float, config: tuning_body }
       # GET /v1/agents/{slug}/settings: the agent's tuning as this key sees it — its own corner's, the team's and production's, each corner's own newest row, or null when that corner set nothing.

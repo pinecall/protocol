@@ -419,6 +419,7 @@ class AgentConfig(WireModel):
     docs: DocsConfig | None = None
     memory: MemoryConfig | None = None
     hangup: HangupConfig | None = None
+    record: bool = True
     tools: list[ToolSpec] | None = None
     uses_knowledge: bool = False
     state_fields: list[StateFieldSpec] | None = None
