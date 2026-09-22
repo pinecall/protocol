@@ -193,7 +193,7 @@ What the app declares about one tool: the contract the model sees and the rules 
 | `description` | `string` | yes | What the tool does, as the model reads it. In the app this is the method's docstring. |
 | `parameters` | `object` | yes | The arguments, as a JSON Schema object the model must satisfy. |
 | `side_effect` | `"read" | "write" | "irreversible"` | no | read looks at the world; write changes it and can be undone; irreversible changes it for good, so the platform asks the caller first. Absent means read. |
-| `confirm` | `string` | no | The read-back the agent says before the tool runs, with {argument} placeholders filled from the call: 'Le reservo con la doctora {doctor} el {at}. ¿Confirmo?'. Absent means no confirmation. |
+| `confirm` | `string` | no | A receipt the agent reads out once the tool has run, before the model replies to the result, with {{name}} placeholders filled from the arguments and {{result.name}} from what came back: 'Reservado: {{result.when}} con {{result.professional}}.'. It does not hold the tool, so it is written as a receipt and never as a question. Absent means no read-back. |
 | `pii` | `string[]` | no | Argument names that carry personal data, masked in the log by declaration. |
 | `timeout_s` | `number` | no | How long the platform waits for the app's result before reporting an error to the model, in seconds. |
 

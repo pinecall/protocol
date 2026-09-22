@@ -48,9 +48,10 @@ class TransferVerb(WireModel):
     mode: TransferMode
 
 
-# Logged as supervisor.ended, then call.ended with reason supervisor_ended.
+# Hang up on the caller's behalf, at once: a sentence playing and a reply still being written are
+# cut, not finished. Logged as supervisor.ended, then call.ended with reason supervisor_ended.
 class EndVerb(WireModel):
-    """Hang up on the caller's behalf."""
+    """Hang up on the caller's behalf, at once."""
 
     verb: Literal["end"] = "end"
     reason: str | None = None

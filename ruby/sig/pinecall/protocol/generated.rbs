@@ -405,7 +405,7 @@ module Pinecall
       type release_verb = { verb: "release" }
       # Send the caller to another number.
       type transfer_verb = { verb: "transfer", to: String, mode: transfer_mode }
-      # Hang up on the caller's behalf.
+      # Hang up on the caller's behalf, at once: a sentence playing and a reply still being written are cut, not finished.
       type end_verb = { verb: "end", ?reason: String }
       # One supervise verb, told apart by its verb field.
       type verb = say_verb | whisper_verb | takeover_verb | release_verb | transfer_verb | end_verb

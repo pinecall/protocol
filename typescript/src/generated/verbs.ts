@@ -50,8 +50,8 @@ export const TransferVerbSchema = z.strictObject({
 export type TransferVerb = z.infer<typeof TransferVerbSchema>;
 
 /**
- * Hang up on the caller's behalf. Logged as supervisor.ended, then call.ended with reason
- * supervisor_ended.
+ * Hang up on the caller's behalf, at once: a sentence playing and a reply still being written are
+ * cut, not finished. Logged as supervisor.ended, then call.ended with reason supervisor_ended.
  */
 export const EndVerbSchema = z.strictObject({
   verb: z.literal("end"),

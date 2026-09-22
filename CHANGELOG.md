@@ -5,6 +5,13 @@ packages from it, and the notes of a GitHub release are the section below it.
 
 ## Unreleased
 
+### Changed
+- **`ToolSpec.confirm` and `EndVerb` say what the runtime does.** `confirm` is a receipt read out
+  once the tool has run and before the model replies, with `{{name}}` and `{{result.name}}`
+  placeholders — the old text described a question asked before the tool, in `{name}` braces that
+  nothing fills. `end` hangs up at once: a sentence playing and a reply being written are cut.
+  Descriptions only; no shape changed.
+
 ## 0.6.4 — A persona's model, voice and verdict; how sure a turn is; whether a call keeps its audio
 
 ### Added

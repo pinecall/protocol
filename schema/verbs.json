@@ -56,7 +56,7 @@
     },
     "EndVerb": {
       "type": "object",
-      "description": "Hang up on the caller's behalf. Logged as supervisor.ended, then call.ended with reason supervisor_ended.",
+      "description": "Hang up on the caller's behalf, at once: a sentence playing and a reply still being written are cut, not finished. Logged as supervisor.ended, then call.ended with reason supervisor_ended.",
       "properties": {
         "verb": {"type": "string", "const": "end", "description": "The verb."},
         "reason": {"type": "string", "description": "Why, in the supervisor's words, for the log."}

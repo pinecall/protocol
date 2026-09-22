@@ -344,7 +344,7 @@ Send the caller to another number. Logged as supervisor.transferred, then call.t
 
 ### `EndVerb`
 
-Hang up on the caller's behalf. Logged as supervisor.ended, then call.ended with reason supervisor_ended.
+Hang up on the caller's behalf, at once: a sentence playing and a reply still being written are cut, not finished. Logged as supervisor.ended, then call.ended with reason supervisor_ended.
 
 | field | type | required | meaning |
 |---|---|---|---|
