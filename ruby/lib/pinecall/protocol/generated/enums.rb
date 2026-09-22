@@ -36,8 +36,9 @@ module Pinecall
       # and the reason names the evidence. Deferred: the judge was asked and could not settle it.
       # Skipped: nobody asked it — no model was reachable inside the call's judging budget.
       SCORE_VERDICT = %w[held broken deferred skipped].freeze
-      # Cold: the caller is sent on and the agent leaves. Warm: the agent stays on the line until
-      # the other side answers, then leaves.
+      # Cold: the caller is sent on with a REFER on their SIP leg and the call ends here. Warm:
+      # the number is dialled into the call's own room, the agent stays on the line until the
+      # other side answers and then falls silent; the call ends when either of them hangs up.
       TRANSFER_MODE = %w[cold warm].freeze
       # Which region of the prompt a block lives in: static, before the history, cached by the
       # provider; or dynamic, after the history, replaced every turn. The append-only history in

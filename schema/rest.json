@@ -49,7 +49,8 @@
         "outcome": {"type": ["string", "null"], "description": "The one-line outcome from call.summary."},
         "cost": {"anyOf": [{"$ref": "defs.json#/$defs/Cost"}, {"type": "null"}], "description": "The cost from call.summary."},
         "score": {"anyOf": [{"$ref": "#/$defs/SessionScore"}, {"type": "null"}], "description": "How the judges answered at hang-up, cut to a row; null when nobody judged the call. Absent from a gateway that predates it."},
-        "flags": {"type": "array", "items": {"$ref": "#/$defs/SessionFlag"}, "description": "What a person reviewing calls should look at first. Absent from a gateway that predates it."}
+        "flags": {"type": "array", "items": {"$ref": "#/$defs/SessionFlag"}, "description": "What a person reviewing calls should look at first. Absent from a gateway that predates it."},
+        "attention": {"anyOf": [{"$ref": "state.json#/$defs/AttentionState"}, {"type": "null"}], "description": "The agent's last ask for a person on this call, as the state has it: open is a caller waiting for somebody to take the line. Absent from a gateway that predates it."}
       }
     },
     "SessionScore": {

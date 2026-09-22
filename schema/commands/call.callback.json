@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.callback.json",
+  "title": "call.callback",
+  "description": "Write down that the caller wants to be called back. Lands as callback.requested with via agent; placing the call is the app's.",
+  "x-pinecall": {"kind": "command", "type": "call.callback", "scope": "call", "produces": ["callback.requested"]},
+  "$ref": "#/$defs/CallCallback",
+  "$defs": {
+    "CallCallback": {
+      "type": "object",
+      "description": "Write down that the caller wants to be called back. Lands as callback.requested with via agent; placing the call is the app's.",
+      "properties": {
+        "number": {"type": "string", "description": "The number to call back, E.164."},
+        "when": {"type": "string", "description": "When the caller asked to be called, in their words or as a date: tomorrow morning, 2026-09-23T10:00."},
+        "note": {"type": "string", "description": "What the call back is about, for whoever places it."}
+      },
+      "required": ["number"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -420,7 +420,8 @@ module Pinecall
           outcome: { kind: :str, null: true, required: true },
           cost: { kind: :ref, null: true, ref: "Cost", required: true },
           score: { kind: :ref, null: true, ref: "SessionScore" },
-          flags: { kind: :list, items: { kind: :ref, ref: "SessionFlag" } }
+          flags: { kind: :list, items: { kind: :ref, ref: "SessionFlag" } },
+          attention: { kind: :ref, null: true, ref: "AttentionState" }
         }.freeze,
         "SessionScore" => {
           held: { kind: :int, required: true },
@@ -1073,6 +1074,13 @@ module Pinecall
           status: { kind: :enum, values: %w[requested done failed], required: true },
           by: { kind: :enum, values: %w[agent supervisor], required: true }
         }.freeze,
+        "AttentionState" => {
+          reason: { kind: :str, required: true },
+          wait_s: { kind: :float, required: true },
+          status: { kind: :enum, values: %w[open answered lapsed], required: true },
+          asked_at: { kind: :float, required: true },
+          by: { kind: :ref, null: true, ref: "Supervisor", required: true }
+        }.freeze,
         "LiveTranscript" => {
           user: { kind: :str, null: true, required: true },
           agent: { kind: :str, null: true, required: true }
@@ -1143,6 +1151,7 @@ module Pinecall
           held: { kind: :bool, required: true },
           muted: { kind: :bool, required: true },
           transfer: { kind: :ref, null: true, ref: "TransferState", required: true },
+          attention: { kind: :ref, null: true, ref: "AttentionState" },
           usage: { kind: :list, items: { kind: :ref, ref: "ModelUsage" }, required: true },
           cost: { kind: :ref, null: true, ref: "Cost", required: true },
           routes: { kind: :list, items: { kind: :ref, ref: "Route" }, required: true },
@@ -1167,7 +1176,7 @@ module Pinecall
         "TransferVerb" => {
           verb: { kind: :const, const: "transfer", required: true },
           to: { kind: :str, required: true },
-          mode: { kind: :ref, ref: "TransferMode", required: true }
+          mode: { kind: :ref, ref: "TransferMode" }
         }.freeze,
         "EndVerb" => {
           verb: { kind: :const, const: "end", required: true },
@@ -1189,6 +1198,15 @@ module Pinecall
         "AgentSay" => {
           text: { kind: :str, required: true },
           allow_interruptions: { kind: :bool }
+        }.freeze,
+        "CallAttention" => {
+          reason: { kind: :str, required: true },
+          wait_s: { kind: :float, required: true }
+        }.freeze,
+        "CallCallback" => {
+          number: { kind: :str, required: true },
+          when: { kind: :str },
+          note: { kind: :str }
         }.freeze,
         "CallDial" => {
           to: { kind: :str, required: true },
@@ -1214,7 +1232,7 @@ module Pinecall
         "CallMute" => {}.freeze,
         "CallTransfer" => {
           to: { kind: :str, required: true },
-          mode: { kind: :ref, ref: "TransferMode", required: true }
+          mode: { kind: :ref, ref: "TransferMode" }
         }.freeze,
         "CallUnhold" => {}.freeze,
         "CallUnmute" => {}.freeze,
@@ -1285,6 +1303,15 @@ module Pinecall
           final: { kind: :bool, required: true },
           start: { kind: :float },
           end: { kind: :float }
+        }.freeze,
+        "AttentionAnswered" => {
+          ok: { kind: :bool, required: true },
+          by: { kind: :ref, null: true, ref: "Supervisor", required: true },
+          error: { kind: :str }
+        }.freeze,
+        "AttentionRequested" => {
+          reason: { kind: :str, required: true },
+          wait_s: { kind: :float, required: true }
         }.freeze,
         "CallDialing" => {
           channel: { kind: :ref, ref: "Channel", required: true },
@@ -1364,8 +1391,10 @@ module Pinecall
         "CallbackRequested" => {
           channel: { kind: :ref, ref: "Channel", required: true },
           number: { kind: :str, required: true },
-          via: { kind: :enum, values: %w[overflow widget], required: true },
+          via: { kind: :enum, values: %w[overflow widget agent], required: true },
           call: { kind: :str, null: true, required: true },
+          when: { kind: :str },
+          note: { kind: :str },
           contact: { kind: :ref, null: true, ref: "Contact", required: true }
         }.freeze,
         "ConfirmDeclined" => {

@@ -45,7 +45,7 @@ class TransferVerb(WireModel):
 
     verb: Literal["transfer"] = "transfer"
     to: str
-    mode: TransferMode
+    mode: TransferMode | None = None
 
 
 # Hang up on the caller's behalf, at once: a sentence playing and a reply still being written are

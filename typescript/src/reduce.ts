@@ -48,6 +48,7 @@ export function initialState(): State {
     held: false,
     muted: false,
     transfer: null,
+    attention: null,
     usage: [],
     cost: null,
     routes: [],
@@ -131,6 +132,8 @@ function applyEvent(state: State, entry: Entry, event: Event): void {
       state.ended_at = event.data.ended_at;
       state.end_reason = event.data.reason;
       state.live = { user: null, agent: null };
+      // A caller who hung up while waiting for a person was never answered.
+      if (state.attention?.status === "open") state.attention = { ...state.attention, status: "lapsed" };
       return;
     case "call.transferred":
       state.transfer = {
@@ -250,6 +253,14 @@ function applyEvent(state: State, entry: Entry, event: Event): void {
       return;
     case "supervisor.transferred":
       state.transfer = { to: event.data.to, mode: event.data.mode, status: "requested", by: "supervisor" };
+      return;
+    case "attention.requested":
+      state.attention = { reason: event.data.reason, wait_s: event.data.wait_s, status: "open", asked_at: entry.ts, by: null };
+      return;
+    case "attention.answered":
+      if (state.attention !== null && state.attention !== undefined) {
+        state.attention = { ...state.attention, status: event.data.ok ? "answered" : "lapsed", by: event.data.by };
+      }
       return;
     case "agent.registered":
       state.routes = [...event.data.routes];

@@ -9,6 +9,8 @@ What reaches the gateway: the commands an app sends over its socket, each with t
 | `agent.register` | agent | `agent.registered` | The app's first message: this socket speaks for this agent and answers these doors. |
 | `agent.reply` | call | `turn.agent` | Make the model speak now, guided by an instruction it reads and the caller never hears: 'tell them a slot at 10:15 just opened'. |
 | `agent.say` | call | `turn.agent` | Make the agent say this text now, verbatim, outside the model's turn: a greeting, a read-back, a system notice. |
+| `call.attention` | call | `attention.requested`, `call.line`, `attention.answered` | Ask for a person without sending the caller anywhere: the call waits on hold until a supervisor takes the line, or until wait_s passes with nobody taking it. |
+| `call.callback` | call | `callback.requested` | Write down that the caller wants to be called back. |
 | `call.dial` | agent | `call.dialing` | Place an outbound call as this agent. |
 | `call.dtmf` | call | nothing | Send touch tones down the line, for an IVR on the far end. |
 | `call.event` | call | `event.received` | Hand the agent a fact from the tenant's backend: a slot freed, an order shipped, a payment confirmed. |
@@ -16,7 +18,7 @@ What reaches the gateway: the commands an app sends over its socket, each with t
 | `call.hold` | call | `call.line` | Put the caller on hold: they hear hold audio, the agent hears nothing. |
 | `call.log` | call | `custom` | Write a line of the app's own into the call's log. |
 | `call.mute` | call | `call.line` | Mute the agent: it keeps listening and thinking, produces no audio. |
-| `call.transfer` | call | `call.transferred` | Send the caller to another number. |
+| `call.transfer` | call | `call.transferred` | Send the caller to another number, or bring that number into the call. |
 | `call.unhold` | call | `call.line` | Take the caller off hold. |
 | `call.unmute` | call | `call.line` | Unmute the agent. |
 | `dev.answer` | agent | nothing | The app's answer to a dev.request: what the verb produced, or the refusal it ended in — a status and a sentence, which the gateway hands the console verbatim. |
@@ -76,6 +78,29 @@ Lands in the log as: `turn.agent`.
 |---|---|---|---|
 | `text` | `string` | yes | What to say, word for word. |
 | `allow_interruptions` | `boolean` | no | Whether the caller may cut it short. Default true; a legal notice sets false. |
+
+### `call.attention`
+
+Ask for a person without sending the caller anywhere: the call waits on hold until a supervisor takes the line, or until wait_s passes with nobody taking it. attention.answered says which.
+
+Lands in the log as: `attention.requested`, `call.line`, `attention.answered`.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `reason` | `string` | yes | Why a person is wanted, in the app's words: what the supervisor reads before taking the line. |
+| `wait_s` | `number` | yes | How long the caller waits for somebody to take the line before the agent has it back. The app's to choose: there is no default. |
+
+### `call.callback`
+
+Write down that the caller wants to be called back. Lands as callback.requested with via agent; placing the call is the app's.
+
+Lands in the log as: `callback.requested`.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `number` | `string` | yes | The number to call back, E.164. |
+| `when` | `string` | no | When the caller asked to be called, in their words or as a date: tomorrow morning, 2026-09-23T10:00. |
+| `note` | `string` | no | What the call back is about, for whoever places it. |
 
 ### `call.dial`
 
@@ -148,14 +173,14 @@ No fields.
 
 ### `call.transfer`
 
-Send the caller to another number. call.transferred says whether it worked.
+Send the caller to another number, or bring that number into the call. call.transferred says whether it worked, and which mode it was.
 
 Lands in the log as: `call.transferred`.
 
 | field | type | required | meaning |
 |---|---|---|---|
 | `to` | `string` | yes | The destination number in E.164 form, or a SIP URI. |
-| `mode` | `TransferMode` | yes | Cold: the caller is sent on and the agent leaves. |
+| `mode` | `TransferMode` | no | Absent, the runtime picks: cold when the caller is on a SIP leg, warm when they are in a browser. A written conversation has no line and refuses both. |
 
 ### `call.unhold`
 
@@ -340,7 +365,7 @@ Send the caller to another number. Logged as supervisor.transferred, then call.t
 |---|---|---|---|
 | `verb` | `"transfer"` | yes | The verb. |
 | `to` | `string` | yes | The destination number in E.164 form, or a SIP URI. |
-| `mode` | `TransferMode` | yes | Cold: the caller is sent on and the agent leaves. |
+| `mode` | `TransferMode` | no | Absent, the runtime picks, as call.transfer does. |
 
 ### `EndVerb`
 

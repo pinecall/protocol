@@ -74,6 +74,25 @@ class AgentTranscript(WireModel):
     end: float | None = None
 
 
+# An ask for a person settled: a supervisor took the line, or the wait ran out and the agent has the
+# caller back.
+class AttentionAnswered(WireModel):
+    """An ask for a person settled."""
+
+    ok: bool
+    by: Supervisor | None
+    error: str | None = None
+
+
+# The agent asked for a person: the caller is on hold and waits for a supervisor to take the line.
+# What a supervisor's console and phone are notified by.
+class AttentionRequested(WireModel):
+    """The agent asked for a person."""
+
+    reason: str
+    wait_s: float
+
+
 # The first entry of an outbound call's log.
 class CallDialing(WireModel):
     """The platform is placing an outbound call and the far end has not answered yet."""
@@ -190,16 +209,18 @@ class CallTransferred(WireModel):
     error: str | None = None
 
 
-# Somebody asked to be called back because no seat was free: a phone caller the overflow agent
-# answered, or a web visitor who left a number at the widget. Written into the agent's own log; the
-# tenant's app reads it and places the call.
+# Somebody asked to be called back: a phone caller the overflow agent answered, a web visitor who
+# left a number at the widget, or a caller who asked the agent for one (call.callback). Written into
+# the agent's own log; the tenant's app reads it and places the call.
 class CallbackRequested(WireModel):
-    """Somebody asked to be called back because no seat was free."""
+    """Somebody asked to be called back."""
 
     channel: Channel
     number: str
-    via: Literal["overflow", "widget"]
+    via: Literal["overflow", "widget", "agent"]
     call: str | None
+    when: str | None = None
+    note: str | None = None
     contact: Contact | None
 
 

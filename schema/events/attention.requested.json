@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/attention.requested.json",
+  "title": "attention.requested",
+  "description": "The agent asked for a person: the caller is on hold and waits for a supervisor to take the line. What a supervisor's console and phone are notified by.",
+  "x-pinecall": {"kind": "event", "type": "attention.requested", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/AttentionRequested",
+  "$defs": {
+    "AttentionRequested": {
+      "type": "object",
+      "description": "The agent asked for a person: the caller is on hold and waits for a supervisor to take the line. What a supervisor's console and phone are notified by.",
+      "properties": {
+        "reason": {"type": "string", "description": "Why a person is wanted, in the app's words."},
+        "wait_s": {"type": "number", "description": "How long the caller will wait before the agent has the line back."}
+      },
+      "required": ["reason", "wait_s"],
+      "additionalProperties": false
+    }
+  }
+}

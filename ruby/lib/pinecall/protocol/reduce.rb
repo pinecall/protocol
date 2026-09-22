@@ -89,6 +89,8 @@ module Pinecall
         when "supervisor.took_over" then state[:handoff] = { active: true, by: data[:by] }
         when "supervisor.released" then state[:handoff] = { active: false, by: nil }
         when "supervisor.transferred" then took_the_line(state, data)
+        when "attention.requested" then asked_for_a_person(state, data, entry.ts)
+        when "attention.answered" then answered(state, data)
         when "agent.registered" then state[:routes] = data[:routes].dup
         when "error" then state[:errors] << { seq: entry.seq, code: data[:code], message: data[:message] }
         when "custom" then state[:custom] << { seq: entry.seq, name: data[:name], data: data[:data].dup }
@@ -129,6 +131,8 @@ module Pinecall
         state[:ended_at] = data[:ended_at]
         state[:end_reason] = data[:reason]
         state[:live] = { user: nil, agent: nil }
+        # A caller who hung up while waiting for a person was never answered.
+        state[:attention] = state[:attention].merge(status: "lapsed") if state[:attention]&.fetch(:status) == "open"
       end
 
       def transferred(state, data)
@@ -142,6 +146,16 @@ module Pinecall
 
       def took_the_line(state, data)
         state[:transfer] = { to: data[:to], mode: data[:mode], status: "requested", by: "supervisor" }
+      end
+
+      def asked_for_a_person(state, data, asked_at)
+        state[:attention] = { reason: data[:reason], wait_s: data[:wait_s], status: "open", asked_at: asked_at, by: nil }
+      end
+
+      def answered(state, data)
+        return if state[:attention].nil?
+
+        state[:attention] = state[:attention].merge(status: data[:ok] ? "answered" : "lapsed", by: data[:by])
       end
 
       def summarised(state, data)

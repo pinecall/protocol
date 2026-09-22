@@ -2,18 +2,18 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pinecall.io/protocol/commands/call.transfer.json",
   "title": "call.transfer",
-  "description": "Send the caller to another number. call.transferred says whether it worked.",
+  "description": "Send the caller to another number, or bring that number into the call. call.transferred says whether it worked, and which mode it was.",
   "x-pinecall": {"kind": "command", "type": "call.transfer", "scope": "call", "produces": ["call.transferred"]},
   "$ref": "#/$defs/CallTransfer",
   "$defs": {
     "CallTransfer": {
       "type": "object",
-      "description": "Send the caller to another number. call.transferred says whether it worked.",
+      "description": "Send the caller to another number, or bring that number into the call. call.transferred says whether it worked, and which mode it was.",
       "properties": {
         "to": {"type": "string", "description": "The destination number in E.164 form, or a SIP URI."},
-        "mode": {"$ref": "../defs.json#/$defs/TransferMode"}
+        "mode": {"$ref": "../defs.json#/$defs/TransferMode", "description": "Absent, the runtime picks: cold when the caller is on a SIP leg, warm when they are in a browser. A written conversation has no line and refuses both."}
       },
-      "required": ["to", "mode"],
+      "required": ["to"],
       "additionalProperties": false
     }
   }

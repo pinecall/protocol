@@ -121,9 +121,21 @@ The transfer in flight or the one that happened.
 | field | type | required | meaning |
 |---|---|---|---|
 | `to` | `string` | yes | The destination. |
-| `mode` | `TransferMode` | yes | Cold: the caller is sent on and the agent leaves. |
+| `mode` | `TransferMode` | yes | Cold: the caller is sent on with a REFER on their SIP leg and the call ends here. |
 | `status` | `"requested" | "done" | "failed"` | yes | requested until call.transferred reports the outcome. |
 | `by` | `"agent" | "supervisor"` | yes | Who asked for it. |
+
+### `AttentionState`
+
+The agent's last ask for a person, from attention.requested until attention.answered settles it.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `reason` | `string` | yes | Why a person was wanted, in the app's words. |
+| `wait_s` | `number` | yes | How long the caller was to wait. |
+| `status` | `"open" | "answered" | "lapsed"` | yes | open while the caller waits; answered when a supervisor took the line; lapsed when nobody did in time, or the call ended first. |
+| `asked_at` | `number` | yes | When it was asked, unix seconds: the entry's own ts. |
+| `by` | `Supervisor | null` | yes | Who took the line, once somebody did. |
 
 ### `LiveTranscript`
 
@@ -235,6 +247,7 @@ The whole of what a log says, at the seq it was read to.
 | `held` | `boolean` | yes | True while the caller is on hold. |
 | `muted` | `boolean` | yes | True while the agent's audio is muted. |
 | `transfer` | `TransferState | null` | yes | The transfer, once one was asked for. |
+| `attention` | `AttentionState | null` | no | The last ask for a person, once the agent made one. Absent from a state folded before it existed. |
 | `usage` | `ModelUsage[]` | yes | The usage rows from call.summary. |
 | `cost` | `Cost | null` | yes | The cost from call.summary. |
 | `routes` | `Route[]` | yes | The agent's doors, from agent.registered. |

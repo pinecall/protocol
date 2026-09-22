@@ -82,8 +82,9 @@ type EndedBy = Literal["caller", "agent", "supervisor", "platform"]
 type ScoreVerdict = Literal["held", "broken", "deferred", "skipped"]
 
 
-# Cold: the caller is sent on and the agent leaves. Warm: the agent stays on the line until the
-# other side answers, then leaves.
+# Cold: the caller is sent on with a REFER on their SIP leg and the call ends here. Warm: the number
+# is dialled into the call's own room, the agent stays on the line until the other side answers and
+# then falls silent; the call ends when either of them hangs up.
 type TransferMode = Literal["cold", "warm"]
 
 

@@ -131,6 +131,19 @@
       "required": ["to", "mode", "status", "by"],
       "additionalProperties": false
     },
+    "AttentionState": {
+      "type": "object",
+      "description": "The agent's last ask for a person, from attention.requested until attention.answered settles it.",
+      "properties": {
+        "reason": {"type": "string", "description": "Why a person was wanted, in the app's words."},
+        "wait_s": {"type": "number", "description": "How long the caller was to wait."},
+        "status": {"type": "string", "enum": ["open", "answered", "lapsed"], "description": "open while the caller waits; answered when a supervisor took the line; lapsed when nobody did in time, or the call ended first."},
+        "asked_at": {"type": "number", "description": "When it was asked, unix seconds: the entry's own ts."},
+        "by": {"anyOf": [{"$ref": "defs.json#/$defs/Supervisor"}, {"type": "null"}], "description": "Who took the line, once somebody did."}
+      },
+      "required": ["reason", "wait_s", "status", "asked_at", "by"],
+      "additionalProperties": false
+    },
     "LiveTranscript": {
       "type": "object",
       "description": "The words on screen right now: interim transcripts that a finished turn clears.",
@@ -246,6 +259,7 @@
         "held": {"type": "boolean", "description": "True while the caller is on hold."},
         "muted": {"type": "boolean", "description": "True while the agent's audio is muted."},
         "transfer": {"anyOf": [{"$ref": "#/$defs/TransferState"}, {"type": "null"}], "description": "The transfer, once one was asked for."},
+        "attention": {"anyOf": [{"$ref": "#/$defs/AttentionState"}, {"type": "null"}], "description": "The last ask for a person, once the agent made one. Absent from a state folded before it existed."},
         "usage": {"type": "array", "items": {"$ref": "metrics.json#/$defs/ModelUsage"}, "description": "The usage rows from call.summary."},
         "cost": {"anyOf": [{"$ref": "defs.json#/$defs/Cost"}, {"type": "null"}], "description": "The cost from call.summary."},
         "routes": {"type": "array", "items": {"$ref": "defs.json#/$defs/Route"}, "description": "The agent's doors, from agent.registered."},

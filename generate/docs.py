@@ -21,6 +21,7 @@ EVENT_PAGES: tuple[tuple[str, tuple[str, ...]], ...] = (
         "events-control.md",
         (
             "supervisor.",
+            "attention.",
             "log.",
             "error",
             "pong",

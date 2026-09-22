@@ -54,6 +54,27 @@ export const AgentSaySchema = z.strictObject({
 export type AgentSay = z.infer<typeof AgentSaySchema>;
 
 /**
+ * Ask for a person without sending the caller anywhere: the call waits on hold until a supervisor
+ * takes the line, or until wait_s passes with nobody taking it. attention.answered says which.
+ */
+export const CallAttentionSchema = z.strictObject({
+  reason: z.string(),
+  wait_s: z.number(),
+});
+export type CallAttention = z.infer<typeof CallAttentionSchema>;
+
+/**
+ * Write down that the caller wants to be called back. Lands as callback.requested with via agent;
+ * placing the call is the app's.
+ */
+export const CallCallbackSchema = z.strictObject({
+  number: z.string(),
+  when: z.string().nullish(),
+  note: z.string().nullish(),
+});
+export type CallCallback = z.infer<typeof CallCallbackSchema>;
+
+/**
  * Place an outbound call as this agent. The new call's log opens with call.dialing; call.started
  * follows when the far end answers.
  */
@@ -106,10 +127,13 @@ export type CallLog = z.infer<typeof CallLogSchema>;
 export const CallMuteSchema = z.strictObject({});
 export type CallMute = z.infer<typeof CallMuteSchema>;
 
-/** Send the caller to another number. call.transferred says whether it worked. */
+/**
+ * Send the caller to another number, or bring that number into the call. call.transferred says
+ * whether it worked, and which mode it was.
+ */
 export const CallTransferSchema = z.strictObject({
   to: z.string(),
-  mode: TransferModeSchema,
+  mode: TransferModeSchema.nullish(),
 });
 export type CallTransfer = z.infer<typeof CallTransferSchema>;
 

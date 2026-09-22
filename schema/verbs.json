@@ -49,9 +49,9 @@
       "properties": {
         "verb": {"type": "string", "const": "transfer", "description": "The verb."},
         "to": {"type": "string", "description": "The destination number in E.164 form, or a SIP URI."},
-        "mode": {"$ref": "defs.json#/$defs/TransferMode"}
+        "mode": {"$ref": "defs.json#/$defs/TransferMode", "description": "Absent, the runtime picks, as call.transfer does."}
       },
-      "required": ["verb", "to", "mode"],
+      "required": ["verb", "to"],
       "additionalProperties": false
     },
     "EndVerb": {

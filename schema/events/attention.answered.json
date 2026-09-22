@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/attention.answered.json",
+  "title": "attention.answered",
+  "description": "An ask for a person settled: a supervisor took the line, or the wait ran out and the agent has the caller back.",
+  "x-pinecall": {"kind": "event", "type": "attention.answered", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/AttentionAnswered",
+  "$defs": {
+    "AttentionAnswered": {
+      "type": "object",
+      "description": "An ask for a person settled: a supervisor took the line, or the wait ran out and the agent has the caller back.",
+      "properties": {
+        "ok": {"type": "boolean", "description": "True when a supervisor took the line."},
+        "by": {"anyOf": [{"$ref": "../defs.json#/$defs/Supervisor"}, {"type": "null"}], "description": "Who took it, or null when nobody did."},
+        "error": {"type": "string", "description": "Why nobody did, when nobody did."}
+      },
+      "required": ["ok", "by"],
+      "additionalProperties": false
+    }
+  }
+}

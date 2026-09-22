@@ -45,7 +45,7 @@ export type ReleaseVerb = z.infer<typeof ReleaseVerbSchema>;
 export const TransferVerbSchema = z.strictObject({
   verb: z.literal("transfer"),
   to: z.string(),
-  mode: TransferModeSchema,
+  mode: TransferModeSchema.nullish(),
 });
 export type TransferVerb = z.infer<typeof TransferVerbSchema>;
 

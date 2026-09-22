@@ -22,7 +22,7 @@ from pinecall_protocol.defs import (
     TurnConfig,
 )
 from pinecall_protocol.envelope import Entry
-from pinecall_protocol.state import CallStatus, State
+from pinecall_protocol.state import AttentionState, CallStatus, State
 
 
 class CallState(WireModel):
@@ -78,6 +78,7 @@ class SessionLine(WireModel):
     cost: Cost | None
     score: SessionScore | None = None
     flags: list[SessionFlag] | None = None
+    attention: AttentionState | None = None
 
 
 # GET /v1/agents/{slug}/sessions and GET /v1/sessions: the calls that match, newest first, a page at

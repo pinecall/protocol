@@ -19,7 +19,7 @@ module Pinecall
       type ended_by = "caller" | "agent" | "supervisor" | "platform"
       # What one judge answered about a finished call.
       type score_verdict = "held" | "broken" | "deferred" | "skipped"
-      # Cold: the caller is sent on and the agent leaves.
+      # Cold: the caller is sent on with a REFER on their SIP leg and the call ends here.
       type transfer_mode = "cold" | "warm"
       # Which region of the prompt a block lives in: static, before the history, cached by the provider; or dynamic, after the history, replaced every turn.
       type prompt_region = "static" | "dynamic"
@@ -148,7 +148,7 @@ module Pinecall
       # One page of a log: what this reader may see, whether the log is open, and where to resume.
       type log_page = { entries: Array[entry], live: bool, next: Integer? }
       # One call as a list draws it: which call, how far the log got, and the state's own fields.
-      type session_line = { call: String, agent: String, live: bool, last_seq: Integer, status: call_status, channel: channel?, direction: direction?, from: String?, to: String?, caller: contact?, started_at: Float?, ended_at: Float?, end_reason: end_reason?, outcome: String?, cost: cost?, ?score: session_score?, ?flags: Array[session_flag] }
+      type session_line = { call: String, agent: String, live: bool, last_seq: Integer, status: call_status, channel: channel?, direction: direction?, from: String?, to: String?, caller: contact?, started_at: Float?, ended_at: Float?, end_reason: end_reason?, outcome: String?, cost: cost?, ?score: session_score?, ?flags: Array[session_flag], ?attention: attention_state? }
       # One call's call.score as a list draws it: how many judges held of how many answered, and why the first one that broke did.
       type session_score = { held: Integer, judged: Integer, passed: bool, reason: String? }
       # escalated: a person took part — a transfer, a supervisor taking the line, saying something, or ending the call.
@@ -379,6 +379,8 @@ module Pinecall
       type handoff = { active: bool, by: supervisor? }
       # The transfer in flight or the one that happened.
       type transfer_state = { to: String, mode: transfer_mode, status: "requested" | "done" | "failed", by: "agent" | "supervisor" }
+      # The agent's last ask for a person, from attention.requested until attention.answered settles it.
+      type attention_state = { reason: String, wait_s: Float, status: "open" | "answered" | "lapsed", asked_at: Float, by: supervisor? }
       # The words on screen right now: interim transcripts that a finished turn clears.
       type live_transcript = { user: String?, agent: String? }
       # A stretch of seqs this reader never saw.
@@ -394,7 +396,7 @@ module Pinecall
       # A line the app wrote into the log with call.log.
       type custom_note = { seq: Integer, name: String, data: Hash[Symbol, untyped] }
       # The whole of what a log says, at the seq it was read to.
-      type state = { seq: Integer, agent: String, call: String?, status: call_status, channel: channel?, direction: direction?, from: String?, to: String?, caller: contact?, room: room?, started_at: Float?, ended_at: Float?, end_reason: end_reason?, outcome: String?, user_state: user_state?, agent_state: agent_state?, live: live_transcript, turns: Array[turn], metrics: collected_metrics, tools: Array[tool_run], app_state: Hash[Symbol, untyped], events: Array[received_event], prompt: prompt_state, tools_visible: Array[String], confirms: Array[confirm], memory: Array[memory_op], sources: Array[doc_source], handoff: handoff, held: bool, muted: bool, transfer: transfer_state?, usage: Array[model_usage], cost: cost?, routes: Array[route], gaps: Array[gap], errors: Array[logged_error], custom: Array[custom_note] }
+      type state = { seq: Integer, agent: String, call: String?, status: call_status, channel: channel?, direction: direction?, from: String?, to: String?, caller: contact?, room: room?, started_at: Float?, ended_at: Float?, end_reason: end_reason?, outcome: String?, user_state: user_state?, agent_state: agent_state?, live: live_transcript, turns: Array[turn], metrics: collected_metrics, tools: Array[tool_run], app_state: Hash[Symbol, untyped], events: Array[received_event], prompt: prompt_state, tools_visible: Array[String], confirms: Array[confirm], memory: Array[memory_op], sources: Array[doc_source], handoff: handoff, held: bool, muted: bool, transfer: transfer_state?, ?attention: attention_state?, usage: Array[model_usage], cost: cost?, routes: Array[route], gaps: Array[gap], errors: Array[logged_error], custom: Array[custom_note] }
       # Make the agent say this, verbatim, to the caller.
       type say_verb = { verb: "say", text: String }
       # Tell the agent something the caller never hears.
@@ -404,7 +406,7 @@ module Pinecall
       # The supervisor hands the line back to the agent, which resumes with the history intact.
       type release_verb = { verb: "release" }
       # Send the caller to another number.
-      type transfer_verb = { verb: "transfer", to: String, mode: transfer_mode }
+      type transfer_verb = { verb: "transfer", to: String, ?mode: transfer_mode }
       # Hang up on the caller's behalf, at once: a sentence playing and a reply still being written are cut, not finished.
       type end_verb = { verb: "end", ?reason: String }
       # One supervise verb, told apart by its verb field.
@@ -417,6 +419,10 @@ module Pinecall
       type agent_reply = { instructions: String, ?allow_interruptions: bool }
       # Make the agent say this text now, verbatim, outside the model's turn: a greeting, a read-back, a system notice.
       type agent_say = { text: String, ?allow_interruptions: bool }
+      # Ask for a person without sending the caller anywhere: the call waits on hold until a supervisor takes the line, or until wait_s passes with nobody taking it.
+      type call_attention = { reason: String, wait_s: Float }
+      # Write down that the caller wants to be called back.
+      type call_callback = { number: String, ?when: String, ?note: String }
       # Place an outbound call as this agent.
       type call_dial = { to: String, ?from: String, ?caller: contact, ?metadata: Hash[Symbol, untyped] }
       # Send touch tones down the line, for an IVR on the far end.
@@ -431,8 +437,8 @@ module Pinecall
       type call_log = { name: String, data: Hash[Symbol, untyped] }
       # Mute the agent: it keeps listening and thinking, produces no audio.
       type call_mute = { }
-      # Send the caller to another number.
-      type call_transfer = { to: String, mode: transfer_mode }
+      # Send the caller to another number, or bring that number into the call.
+      type call_transfer = { to: String, ?mode: transfer_mode }
       # Take the caller off hold.
       type call_unhold = { }
       # Unmute the agent.
@@ -471,6 +477,10 @@ module Pinecall
       type agent_state_changed = { state: agent_state }
       # One delta of the reply the agent is giving, never the reply so far: in a voice call one word, as the voice plays it, with the seconds it was aligned to; in a written call one model token.
       type agent_transcript = { speech_id: String, text: String, final: bool, ?start: Float, ?end: Float }
+      # An ask for a person settled: a supervisor took the line, or the wait ran out and the agent has the caller back.
+      type attention_answered = { ok: bool, by: supervisor?, ?error: String }
+      # The agent asked for a person: the caller is on hold and waits for a supervisor to take the line.
+      type attention_requested = { reason: String, wait_s: Float }
       # The platform is placing an outbound call and the far end has not answered yet.
       type call_dialing = { channel: channel, from: String, to: String, ?run: String?, caller: contact?, ?external_id: String, ?asked_by: String }
       # The call is over.
@@ -491,8 +501,8 @@ module Pinecall
       type call_summary = { reason: end_reason, outcome: String, duration_s: Float, turns: Integer, usage: Array[model_usage], cost: cost, ?recording: String }
       # A transfer asked for by the agent or a supervisor finished, one way or the other.
       type call_transferred = { to: String, mode: transfer_mode, ok: bool, ?error: String }
-      # Somebody asked to be called back because no seat was free: a phone caller the overflow agent answered, or a web visitor who left a number at the widget.
-      type callback_requested = { channel: channel, number: String, via: "overflow" | "widget", call: String?, contact: contact? }
+      # Somebody asked to be called back: a phone caller the overflow agent answered, a web visitor who left a number at the widget, or a caller who asked the agent for one (call.callback).
+      type callback_requested = { channel: channel, number: String, via: "overflow" | "widget" | "agent", call: String?, ?when: String, ?note: String, contact: contact? }
       # The caller did not say yes, or the request lapsed.
       type confirm_declined = { tool: String, call_id: String, audience: String, ?said: String, reason: "no" | "timeout" | "changed" | "cancelled" }
       # The caller said yes.

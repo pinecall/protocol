@@ -74,6 +74,27 @@ export const AgentTranscriptSchema = z.strictObject({
 export type AgentTranscript = z.infer<typeof AgentTranscriptSchema>;
 
 /**
+ * An ask for a person settled: a supervisor took the line, or the wait ran out and the agent has
+ * the caller back.
+ */
+export const AttentionAnsweredSchema = z.strictObject({
+  ok: z.boolean(),
+  by: SupervisorSchema.nullable(),
+  error: z.string().nullish(),
+});
+export type AttentionAnswered = z.infer<typeof AttentionAnsweredSchema>;
+
+/**
+ * The agent asked for a person: the caller is on hold and waits for a supervisor to take the line.
+ * What a supervisor's console and phone are notified by.
+ */
+export const AttentionRequestedSchema = z.strictObject({
+  reason: z.string(),
+  wait_s: z.number(),
+});
+export type AttentionRequested = z.infer<typeof AttentionRequestedSchema>;
+
+/**
  * The platform is placing an outbound call and the far end has not answered yet. The first entry
  * of an outbound call's log.
  */
@@ -203,15 +224,17 @@ export const CallTransferredSchema = z.strictObject({
 export type CallTransferred = z.infer<typeof CallTransferredSchema>;
 
 /**
- * Somebody asked to be called back because no seat was free: a phone caller the overflow agent
- * answered, or a web visitor who left a number at the widget. Written into the agent's own log;
- * the tenant's app reads it and places the call.
+ * Somebody asked to be called back: a phone caller the overflow agent answered, a web visitor who
+ * left a number at the widget, or a caller who asked the agent for one (call.callback). Written
+ * into the agent's own log; the tenant's app reads it and places the call.
  */
 export const CallbackRequestedSchema = z.strictObject({
   channel: ChannelSchema,
   number: z.string(),
-  via: z.enum(["overflow", "widget"]),
+  via: z.enum(["overflow", "widget", "agent"]),
   call: z.string().nullable(),
+  when: z.string().nullish(),
+  note: z.string().nullish(),
   contact: ContactSchema.nullable(),
 });
 export type CallbackRequested = z.infer<typeof CallbackRequestedSchema>;

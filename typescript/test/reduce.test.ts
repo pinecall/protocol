@@ -43,6 +43,23 @@ describe("reduce", () => {
     expect(state.confirms[0]).toMatchObject({ status: "granted", said: "sí" });
   });
 
+  it("an ask for a person is open until a supervisor takes the line", () => {
+    const by = { id: "sup_1", name: "Lucía" };
+    const asked = entry(1, "attention.requested", { reason: "wants a refund", wait_s: 60 });
+    const open = reduce([asked]);
+    const taken = reduce([asked, entry(2, "attention.answered", { ok: true, by })]);
+    expect(open.attention).toEqual({ reason: "wants a refund", wait_s: 60, status: "open", asked_at: 1786537501, by: null });
+    expect(taken.attention).toMatchObject({ status: "answered", by });
+  });
+
+  it("an ask for a person nobody took lapses, and so does one the caller hung up on", () => {
+    const asked = entry(1, "attention.requested", { reason: "wants a refund", wait_s: 60 });
+    const nobody = reduce([asked, entry(2, "attention.answered", { ok: false, by: null, error: "nobody took it" })]);
+    const hungUp = reduce([asked, entry(2, "call.ended", { reason: "caller_hung_up", ended_by: "caller", ended_at: 2, duration_s: 1 })]);
+    expect(nobody.attention?.status).toBe("lapsed");
+    expect(hungUp.attention?.status).toBe("lapsed");
+  });
+
   it("a gap with a snapshot replaces everything and is remembered", () => {
     const snapshot = reduce([entry(1, "call.started", { ...line, direction: "inbound", caller, started_at: 1 })]);
     const state = reduce([entry(3, "log.gap", { from_seq: 1, to_seq: 3, snapshot }, true)]);

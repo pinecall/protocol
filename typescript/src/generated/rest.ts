@@ -18,7 +18,7 @@ import {
   TurnConfigSchema,
 } from "./defs.js";
 import { EntrySchema } from "./envelope.js";
-import { CallStatusSchema, StateSchema } from "./state.js";
+import { AttentionStateSchema, CallStatusSchema, StateSchema } from "./state.js";
 
 /** GET /v1/calls/{call}/state: the whole log folded, and the seq a stream resumes from. */
 export const CallStateSchema = z.strictObject({
@@ -75,6 +75,7 @@ export const SessionLineSchema = z.strictObject({
   cost: CostSchema.nullable(),
   score: SessionScoreSchema.nullable().nullish(),
   flags: z.array(SessionFlagSchema).nullish(),
+  attention: AttentionStateSchema.nullable().nullish(),
 });
 export type SessionLine = z.infer<typeof SessionLineSchema>;
 

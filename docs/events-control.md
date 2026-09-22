@@ -32,16 +32,37 @@ The gateway accepted an agent.register: this socket now speaks for the agent and
 | `sdk` | `string` | no | The SDK and version the app runs, as it reported them. |
 | `env` | `Env` | no | The world the key that registered it opens: production, or sandbox. Absent on entries written before keys knew where they were, which read as production. |
 
+### `attention.answered`
+
+An ask for a person settled: a supervisor took the line, or the wait ran out and the agent has the caller back.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `ok` | `boolean` | yes | True when a supervisor took the line. |
+| `by` | `Supervisor | null` | yes | Who took it, or null when nobody did. |
+| `error` | `string` | no | Why nobody did, when nobody did. |
+
+### `attention.requested`
+
+The agent asked for a person: the caller is on hold and waits for a supervisor to take the line. What a supervisor's console and phone are notified by.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `reason` | `string` | yes | Why a person is wanted, in the app's words. |
+| `wait_s` | `number` | yes | How long the caller will wait before the agent has the line back. |
+
 ### `callback.requested`
 
-Somebody asked to be called back because no seat was free: a phone caller the overflow agent answered, or a web visitor who left a number at the widget. Written into the agent's own log; the tenant's app reads it and places the call.
+Somebody asked to be called back: a phone caller the overflow agent answered, a web visitor who left a number at the widget, or a caller who asked the agent for one (call.callback). Written into the agent's own log; the tenant's app reads it and places the call.
 
 | field | type | required | meaning |
 |---|---|---|---|
 | `channel` | `Channel` | yes | The door the public came through: a phone call over SIP, the browser widget over WebRTC, or WhatsApp text. |
 | `number` | `string` | yes | The number to call back, E.164. |
-| `via` | `"overflow" | "widget"` | yes | Who took the request: the overflow agent that answered a phone call the fleet could not, or the widget, before any room was made. |
-| `call` | `string | null` | yes | The call the overflow agent answered, when there was one. Null for a widget visitor who never had a room. |
+| `via` | `"overflow" | "widget" | "agent"` | yes | Who took the request: the overflow agent that answered a phone call the fleet could not, the widget, before any room was made, or the agent itself, on a call. |
+| `call` | `string | null` | yes | The call the request was made on, when there was one. Null for a widget visitor who never had a room. |
+| `when` | `string` | no | When the caller asked to be called, when the agent said. |
+| `note` | `string` | no | What the call back is about, when the agent said. |
 | `contact` | `Contact | null` | yes | Who asked, when the app said. |
 
 ### `credits.exhausted`
@@ -155,7 +176,7 @@ A supervisor asked for a transfer. call.transferred says how it went.
 |---|---|---|---|
 | `by` | `Supervisor` | yes | The human who sent a supervise verb, as the token that let them in names them. |
 | `to` | `string` | yes | The destination. |
-| `mode` | `TransferMode` | yes | Cold: the caller is sent on and the agent leaves. |
+| `mode` | `TransferMode` | yes | Cold: the caller is sent on with a REFER on their SIP leg and the call ends here. |
 
 ### `supervisor.whispered`
 

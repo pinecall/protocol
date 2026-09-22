@@ -41,6 +41,7 @@ module Pinecall
           held: false,
           muted: false,
           transfer: nil,
+          attention: nil,
           usage: [],
           cost: nil,
           routes: [],

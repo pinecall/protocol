@@ -10,6 +10,8 @@ Every event the gateway writes, one line each, with the page that holds its data
 | `agent.registered` | agent | no | [events-control.md](events-control.md) | The gateway accepted an agent.register: this socket now speaks for the agent and answers its routes. |
 | `agent.state` | call | no | [events-call.md](events-call.md) | The agent's state changed, in the session's own words. |
 | `agent.transcript` | call | yes | [events-call.md](events-call.md) | One delta of the reply the agent is giving, never the reply so far: in a voice call one word, as the voice plays it, with the seconds it was aligned to; in a written call one model token. |
+| `attention.answered` | call | no | [events-control.md](events-control.md) | An ask for a person settled: a supervisor took the line, or the wait ran out and the agent has the caller back. |
+| `attention.requested` | call | no | [events-control.md](events-control.md) | The agent asked for a person: the caller is on hold and waits for a supervisor to take the line. |
 | `call.dialing` | call | no | [events-call.md](events-call.md) | The platform is placing an outbound call and the far end has not answered yet. |
 | `call.ended` | call | no | [events-call.md](events-call.md) | The call is over. |
 | `call.line` | call | no | [events-call.md](events-call.md) | The line's hold and mute flags after one of them changed. |
@@ -18,7 +20,7 @@ Every event the gateway writes, one line each, with the page that holds its data
 | `call.started` | call | no | [events-call.md](events-call.md) | Media is up: the caller and the agent can hear each other, or the text session is open. |
 | `call.summary` | call | no | [events-call.md](events-call.md) | What the call was about, how it went, what it consumed and what that cost. |
 | `call.transferred` | call | no | [events-call.md](events-call.md) | A transfer asked for by the agent or a supervisor finished, one way or the other. |
-| `callback.requested` | agent | no | [events-control.md](events-control.md) | Somebody asked to be called back because no seat was free: a phone caller the overflow agent answered, or a web visitor who left a number at the widget. |
+| `callback.requested` | agent | no | [events-control.md](events-control.md) | Somebody asked to be called back: a phone caller the overflow agent answered, a web visitor who left a number at the widget, or a caller who asked the agent for one (call.callback). |
 | `confirm.declined` | call | no | [events-app.md](events-app.md) | The caller did not say yes, or the request lapsed. |
 | `confirm.granted` | call | no | [events-app.md](events-app.md) | The caller said yes. |
 | `confirm.request` | call | no | [events-app.md](events-app.md) | A tool with confirm set is about to run and the platform is asking the caller. |

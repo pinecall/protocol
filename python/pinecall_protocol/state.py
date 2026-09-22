@@ -139,6 +139,17 @@ class TransferState(WireModel):
     by: Literal["agent", "supervisor"]
 
 
+# The agent's last ask for a person, from attention.requested until attention.answered settles it.
+class AttentionState(WireModel):
+    """AttentionState, as protocol/schema declares it."""
+
+    reason: str
+    wait_s: float
+    status: Literal["open", "answered", "lapsed"]
+    asked_at: float
+    by: Supervisor | None
+
+
 class LiveTranscript(WireModel):
     """The words on screen right now: interim transcripts that a finished turn clears."""
 
@@ -233,6 +244,7 @@ class State(WireModel):
     held: bool
     muted: bool
     transfer: TransferState | None
+    attention: AttentionState | None = None
     usage: list[ModelUsage]
     cost: Cost | None
     routes: list[Route]

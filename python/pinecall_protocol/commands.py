@@ -46,6 +46,24 @@ class AgentSay(WireModel):
     allow_interruptions: bool | None = None
 
 
+# Ask for a person without sending the caller anywhere: the call waits on hold until a supervisor
+# takes the line, or until wait_s passes with nobody taking it. attention.answered says which.
+class CallAttention(WireModel):
+    """Ask for a person without sending the caller anywhere."""
+
+    reason: str
+    wait_s: float
+
+
+# Lands as callback.requested with via agent; placing the call is the app's.
+class CallCallback(WireModel):
+    """Write down that the caller wants to be called back."""
+
+    number: str
+    when: str | None = None
+    note: str | None = None
+
+
 # The new call's log opens with call.dialing; call.started follows when the far end answers.
 class CallDial(WireModel):
     """Place an outbound call as this agent."""
@@ -95,12 +113,12 @@ class CallMute(WireModel):
     """Mute the agent: it keeps listening and thinking, produces no audio."""
 
 
-# call.transferred says whether it worked.
+# call.transferred says whether it worked, and which mode it was.
 class CallTransfer(WireModel):
-    """Send the caller to another number."""
+    """Send the caller to another number, or bring that number into the call."""
 
     to: str
-    mode: TransferMode
+    mode: TransferMode | None = None
 
 
 class CallUnhold(WireModel):

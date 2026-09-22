@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.attention.json",
+  "title": "call.attention",
+  "description": "Ask for a person without sending the caller anywhere: the call waits on hold until a supervisor takes the line, or until wait_s passes with nobody taking it. attention.answered says which.",
+  "x-pinecall": {"kind": "command", "type": "call.attention", "scope": "call", "produces": ["attention.requested", "call.line", "attention.answered"]},
+  "$ref": "#/$defs/CallAttention",
+  "$defs": {
+    "CallAttention": {
+      "type": "object",
+      "description": "Ask for a person without sending the caller anywhere: the call waits on hold until a supervisor takes the line, or until wait_s passes with nobody taking it. attention.answered says which.",
+      "properties": {
+        "reason": {"type": "string", "description": "Why a person is wanted, in the app's words: what the supervisor reads before taking the line."},
+        "wait_s": {"type": "number", "exclusiveMinimum": 0, "description": "How long the caller waits for somebody to take the line before the agent has it back. The app's to choose: there is no default."}
+      },
+      "required": ["reason", "wait_s"],
+      "additionalProperties": false
+    }
+  }
+}

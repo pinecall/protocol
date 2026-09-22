@@ -141,6 +141,16 @@ export const TransferStateSchema = z.strictObject({
 });
 export type TransferState = z.infer<typeof TransferStateSchema>;
 
+/** The agent's last ask for a person, from attention.requested until attention.answered settles it. */
+export const AttentionStateSchema = z.strictObject({
+  reason: z.string(),
+  wait_s: z.number(),
+  status: z.enum(["open", "answered", "lapsed"]),
+  asked_at: z.number(),
+  by: SupervisorSchema.nullable(),
+});
+export type AttentionState = z.infer<typeof AttentionStateSchema>;
+
 /** The words on screen right now: interim transcripts that a finished turn clears. */
 export const LiveTranscriptSchema = z.strictObject({
   user: z.string().nullable(),
@@ -236,6 +246,7 @@ export const StateSchema = z.strictObject({
   held: z.boolean(),
   muted: z.boolean(),
   transfer: TransferStateSchema.nullable(),
+  attention: AttentionStateSchema.nullable().nullish(),
   usage: z.array(ModelUsageSchema),
   cost: CostSchema.nullable(),
   routes: z.array(RouteSchema),
