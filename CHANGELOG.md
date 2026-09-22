@@ -5,7 +5,18 @@ packages from it, and the notes of a GitHub release are the section below it.
 
 ## Unreleased
 
+### Added
+- **`call.attention`, `attention.requested`, `attention.answered`, `State.attention`,
+  `SessionLine.attention`.** The agent asks for a person without sending the caller anywhere: the
+  call waits on hold until a supervisor takes the line or `wait_s` runs out. `wait_s` has no
+  default; the app chooses it.
+- **`call.callback`, and `callback.requested` with `via: "agent"`, `when` and `note`.** A caller who
+  asks to be called back, written down from inside the call.
+
 ### Changed
+- **`call.transfer` and `TransferVerb` take no required `mode`.** Absent, the runtime picks: cold
+  for a caller on a SIP leg, warm — the number dialled into the call's room — for one in a
+  browser. `TransferMode`'s warm now says the agent falls silent once the far side answers.
 - **`ToolSpec.confirm` and `EndVerb` say what the runtime does.** `confirm` is a receipt read out
   once the tool has run and before the model replies, with `{{name}}` and `{{result.name}}`
   placeholders — the old text described a question asked before the tool, in `{name}` braces that
