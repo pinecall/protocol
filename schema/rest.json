@@ -1079,7 +1079,7 @@
       "type": "object",
       "additionalProperties": false,
       "description": "One synthetic caller of an ORG, kept by the gateway: what they want, how they talk, and what they may state about themselves. A model plays them turn by turn — there is no script — for `pinecall simulate` and the console's Simulations. A caller is a person on the phone, so who they are does not depend on which of the org's agents answers: every agent of the org calls with the same list.",
-      "required": ["name", "about", "goal", "style", "facts", "state", "author", "set_at"],
+      "required": ["name", "about", "goal", "style", "facts", "state", "llm", "tts", "voice", "accepts_when", "declines_when", "author", "set_at"],
       "properties": {
         "name": {"type": "string", "description": "What names this caller: lower-case words joined by hyphens, as `--persona` takes it."},
         "about": {"type": "string", "description": "One line about them, for the people reading the list. The model playing them is never told it."},
@@ -1087,6 +1087,11 @@
         "style": {"type": "string", "description": "How they talk: hurried, polite, switching language mid-sentence. The manner, never the content."},
         "facts": {"type": "object", "additionalProperties": {"type": "string"}, "description": "The only facts they may state about themselves — their name, their phone — by what each one is. Asked for anything else, they say they do not know."},
         "state": {"type": "object", "additionalProperties": true, "description": "The state the call opens in, for a caller the business already knows. Empty for a stranger."},
+        "llm": {"type": ["string", "null"], "description": "The model that plays them, as `pinecall agent set --llm` takes it: `vendor/model`, a vendor alone, or a model alone on whichever vendor is in use. Run on the org's own keys when it brought any. Null: the runtime's default."},
+        "tts": {"type": ["string", "null"], "description": "The vendor that reads their lines, `cartesia` or `cartesia/sonic-3`: a bare vendor keeps its own default model. Null: the vendor the runtime speaks with."},
+        "voice": {"type": ["string", "null"], "description": "The voice they speak in on a `--voice` run: a curated name, or the vendor's own id when `tts` names the vendor. Null: a voice the agent does not have, picked by the runtime."},
+        "accepts_when": {"type": "string", "description": "When this caller hangs up satisfied, in their own words: what has to have happened on the call. A judge named `persona` reads the finished call against it at hang-up and answers in call.score — held is the caller accepting. Empty: nothing to accept on."},
+        "declines_when": {"type": "string", "description": "When this caller hangs up unsatisfied: what on the call makes them decline it. The same judge; a call that meets this is broken. Empty, with `accepts_when` empty too, means no judge runs for this caller."},
         "author": {"type": "string", "description": "Who wrote it last, as the key names them."},
         "set_at": {"type": "number", "description": "When it was last written, in seconds."}
       }
@@ -1111,6 +1116,11 @@
         "style": {"type": "string", "description": "How they talk."},
         "facts": {"type": "object", "additionalProperties": {"type": "string"}, "description": "What they may state about themselves, by what each one is."},
         "state": {"type": "object", "additionalProperties": true, "description": "The state the call opens in; empty for a stranger."},
+        "llm": {"type": ["string", "null"], "description": "The model that plays them: `vendor/model`, a vendor alone, or a model alone. A vendor this build has no file for is refused here, not on the first turn. Absent, null or empty: the runtime's default."},
+        "tts": {"type": ["string", "null"], "description": "The vendor that reads their lines, `cartesia` or `cartesia/sonic-3`. Absent, null or empty: the runtime's."},
+        "voice": {"type": ["string", "null"], "description": "The voice: a curated name, or the vendor's own id when `tts` names the vendor. A name this build does not curate is refused here. Absent, null or empty: a voice the agent does not have."},
+        "accepts_when": {"type": "string", "description": "When this caller hangs up satisfied. Absent or empty: nothing to accept on."},
+        "declines_when": {"type": "string", "description": "When this caller hangs up unsatisfied. Absent or empty, with `accepts_when` too: no `persona` judge on their calls."},
         "was": {"type": "string", "description": "The name this caller had, when the write is a rename: that row goes and this one takes its place."}
       }
     },

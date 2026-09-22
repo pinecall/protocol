@@ -160,6 +160,8 @@ class CallStarted(WireModel):
     to: str
     run: str | None = None
     persona: str | None = None
+    accepts_when: str | None = None
+    declines_when: str | None = None
     caller: Contact | None
     started_at: float
     env: Env | None = None

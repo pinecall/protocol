@@ -1051,6 +1051,11 @@ export const PersonaSchema = z.strictObject({
   style: z.string(),
   facts: z.record(z.string(), z.string()),
   state: z.record(z.string(), z.unknown()),
+  llm: z.string().nullable(),
+  tts: z.string().nullable(),
+  voice: z.string().nullable(),
+  accepts_when: z.string(),
+  declines_when: z.string(),
   author: z.string(),
   set_at: z.number(),
 });
@@ -1075,6 +1080,11 @@ export const PersonaPutSchema = z.strictObject({
   style: z.string(),
   facts: z.record(z.string(), z.string()).nullish(),
   state: z.record(z.string(), z.unknown()).nullish(),
+  llm: z.string().nullable().nullish(),
+  tts: z.string().nullable().nullish(),
+  voice: z.string().nullable().nullish(),
+  accepts_when: z.string().nullish(),
+  declines_when: z.string().nullish(),
   was: z.string().nullish(),
 });
 export type PersonaPut = z.infer<typeof PersonaPutSchema>;

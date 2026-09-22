@@ -5,7 +5,13 @@ packages from it, and the notes of a GitHub release are the section below it.
 
 ## Unreleased
 
+## 0.6.4 — A persona's model, voice and verdict; how sure a turn is; whether a call keeps its audio
+
 ### Added
+- **`Persona.llm` · `tts` · `voice` · `accepts_when` · `declines_when`, and the same on
+  `PersonaPut`.** How a synthetic caller is played, in the agent's own three words, and its own
+  rule for a call. `CallStarted` carries `accepts_when` · `declines_when` too, so the judge at
+  hang-up reads the rule a call was made under.
 - **`TurnConfig.eot_threshold` and `eot_threshold`'s eager half.** A recogniser that decides the
   end of the turn itself — Deepgram Flux — does it on a confidence, and how sure it has to be was
   the one thing about a turn the wire could not carry: an agent could say how long a silence is,

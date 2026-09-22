@@ -983,6 +983,11 @@ class Persona(WireModel):
     style: str
     facts: dict[str, str]
     state: dict[str, Any]
+    llm: str | None
+    tts: str | None
+    voice: str | None
+    accepts_when: str
+    declines_when: str
     author: str
     set_at: float
 
@@ -1003,6 +1008,11 @@ class PersonaPut(WireModel):
     style: str
     facts: dict[str, str] | None = None
     state: dict[str, Any] | None = None
+    llm: str | None = None
+    tts: str | None = None
+    voice: str | None = None
+    accepts_when: str | None = None
+    declines_when: str | None = None
     was: str | None = None
 
 

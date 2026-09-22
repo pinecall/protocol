@@ -330,11 +330,11 @@ module Pinecall
       # GET /v1/knowledge/attached: which agents read each base, off every agent's newest settings in this world.
       type knowledge_uses = { bases: Array[knowledge_use] }
       # One synthetic caller of an ORG, kept by the gateway: what they want, how they talk, and what they may state about themselves.
-      type persona = { name: String, about: String, goal: String, style: String, facts: Hash[Symbol, String], state: Hash[Symbol, untyped], author: String, set_at: Float }
+      type persona = { name: String, about: String, goal: String, style: String, facts: Hash[Symbol, String], state: Hash[Symbol, untyped], llm: String?, tts: String?, voice: String?, accepts_when: String, declines_when: String, author: String, set_at: Float }
       # GET /v1/personas: every caller the org wrote, by name.
       type persona_list = { personas: Array[persona] }
       # PUT /v1/personas/{name}, the body: the caller, written whole.
-      type persona_put = { ?about: String, goal: String, style: String, ?facts: Hash[Symbol, String], ?state: Hash[Symbol, untyped], ?was: String }
+      type persona_put = { ?about: String, goal: String, style: String, ?facts: Hash[Symbol, String], ?state: Hash[Symbol, untyped], ?llm: String?, ?tts: String?, ?voice: String?, ?accepts_when: String, ?declines_when: String, ?was: String }
       # One simulation this caller has run: the call it was, and what the call came to.
       type persona_run = { call: String, agent: String, started_at: Float, ended_at: Float?, turns: Integer, end_reason: end_reason?, outcome: String?, cost_eur: Float?, score: session_score? }
       # Every simulation this caller has run, newest first, a page at a time.
@@ -486,7 +486,7 @@ module Pinecall
       # Where in the call's own log a judgment is about.
       type judgment_evidence = { seqs: Array[Integer], ?said: String }
       # Media is up: the caller and the agent can hear each other, or the text session is open.
-      type call_started = { channel: channel, direction: direction, from: String, to: String, ?run: String?, ?persona: String?, caller: contact?, started_at: Float, ?env: env }
+      type call_started = { channel: channel, direction: direction, from: String, to: String, ?run: String?, ?persona: String?, ?accepts_when: String?, ?declines_when: String?, caller: contact?, started_at: Float, ?env: env }
       # What the call was about, how it went, what it consumed and what that cost.
       type call_summary = { reason: end_reason, outcome: String, duration_s: Float, turns: Integer, usage: Array[model_usage], cost: cost, ?recording: String }
       # A transfer asked for by the agent or a supervisor finished, one way or the other.

@@ -96,6 +96,8 @@ Media is up: the caller and the agent can hear each other, or the text session i
 | `to` | `string` | yes | The called side. |
 | `run` | `string | null` | no | The eval run that opened this call, when one did: such a call starts mid-conversation, in the golden's state. Absent or null for a person. |
 | `persona` | `string | null` | no | The synthetic caller that opened this call, by name (GET /v1/personas), when a simulation did. Absent or null for a person: nobody is playing anybody. |
+| `accepts_when` | `string | null` | no | When that caller hangs up satisfied, as the persona said it when the call opened. Carried on the call's own first entry so the judge at hang-up — and any judging later — read the rule the call was made under, whatever the persona says since. Absent or null: no rule, and no `persona` judge on this call. |
+| `declines_when` | `string | null` | no | When that caller hangs up unsatisfied, as the persona said it when the call opened. The other half of the same rule; absent or null with `accepts_when` absent is a call nobody judges for it. |
 | `caller` | `Contact | null` | yes | Who is on the line, as far as the platform knows now. |
 | `started_at` | `number` | yes | When media came up, unix seconds. |
 | `env` | `Env` | no | The world this call ran in: the one the key that holds its agent opens. Absent on entries written before keys knew where they were, which read as production. |

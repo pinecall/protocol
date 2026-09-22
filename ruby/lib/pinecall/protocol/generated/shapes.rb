@@ -925,6 +925,11 @@ module Pinecall
           style: { kind: :str, required: true },
           facts: { kind: :map, items: { kind: :str }, required: true },
           state: { kind: :json, required: true },
+          llm: { kind: :str, null: true, required: true },
+          tts: { kind: :str, null: true, required: true },
+          voice: { kind: :str, null: true, required: true },
+          accepts_when: { kind: :str, required: true },
+          declines_when: { kind: :str, required: true },
           author: { kind: :str, required: true },
           set_at: { kind: :float, required: true }
         }.freeze,
@@ -937,6 +942,11 @@ module Pinecall
           style: { kind: :str, required: true },
           facts: { kind: :map, items: { kind: :str } },
           state: { kind: :json },
+          llm: { kind: :str, null: true },
+          tts: { kind: :str, null: true },
+          voice: { kind: :str, null: true },
+          accepts_when: { kind: :str },
+          declines_when: { kind: :str },
           was: { kind: :str }
         }.freeze,
         "PersonaRun" => {
@@ -1330,6 +1340,8 @@ module Pinecall
           to: { kind: :str, required: true },
           run: { kind: :str, null: true },
           persona: { kind: :str, null: true },
+          accepts_when: { kind: :str, null: true },
+          declines_when: { kind: :str, null: true },
           caller: { kind: :ref, null: true, ref: "Contact", required: true },
           started_at: { kind: :float, required: true },
           env: { kind: :ref, ref: "Env" }
