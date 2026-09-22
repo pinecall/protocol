@@ -176,7 +176,7 @@ A supervisor asked for a transfer. call.transferred says how it went.
 |---|---|---|---|
 | `by` | `Supervisor` | yes | The human who sent a supervise verb, as the token that let them in names them. |
 | `to` | `string` | yes | The destination. |
-| `mode` | `TransferMode` | yes | Cold: the caller is sent on with a REFER on their SIP leg and the call ends here. |
+| `mode` | `TransferMode | null` | no | Which of the two the runtime will run, once it has looked at the room. |
 
 ### `supervisor.whispered`
 

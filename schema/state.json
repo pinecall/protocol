@@ -124,11 +124,11 @@
       "description": "The transfer in flight or the one that happened.",
       "properties": {
         "to": {"type": "string", "description": "The destination."},
-        "mode": {"$ref": "defs.json#/$defs/TransferMode"},
+        "mode": {"anyOf": [{"$ref": "defs.json#/$defs/TransferMode"}, {"type": "null"}], "description": "Cold or warm, or null while nobody has said which yet."},
         "status": {"type": "string", "enum": ["requested", "done", "failed"], "description": "requested until call.transferred reports the outcome."},
         "by": {"type": "string", "enum": ["agent", "supervisor"], "description": "Who asked for it."}
       },
-      "required": ["to", "mode", "status", "by"],
+      "required": ["to", "status", "by"],
       "additionalProperties": false
     },
     "AttentionState": {

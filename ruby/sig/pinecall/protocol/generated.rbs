@@ -378,7 +378,7 @@ module Pinecall
       # Whether a supervisor holds the line right now.
       type handoff = { active: bool, by: supervisor? }
       # The transfer in flight or the one that happened.
-      type transfer_state = { to: String, mode: transfer_mode, status: "requested" | "done" | "failed", by: "agent" | "supervisor" }
+      type transfer_state = { to: String, ?mode: transfer_mode?, status: "requested" | "done" | "failed", by: "agent" | "supervisor" }
       # The agent's last ask for a person, from attention.requested until attention.answered settles it.
       type attention_state = { reason: String, wait_s: Float, status: "open" | "answered" | "lapsed", asked_at: Float, by: supervisor? }
       # The words on screen right now: interim transcripts that a finished turn clears.
@@ -500,7 +500,7 @@ module Pinecall
       # What the call was about, how it went, what it consumed and what that cost.
       type call_summary = { reason: end_reason, outcome: String, duration_s: Float, turns: Integer, usage: Array[model_usage], cost: cost, ?recording: String }
       # A transfer asked for by the agent or a supervisor finished, one way or the other.
-      type call_transferred = { to: String, mode: transfer_mode, ok: bool, ?error: String }
+      type call_transferred = { to: String, ?mode: transfer_mode?, ok: bool, ?error: String }
       # Somebody asked to be called back: a phone caller the overflow agent answered, a web visitor who left a number at the widget, or a caller who asked the agent for one (call.callback).
       type callback_requested = { channel: channel, number: String, via: "overflow" | "widget" | "agent", call: String?, ?when: String, ?note: String, contact: contact? }
       # The caller did not say yes, or the request lapsed.
@@ -548,7 +548,7 @@ module Pinecall
       # A supervisor took the line; the agent is quiet until supervisor.released.
       type supervisor_took_over = { by: supervisor }
       # A supervisor asked for a transfer.
-      type supervisor_transferred = { by: supervisor, to: String, mode: transfer_mode }
+      type supervisor_transferred = { by: supervisor, to: String, ?mode: transfer_mode? }
       # A supervisor told the agent something the caller never heard.
       type supervisor_whispered = { by: supervisor, text: String }
       # The model called a tool.

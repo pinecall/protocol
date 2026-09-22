@@ -204,7 +204,7 @@ class CallTransferred(WireModel):
     """A transfer asked for by the agent or a supervisor finished, one way or the other."""
 
     to: str
-    mode: TransferMode
+    mode: TransferMode | None = None
     ok: bool
     error: str | None = None
 
@@ -432,7 +432,7 @@ class SupervisorTransferred(WireModel):
 
     by: Supervisor
     to: str
-    mode: TransferMode
+    mode: TransferMode | None = None
 
 
 class SupervisorWhispered(WireModel):

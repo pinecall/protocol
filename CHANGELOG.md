@@ -14,6 +14,10 @@ packages from it, and the notes of a GitHub release are the section below it.
   asks to be called back, written down from inside the call.
 
 ### Changed
+- **`mode` is optional wherever a transfer is named.** `call.transfer` and `TransferVerb` take
+  none — see below; `supervisor.transferred` carries the one the runtime picked; `call.transferred`
+  and `TransferState.mode` are null when nothing was attempted, which is what a written
+  conversation answers.
 - **`call.transfer` and `TransferVerb` take no required `mode`.** Absent, the runtime picks: cold
   for a caller on a SIP leg, warm — the number dialled into the call's room — for one in a
   browser. `TransferMode`'s warm now says the agent falls silent once the far side answers.

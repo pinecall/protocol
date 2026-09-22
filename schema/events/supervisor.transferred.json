@@ -12,9 +12,9 @@
       "properties": {
         "by": {"$ref": "../defs.json#/$defs/Supervisor"},
         "to": {"type": "string", "description": "The destination."},
-        "mode": {"$ref": "../defs.json#/$defs/TransferMode"}
+        "mode": {"anyOf": [{"$ref": "../defs.json#/$defs/TransferMode"}, {"type": "null"}], "description": "Which of the two the runtime will run, once it has looked at the room."}
       },
-      "required": ["by", "to", "mode"],
+      "required": ["by", "to"],
       "additionalProperties": false
     }
   }

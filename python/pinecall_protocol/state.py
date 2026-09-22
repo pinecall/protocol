@@ -134,7 +134,7 @@ class TransferState(WireModel):
     """The transfer in flight or the one that happened."""
 
     to: str
-    mode: TransferMode
+    mode: TransferMode | None = None
     status: Literal["requested", "done", "failed"]
     by: Literal["agent", "supervisor"]
 

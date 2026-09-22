@@ -121,7 +121,7 @@ The transfer in flight or the one that happened.
 | field | type | required | meaning |
 |---|---|---|---|
 | `to` | `string` | yes | The destination. |
-| `mode` | `TransferMode` | yes | Cold: the caller is sent on with a REFER on their SIP leg and the call ends here. |
+| `mode` | `TransferMode | null` | no | Cold or warm, or null while nobody has said which yet. |
 | `status` | `"requested" | "done" | "failed"` | yes | requested until call.transferred reports the outcome. |
 | `by` | `"agent" | "supervisor"` | yes | Who asked for it. |
 

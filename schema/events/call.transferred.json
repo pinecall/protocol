@@ -11,11 +11,11 @@
       "description": "A transfer asked for by the agent or a supervisor finished, one way or the other.",
       "properties": {
         "to": {"type": "string", "description": "Where the caller was sent."},
-        "mode": {"$ref": "../defs.json#/$defs/TransferMode"},
+        "mode": {"anyOf": [{"$ref": "../defs.json#/$defs/TransferMode"}, {"type": "null"}], "description": "Which of the two happened, or null when nothing was attempted at all — a written conversation has no line to transfer."},
         "ok": {"type": "boolean", "description": "True when the far end took the call."},
         "error": {"type": "string", "description": "Why it failed, when it did."}
       },
-      "required": ["to", "mode", "ok"],
+      "required": ["to", "ok"],
       "additionalProperties": false
     }
   }

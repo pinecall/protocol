@@ -217,7 +217,7 @@ export type CallSummary = z.infer<typeof CallSummarySchema>;
 /** A transfer asked for by the agent or a supervisor finished, one way or the other. */
 export const CallTransferredSchema = z.strictObject({
   to: z.string(),
-  mode: TransferModeSchema,
+  mode: TransferModeSchema.nullable().nullish(),
   ok: z.boolean(),
   error: z.string().nullish(),
 });
@@ -452,7 +452,7 @@ export type SupervisorTookOver = z.infer<typeof SupervisorTookOverSchema>;
 export const SupervisorTransferredSchema = z.strictObject({
   by: SupervisorSchema,
   to: z.string(),
-  mode: TransferModeSchema,
+  mode: TransferModeSchema.nullable().nullish(),
 });
 export type SupervisorTransferred = z.infer<typeof SupervisorTransferredSchema>;
 

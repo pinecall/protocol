@@ -135,7 +135,7 @@ export type Handoff = z.infer<typeof HandoffSchema>;
 /** The transfer in flight or the one that happened. */
 export const TransferStateSchema = z.strictObject({
   to: z.string(),
-  mode: TransferModeSchema,
+  mode: TransferModeSchema.nullable().nullish(),
   status: z.enum(["requested", "done", "failed"]),
   by: z.enum(["agent", "supervisor"]),
 });

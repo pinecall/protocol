@@ -1070,7 +1070,7 @@ module Pinecall
         }.freeze,
         "TransferState" => {
           to: { kind: :str, required: true },
-          mode: { kind: :ref, ref: "TransferMode", required: true },
+          mode: { kind: :ref, null: true, ref: "TransferMode" },
           status: { kind: :enum, values: %w[requested done failed], required: true },
           by: { kind: :enum, values: %w[agent supervisor], required: true }
         }.freeze,
@@ -1384,7 +1384,7 @@ module Pinecall
         }.freeze,
         "CallTransferred" => {
           to: { kind: :str, required: true },
-          mode: { kind: :ref, ref: "TransferMode", required: true },
+          mode: { kind: :ref, null: true, ref: "TransferMode" },
           ok: { kind: :bool, required: true },
           error: { kind: :str }
         }.freeze,
@@ -1504,7 +1504,7 @@ module Pinecall
         "SupervisorTransferred" => {
           by: { kind: :ref, ref: "Supervisor", required: true },
           to: { kind: :str, required: true },
-          mode: { kind: :ref, ref: "TransferMode", required: true }
+          mode: { kind: :ref, null: true, ref: "TransferMode" }
         }.freeze,
         "SupervisorWhispered" => {
           by: { kind: :ref, ref: "Supervisor", required: true },

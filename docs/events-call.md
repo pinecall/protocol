@@ -123,7 +123,7 @@ A transfer asked for by the agent or a supervisor finished, one way or the other
 | field | type | required | meaning |
 |---|---|---|---|
 | `to` | `string` | yes | Where the caller was sent. |
-| `mode` | `TransferMode` | yes | Cold: the caller is sent on with a REFER on their SIP leg and the call ends here. |
+| `mode` | `TransferMode | null` | no | Which of the two happened, or null when nothing was attempted at all — a written conversation has no line to transfer. |
 | `ok` | `boolean` | yes | True when the far end took the call. |
 | `error` | `string` | no | Why it failed, when it did. |
 
