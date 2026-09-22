@@ -5,6 +5,8 @@ packages from it, and the notes of a GitHub release are the section below it.
 
 ## Unreleased
 
+## 0.6.5 — Asking for a person, a call back, and a transfer the runtime shapes
+
 ### Added
 - **`call.attention`, `attention.requested`, `attention.answered`, `State.attention`,
   `SessionLine.attention`.** The agent asks for a person without sending the caller anywhere: the
@@ -15,12 +17,11 @@ packages from it, and the notes of a GitHub release are the section below it.
 
 ### Changed
 - **`mode` is optional wherever a transfer is named.** `call.transfer` and `TransferVerb` take
-  none — see below; `supervisor.transferred` carries the one the runtime picked; `call.transferred`
-  and `TransferState.mode` are null when nothing was attempted, which is what a written
-  conversation answers.
-- **`call.transfer` and `TransferVerb` take no required `mode`.** Absent, the runtime picks: cold
-  for a caller on a SIP leg, warm — the number dialled into the call's room — for one in a
-  browser. `TransferMode`'s warm now says the agent falls silent once the far side answers.
+  none: absent, the runtime picks — cold for a caller on a SIP leg, warm (the number dialled into
+  the call's own room) for one in a browser. `supervisor.transferred` carries the one it picked;
+  `call.transferred` and `TransferState.mode` are null when nothing was attempted at all, which is
+  what a written conversation answers. `TransferMode`'s warm now says what it does: the agent
+  falls silent once the far side answers, and the call ends when either human hangs up.
 - **`ToolSpec.confirm` and `EndVerb` say what the runtime does.** `confirm` is a receipt read out
   once the tool has run and before the model replies, with `{{name}}` and `{{result.name}}`
   placeholders — the old text described a question asked before the tool, in `{name}` braces that
