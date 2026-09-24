@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/message.waiting.json",
+  "title": "message.waiting",
+  "description": "A message reached one of the org's numbers while no app held the agent it routes to — the process between two deploys, a gateway just restarted. It is kept here, on the agent's own log, and answered the moment a socket holds the agent again; message.taken says when. One older than WhatsApp's customer-service window is never answered.",
+  "x-pinecall": {"kind": "event", "type": "message.waiting", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/MessageWaiting",
+  "$defs": {
+    "MessageWaiting": {
+      "type": "object",
+      "description": "One message, kept until somebody can answer it.",
+      "properties": {
+        "channel": {"$ref": "../defs.json#/$defs/Channel", "description": "Where it was written."},
+        "env": {"$ref": "../defs.json#/$defs/Env", "description": "The world the number answers in."},
+        "number": {"type": "string", "description": "The org's number it was written to, E.164."},
+        "phone_number_id": {"type": "string", "description": "The provider's id for that number: what the answer is sent from."},
+        "from": {"type": "string", "description": "Who wrote it: the provider's id for the person."},
+        "name": {"type": ["string", "null"], "description": "The name the provider shows for them, when it shows one."},
+        "message_id": {"type": "string", "description": "The provider's id for the message: what message.taken names."},
+        "text": {"type": "string", "description": "What they wrote."},
+        "received_at": {"type": "number", "description": "When it arrived, unix seconds."}
+      },
+      "required": ["channel", "env", "number", "phone_number_id", "from", "name", "message_id", "text", "received_at"],
+      "additionalProperties": false
+    }
+  }
+}

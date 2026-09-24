@@ -5,6 +5,14 @@ packages from it, and the notes of a GitHub release are the section below it.
 
 ## Unreleased
 
+## 0.6.7 — A message nobody could answer yet
+
+### Added
+- **`message.waiting` and `message.taken`**, on the agent's own log. A WhatsApp message that reached
+  a number while no app held the agent — a deploy, a gateway just restarted — is kept as
+  `message.waiting` and answered the moment a socket holds the agent again; `message.taken` says on
+  which call, or `null` when it outlived the customer-service window unanswered.
+
 ## 0.6.6 — The box's floor
 
 ### Added

@@ -370,6 +370,27 @@ class MemoryOps(WireModel):
     speech_id: str | None = None
 
 
+class MessageTaken(WireModel):
+    """One waiting message, off the queue."""
+
+    message_id: str
+    call: str | None
+
+
+class MessageWaiting(WireModel):
+    """One message, kept until somebody can answer it."""
+
+    channel: Channel
+    env: Env
+    number: str
+    phone_number_id: str
+    from_: str = Field(alias="from")
+    name: str | None
+    message_id: str
+    text: str
+    received_at: float
+
+
 # Ephemeral: it proves the socket is alive and says nothing else.
 class Pong(WireModel):
     """The answer to ping."""

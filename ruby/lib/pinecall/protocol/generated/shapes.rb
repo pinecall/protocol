@@ -1488,6 +1488,21 @@ module Pinecall
           ops: { kind: :list, items: { kind: :ref, ref: "MemoryOp" }, required: true },
           speech_id: { kind: :str }
         }.freeze,
+        "MessageTaken" => {
+          message_id: { kind: :str, required: true },
+          call: { kind: :str, null: true, required: true }
+        }.freeze,
+        "MessageWaiting" => {
+          channel: { kind: :ref, ref: "Channel", required: true },
+          env: { kind: :ref, ref: "Env", required: true },
+          number: { kind: :str, required: true },
+          phone_number_id: { kind: :str, required: true },
+          from: { kind: :str, required: true },
+          name: { kind: :str, null: true, required: true },
+          message_id: { kind: :str, required: true },
+          text: { kind: :str, required: true },
+          received_at: { kind: :float, required: true }
+        }.freeze,
         "Pong" => {
           ts: { kind: :float, required: true }
         }.freeze,

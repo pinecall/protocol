@@ -392,6 +392,27 @@ export const MemoryOpsSchema = z.strictObject({
 });
 export type MemoryOps = z.infer<typeof MemoryOpsSchema>;
 
+/** One waiting message, off the queue. */
+export const MessageTakenSchema = z.strictObject({
+  message_id: z.string(),
+  call: z.string().nullable(),
+});
+export type MessageTaken = z.infer<typeof MessageTakenSchema>;
+
+/** One message, kept until somebody can answer it. */
+export const MessageWaitingSchema = z.strictObject({
+  channel: ChannelSchema,
+  env: EnvSchema,
+  number: z.string(),
+  phone_number_id: z.string(),
+  from: z.string(),
+  name: z.string().nullable(),
+  message_id: z.string(),
+  text: z.string(),
+  received_at: z.number(),
+});
+export type MessageWaiting = z.infer<typeof MessageWaitingSchema>;
+
 /** The answer to ping. Ephemeral: it proves the socket is alive and says nothing else. */
 export const PongSchema = z.strictObject({
   ts: z.number(),

@@ -137,6 +137,31 @@ This reader missed a stretch: it reconnected too late for the store, or fell beh
 | `to_seq` | `integer` | yes | The last seq the reader did not get. |
 | `snapshot` | `State | null` | yes | The state at to_seq, when the platform could compute it. Null when only ephemeral entries were dropped. |
 
+### `message.taken`
+
+A message that was waiting (message.waiting) was answered, on this call — or will never be: `call` is null when it outlived WhatsApp's customer-service window and nothing may be said to it any more.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `message_id` | `string` | yes | The message, as message.waiting named it. |
+| `call` | `string | null` | yes | The call it was answered on; null when it expired unanswered. |
+
+### `message.waiting`
+
+A message reached one of the org's numbers while no app held the agent it routes to — the process between two deploys, a gateway just restarted. It is kept here, on the agent's own log, and answered the moment a socket holds the agent again; message.taken says when. One older than WhatsApp's customer-service window is never answered.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `channel` | `Channel` | yes | Where it was written. |
+| `env` | `Env` | yes | The world the number answers in. |
+| `number` | `string` | yes | The org's number it was written to, E.164. |
+| `phone_number_id` | `string` | yes | The provider's id for that number: what the answer is sent from. |
+| `from` | `string` | yes | Who wrote it: the provider's id for the person. |
+| `name` | `string | null` | yes | The name the provider shows for them, when it shows one. |
+| `message_id` | `string` | yes | The provider's id for the message: what message.taken names. |
+| `text` | `string` | yes | What they wrote. |
+| `received_at` | `number` | yes | When it arrived, unix seconds. |
+
 ### `pong`
 
 The answer to ping. Ephemeral: it proves the socket is alive and says nothing else.

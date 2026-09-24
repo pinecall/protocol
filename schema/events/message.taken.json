@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/message.taken.json",
+  "title": "message.taken",
+  "description": "A message that was waiting (message.waiting) was answered, on this call — or will never be: `call` is null when it outlived WhatsApp's customer-service window and nothing may be said to it any more.",
+  "x-pinecall": {"kind": "event", "type": "message.taken", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/MessageTaken",
+  "$defs": {
+    "MessageTaken": {
+      "type": "object",
+      "description": "One waiting message, off the queue.",
+      "properties": {
+        "message_id": {"type": "string", "description": "The message, as message.waiting named it."},
+        "call": {"type": ["string", "null"], "description": "The call it was answered on; null when it expired unanswered."}
+      },
+      "required": ["message_id", "call"],
+      "additionalProperties": false
+    }
+  }
+}

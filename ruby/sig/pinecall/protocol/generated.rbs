@@ -537,6 +537,10 @@ module Pinecall
       type log_gap = { from_seq: Integer, to_seq: Integer, snapshot: state? }
       # What memory did for this turn or at hangup: a recall before the reply, a remember after the call, a forget on request.
       type memory_ops = { ops: Array[memory_op], ?speech_id: String }
+      # One waiting message, off the queue.
+      type message_taken = { message_id: String, call: String? }
+      # One message, kept until somebody can answer it.
+      type message_waiting = { channel: channel, env: env, number: String, phone_number_id: String, from: String, name: String?, message_id: String, text: String, received_at: Float }
       # The answer to ping.
       type pong = { ts: Float }
       # A block of the prompt was rewritten.
