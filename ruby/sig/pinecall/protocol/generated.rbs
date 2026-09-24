@@ -151,6 +151,8 @@ module Pinecall
       type session_line = { call: String, agent: String, live: bool, last_seq: Integer, status: call_status, channel: channel?, direction: direction?, from: String?, to: String?, caller: contact?, started_at: Float?, ended_at: Float?, end_reason: end_reason?, outcome: String?, cost: cost?, ?score: session_score?, ?flags: Array[session_flag], ?attention: attention_state? }
       # One call's call.score as a list draws it: how many judges held of how many answered, and why the first one that broke did.
       type session_score = { held: Integer, judged: Integer, passed: bool, reason: String? }
+      # One frame of GET /v1/ops/events: an entry of some org's floor, and whose floor it is.
+      type box_event = { org: String, entry: entry }
       # escalated: a person took part — a transfer, a supervisor taking the line, saying something, or ending the call.
       type session_flag = "escalated" | "low_score" | "promise"
       # GET /v1/agents/{slug}/sessions and GET /v1/sessions: the calls that match, newest first, a page at a time.

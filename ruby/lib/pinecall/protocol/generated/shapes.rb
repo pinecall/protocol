@@ -429,6 +429,10 @@ module Pinecall
           passed: { kind: :bool, required: true },
           reason: { kind: :str, null: true, required: true }
         }.freeze,
+        "BoxEvent" => {
+          org: { kind: :str, required: true },
+          entry: { kind: :ref, ref: "Entry", required: true }
+        }.freeze,
         "SessionList" => {
           calls: { kind: :list, items: { kind: :ref, ref: "SessionLine" }, required: true },
           total: { kind: :int, null: true },

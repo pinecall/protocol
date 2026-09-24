@@ -80,6 +80,16 @@ export const SessionLineSchema = z.strictObject({
 export type SessionLine = z.infer<typeof SessionLineSchema>;
 
 /**
+ * One frame of GET /v1/ops/events: an entry of some org's floor, and whose floor it is. The
+ * operator's stream, every org of the box at once.
+ */
+export const BoxEventSchema = z.strictObject({
+  org: z.string(),
+  entry: EntrySchema,
+});
+export type BoxEvent = z.infer<typeof BoxEventSchema>;
+
+/**
  * GET /v1/agents/{slug}/sessions and GET /v1/sessions: the calls that match, newest first, a page
  * at a time.
  */

@@ -65,6 +65,16 @@
         "reason": {"type": ["string", "null"], "description": "The first broken judge's reason, as it wrote it; null when none broke."}
       }
     },
+    "BoxEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One frame of GET /v1/ops/events: an entry of some org's floor, and whose floor it is. The operator's stream, every org of the box at once.",
+      "required": ["org", "entry"],
+      "properties": {
+        "org": {"type": "string", "description": "The id of the org whose floor this is: what that org's keys answer as `org` at /v1/whoami."},
+        "entry": {"$ref": "envelope.json#/$defs/Entry"}
+      }
+    },
     "SessionFlag": {"type": "string", "enum": ["escalated", "low_score", "promise"], "description": "escalated: a person took part — a transfer, a supervisor taking the line, saying something, or ending the call. low_score: a judge answered broken. promise: the promises judge found the agent committing the business to something no tool call records."},
     "SessionList": {
       "type": "object",

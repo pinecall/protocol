@@ -5,6 +5,12 @@ packages from it, and the notes of a GitHub release are the section below it.
 
 ## Unreleased
 
+## 0.6.6 — The box's floor
+
+### Added
+- **`BoxEvent`**, the frame of the operator's `GET /v1/ops/events`: `{org, entry}`, an entry of
+  some org's floor and the id of the org it is. The envelope itself is untouched.
+
 ## 0.6.5 — Asking for a person, a call back, and a transfer the runtime shapes
 
 ### Added

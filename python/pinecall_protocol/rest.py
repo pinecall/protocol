@@ -81,6 +81,14 @@ class SessionLine(WireModel):
     attention: AttentionState | None = None
 
 
+# The operator's stream, every org of the box at once.
+class BoxEvent(WireModel):
+    """One frame of GET /v1/ops/events: an entry of some org's floor, and whose floor it is."""
+
+    org: str
+    entry: Entry
+
+
 # GET /v1/agents/{slug}/sessions and GET /v1/sessions: the calls that match, newest first, a page at
 # a time.
 class SessionList(WireModel):
