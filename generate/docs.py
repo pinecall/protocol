@@ -28,6 +28,7 @@ EVENT_PAGES: tuple[tuple[str, tuple[str, ...]], ...] = (
             "agent.registered",
             "agent.configured",
             "agent.detached",
+            "agent.draining",
             "credits.",
             "fleet.",
             "callback.",

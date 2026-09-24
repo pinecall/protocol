@@ -6,6 +6,7 @@ What reaches the gateway: the commands an app sends over its socket, each with t
 | type | scope | lands as | what it does |
 |---|---|---|---|
 | `agent.configure` | agent | `agent.configured` | Declare or change what the agent is: voice, models, language, greeting, the full tool list. |
+| `agent.drain` | agent | `agent.draining` | This socket is leaving: hand it no new call for the agent, move the live calls it holds to the newest other socket holding the agent, or park them until one registers. |
 | `agent.register` | agent | `agent.registered` | The app's first message: this socket speaks for this agent and answers these doors. |
 | `agent.reply` | call | `turn.agent` | Make the model speak now, guided by an instruction it reads and the caller never hears: 'tell them a slot at 10:15 just opened'. |
 | `agent.say` | call | `turn.agent` | Make the agent say this text now, verbatim, outside the model's turn: a greeting, a read-back, a system notice. |
@@ -43,6 +44,14 @@ Lands in the log as: `agent.configured`.
 | field | type | required | meaning |
 |---|---|---|---|
 | `config` | `AgentConfig` | yes | What an app declares about its agent: the prompt's layout, the language, the tools, whether it searches its bases itself, and who may see and send what. |
+
+### `agent.drain`
+
+This socket is leaving: hand it no new call for the agent, move the live calls it holds to the newest other socket holding the agent, or park them until one registers. The gateway answers agent.draining; the socket closes once its tools in flight have answered.
+
+Lands in the log as: `agent.draining`.
+
+No fields.
 
 ### `agent.register`
 

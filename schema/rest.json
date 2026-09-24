@@ -814,13 +814,26 @@
       "type": "object",
       "additionalProperties": false,
       "description": "POST /v1/agents/{slug}/dial, the answer: the call a dial became, accepted before the far end has heard anything ring.",
-      "required": ["call", "agent", "to", "from", "env"],
+      "required": ["call", "agent", "to", "from", "env", "log_token"],
       "properties": {
         "call": {"type": "string", "description": "The id of the call this became; its log opens with call.dialing."},
         "agent": {"type": "string", "description": "The agent that will answer on it."},
         "to": {"type": "string", "description": "The number being dialled, E.164."},
         "from": {"type": "string", "description": "The org's own number the call shows as coming from, E.164."},
-        "env": {"$ref": "defs.json#/$defs/Env"}
+        "env": {"$ref": "defs.json#/$defs/Env"},
+        "log_token": {"type": "string", "description": "Reads this call's log and its recording and nothing else: ?token= on GET /v1/calls/{call}/events and /recording."}
+      }
+    },
+    "Minted": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/tokens, the answer: where the browser joins, as whom, the call it becomes, and a token that reads that call's log.",
+      "required": ["server_url", "participant_token", "call", "log_token"],
+      "properties": {
+        "server_url": {"type": "string", "description": "The LiveKit server the browser joins."},
+        "participant_token": {"type": "string", "description": "The seat: single use, short-lived, one room."},
+        "call": {"type": "string", "description": "The id of the call this becomes, minted before the browser joins."},
+        "log_token": {"type": "string", "description": "Reads this call's log and its recording and nothing else: ?token= on GET /v1/calls/{call}/events and /recording."}
       }
     },
     "DialGuards": {

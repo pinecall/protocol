@@ -17,6 +17,10 @@ class AgentConfigure(WireModel):
     config: AgentConfig
 
 
+class AgentDrain(WireModel):
+    """This socket is leaving, and its calls go on without it."""
+
+
 # The gateway answers agent.registered, or error.
 class AgentRegister(WireModel):
     """The app's first message: this socket speaks for this agent and answers these doors."""

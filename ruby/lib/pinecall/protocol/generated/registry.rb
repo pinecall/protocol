@@ -12,11 +12,13 @@ module Pinecall
       EVENTS = {
         "agent.configured" => "AgentConfigured",
         "agent.detached" => "AgentDetached",
+        "agent.draining" => "AgentDraining",
         "agent.registered" => "AgentRegistered",
         "agent.state" => "AgentStateChanged",
         "agent.transcript" => "AgentTranscript",
         "attention.answered" => "AttentionAnswered",
         "attention.requested" => "AttentionRequested",
+        "call.attached" => "CallAttached",
         "call.dialing" => "CallDialing",
         "call.ended" => "CallEnded",
         "call.line" => "CallLine",
@@ -76,6 +78,7 @@ module Pinecall
       # The shape each command's data is, by the command's wire type.
       COMMANDS = {
         "agent.configure" => "AgentConfigure",
+        "agent.drain" => "AgentDrain",
         "agent.register" => "AgentRegister",
         "agent.reply" => "AgentReply",
         "agent.say" => "AgentSay",
@@ -106,10 +109,10 @@ module Pinecall
       }.freeze
 
       # Every event this protocol declares, in the schema's own order.
-      EVENT_TYPES = %w[agent.configured agent.detached agent.registered agent.state agent.transcript attention.answered attention.requested call.dialing call.ended call.line call.ringing call.score call.started call.summary call.transferred callback.requested confirm.declined confirm.granted confirm.request credits.exhausted custom dev.request docs.sources error event.received fleet.full log.caught_up log.gap memory.ops metrics.avatar metrics.eot metrics.eou metrics.interruption metrics.llm metrics.realtime metrics.stt metrics.tts metrics.vad participant.joined participant.left participant.speaking pong prompt.changed room.opened room.sent state.changed supervisor.ended supervisor.released supervisor.said supervisor.took_over supervisor.transferred supervisor.whispered tool.call tool.result tools.changed track.published track.unpublished turn.agent turn.user user.state user.transcript].freeze
+      EVENT_TYPES = %w[agent.configured agent.detached agent.draining agent.registered agent.state agent.transcript attention.answered attention.requested call.attached call.dialing call.ended call.line call.ringing call.score call.started call.summary call.transferred callback.requested confirm.declined confirm.granted confirm.request credits.exhausted custom dev.request docs.sources error event.received fleet.full log.caught_up log.gap memory.ops metrics.avatar metrics.eot metrics.eou metrics.interruption metrics.llm metrics.realtime metrics.stt metrics.tts metrics.vad participant.joined participant.left participant.speaking pong prompt.changed room.opened room.sent state.changed supervisor.ended supervisor.released supervisor.said supervisor.took_over supervisor.transferred supervisor.whispered tool.call tool.result tools.changed track.published track.unpublished turn.agent turn.user user.state user.transcript].freeze
 
       # Every command an app may send.
-      COMMAND_TYPES = %w[agent.configure agent.register agent.reply agent.say call.attention call.callback call.dial call.dtmf call.event call.hangup call.hold call.log call.mute call.transfer call.unhold call.unmute dev.answer participant.mute participant.remove ping prompt.set room.invite room.send session.configure state.set supervisor.verb tool.result tools.set].freeze
+      COMMAND_TYPES = %w[agent.configure agent.drain agent.register agent.reply agent.say call.attention call.callback call.dial call.dtmf call.event call.hangup call.hold call.log call.mute call.transfer call.unhold call.unmute dev.answer participant.mute participant.remove ping prompt.set room.invite room.send session.configure state.set supervisor.verb tool.result tools.set].freeze
 
       # Entries a store may drop and a slow reader may miss without harm: the entry's
       # own ephemeral flag defaults to this.
@@ -121,6 +124,7 @@ module Pinecall
       # Which events a command lands in the log as, so a caller knows what to wait for.
       PRODUCES = {
         "agent.configure" => %w[agent.configured],
+        "agent.drain" => %w[agent.draining],
         "agent.register" => %w[agent.registered],
         "agent.reply" => %w[turn.agent],
         "agent.say" => %w[turn.agent],

@@ -2,6 +2,7 @@
 
 import {
   AgentConfigureSchema,
+  AgentDrainSchema,
   AgentRegisterSchema,
   AgentReplySchema,
   AgentSaySchema,
@@ -33,12 +34,14 @@ import { ToolResultSchema } from "./defs.js";
 import {
   AgentConfiguredSchema,
   AgentDetachedSchema,
+  AgentDrainingSchema,
   AgentRegisteredSchema,
   AgentStateChangedSchema,
   AgentTranscriptSchema,
   AgentTurnEndedSchema,
   AttentionAnsweredSchema,
   AttentionRequestedSchema,
+  CallAttachedSchema,
   CallDialingSchema,
   CallEndedSchema,
   CallLineSchema,
@@ -101,11 +104,13 @@ import {
 export const EVENT_SCHEMAS = {
   "agent.configured": AgentConfiguredSchema,
   "agent.detached": AgentDetachedSchema,
+  "agent.draining": AgentDrainingSchema,
   "agent.registered": AgentRegisteredSchema,
   "agent.state": AgentStateChangedSchema,
   "agent.transcript": AgentTranscriptSchema,
   "attention.answered": AttentionAnsweredSchema,
   "attention.requested": AttentionRequestedSchema,
+  "call.attached": CallAttachedSchema,
   "call.dialing": CallDialingSchema,
   "call.ended": CallEndedSchema,
   "call.line": CallLineSchema,
@@ -172,6 +177,7 @@ export const TERMINAL_EVENT: EventType = "call.score";
 /** Every command by its wire type; the codec looks the schema up here. */
 export const COMMAND_SCHEMAS = {
   "agent.configure": AgentConfigureSchema,
+  "agent.drain": AgentDrainSchema,
   "agent.register": AgentRegisterSchema,
   "agent.reply": AgentReplySchema,
   "agent.say": AgentSaySchema,
@@ -205,6 +211,7 @@ export type CommandType = keyof typeof COMMAND_SCHEMAS;
 /** Which events a command lands in the log as, so a caller knows what to wait for. */
 export const PRODUCES: Readonly<Record<CommandType, readonly string[]>> = {
   "agent.configure": ["agent.configured"],
+  "agent.drain": ["agent.draining"],
   "agent.register": ["agent.registered"],
   "agent.reply": ["turn.agent"],
   "agent.say": ["turn.agent"],

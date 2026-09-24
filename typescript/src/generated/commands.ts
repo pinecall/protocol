@@ -20,6 +20,10 @@ export const AgentConfigureSchema = z.strictObject({
 });
 export type AgentConfigure = z.infer<typeof AgentConfigureSchema>;
 
+/** This socket is leaving, and its calls go on without it. */
+export const AgentDrainSchema = z.strictObject({});
+export type AgentDrain = z.infer<typeof AgentDrainSchema>;
+
 /**
  * The app's first message: this socket speaks for this agent and answers these doors. The gateway
  * answers agent.registered, or error.

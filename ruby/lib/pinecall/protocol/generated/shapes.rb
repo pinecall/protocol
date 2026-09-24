@@ -789,7 +789,14 @@ module Pinecall
           agent: { kind: :str, required: true },
           to: { kind: :str, required: true },
           from: { kind: :str, required: true },
-          env: { kind: :ref, ref: "Env", required: true }
+          env: { kind: :ref, ref: "Env", required: true },
+          log_token: { kind: :str, required: true }
+        }.freeze,
+        "Minted" => {
+          server_url: { kind: :str, required: true },
+          participant_token: { kind: :str, required: true },
+          call: { kind: :str, required: true },
+          log_token: { kind: :str, required: true }
         }.freeze,
         "DialGuards" => {
           dial_anywhere: { kind: :bool, required: true },
@@ -1189,6 +1196,7 @@ module Pinecall
         "AgentConfigure" => {
           config: { kind: :ref, ref: "AgentConfig", required: true }
         }.freeze,
+        "AgentDrain" => {}.freeze,
         "AgentRegister" => {
           routes: { kind: :list, items: { kind: :ref, ref: "Route" }, required: true },
           sdk: { kind: :str },
@@ -1292,6 +1300,12 @@ module Pinecall
           env: { kind: :ref, ref: "Env", required: true },
           left: { kind: :bool, required: true }
         }.freeze,
+        "AgentDraining" => {
+          app: { kind: :str, required: true },
+          env: { kind: :ref, ref: "Env", required: true },
+          handed: { kind: :int, required: true },
+          parked: { kind: :int, required: true }
+        }.freeze,
         "AgentRegistered" => {
           routes: { kind: :list, items: { kind: :ref, ref: "Route" }, required: true },
           app: { kind: :str, required: true },
@@ -1316,6 +1330,12 @@ module Pinecall
         "AttentionRequested" => {
           reason: { kind: :str, required: true },
           wait_s: { kind: :float, required: true }
+        }.freeze,
+        "CallAttached" => {
+          app: { kind: :str, required: true },
+          started: { kind: :ref, ref: "CallStarted", required: true },
+          state: { kind: :json, required: true },
+          seq: { kind: :int, required: true }
         }.freeze,
         "CallDialing" => {
           channel: { kind: :ref, ref: "Channel", required: true },

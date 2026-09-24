@@ -21,6 +21,17 @@ A socket that held the agent is gone — the process exited, the connection drop
 | `env` | `Env` | yes | The world it held the agent in. |
 | `left` | `boolean` | yes | True when nobody holds the agent in that world any more; false when another socket still does. |
 
+### `agent.draining`
+
+The answer to agent.drain, written to the agent's own log once the socket's live calls have moved: it takes no new call, and each call it held went to another socket holding the agent or waits, parked, for the next one that registers.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `app` | `string` | yes | The socket that is leaving, as agent.registered named it. |
+| `env` | `Env` | yes | The world it held the agent in. |
+| `handed` | `integer` | yes | Live calls attached to another socket holding the agent. |
+| `parked` | `integer` | yes | Live calls waiting for the next socket that registers the agent. |
+
 ### `agent.registered`
 
 The gateway accepted an agent.register: this socket now speaks for the agent and answers its routes. Many sockets may hold one agent at once — a new call takes the newest of them, unless the caller names one by its `app` id.

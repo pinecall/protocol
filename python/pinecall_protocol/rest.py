@@ -747,6 +747,18 @@ class Dialled(WireModel):
     to: str
     from_: str = Field(alias="from")
     env: Env
+    log_token: str
+
+
+# POST /v1/tokens, the answer: where the browser joins, as whom, the call it becomes, and a token
+# that reads that call's log.
+class Minted(WireModel):
+    """POST /v1/tokens, the answer."""
+
+    server_url: str
+    participant_token: str
+    call: str
+    log_token: str
 
 
 class DialGuards(WireModel):

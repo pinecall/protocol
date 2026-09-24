@@ -798,8 +798,21 @@ export const DialledSchema = z.strictObject({
   to: z.string(),
   from: z.string(),
   env: EnvSchema,
+  log_token: z.string(),
 });
 export type Dialled = z.infer<typeof DialledSchema>;
+
+/**
+ * POST /v1/tokens, the answer: where the browser joins, as whom, the call it becomes, and a token
+ * that reads that call's log.
+ */
+export const MintedSchema = z.strictObject({
+  server_url: z.string(),
+  participant_token: z.string(),
+  call: z.string(),
+  log_token: z.string(),
+});
+export type Minted = z.infer<typeof MintedSchema>;
 
 /** GET /v1/carrier/outbound, the guards: what this org may dial and how often. */
 export const DialGuardsSchema = z.strictObject({

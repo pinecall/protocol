@@ -42,6 +42,15 @@ class AgentDetached(WireModel):
     left: bool
 
 
+class AgentDraining(WireModel):
+    """One socket let go of its calls without cutting them."""
+
+    app: str
+    env: Env
+    handed: int
+    parked: int
+
+
 # The gateway accepted an agent.register: this socket now speaks for the agent and answers its
 # routes. Many sockets may hold one agent at once — a new call takes the newest of them, unless the
 # caller names one by its `app` id.
@@ -91,6 +100,32 @@ class AttentionRequested(WireModel):
 
     reason: str
     wait_s: float
+
+
+# Everything the agent says and hears comes after this.
+class CallStarted(WireModel):
+    """Media is up: the caller and the agent can hear each other, or the text session is open."""
+
+    channel: Channel
+    direction: Direction
+    from_: str = Field(alias="from")
+    to: str
+    run: str | None = None
+    persona: str | None = None
+    accepts_when: str | None = None
+    declines_when: str | None = None
+    caller: Contact | None
+    started_at: float
+    env: Env | None = None
+
+
+class CallAttached(WireModel):
+    """A call changed hands without ending."""
+
+    app: str
+    started: CallStarted
+    state: dict[str, Any]
+    seq: int
 
 
 # The first entry of an outbound call's log.
@@ -167,23 +202,6 @@ class CallScore(WireModel):
     panel: list[str] | None = None
     judge_calls: int
     judge_cost_eur: float | None = None
-
-
-# Everything the agent says and hears comes after this.
-class CallStarted(WireModel):
-    """Media is up: the caller and the agent can hear each other, or the text session is open."""
-
-    channel: Channel
-    direction: Direction
-    from_: str = Field(alias="from")
-    to: str
-    run: str | None = None
-    persona: str | None = None
-    accepts_when: str | None = None
-    declines_when: str | None = None
-    caller: Contact | None
-    started_at: float
-    env: Env | None = None
 
 
 # Written after call.ended, once memory and pricing are done; call.score follows it and seals the

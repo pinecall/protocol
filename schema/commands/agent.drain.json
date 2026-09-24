@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/agent.drain.json",
+  "title": "agent.drain",
+  "description": "This socket is leaving: hand it no new call for the agent, move the live calls it holds to the newest other socket holding the agent, or park them until one registers. The gateway answers agent.draining; the socket closes once its tools in flight have answered.",
+  "x-pinecall": {"kind": "command", "type": "agent.drain", "scope": "agent", "produces": ["agent.draining"]},
+  "$ref": "#/$defs/AgentDrain",
+  "$defs": {
+    "AgentDrain": {
+      "type": "object",
+      "description": "This socket is leaving, and its calls go on without it.",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/agent.draining.json",
+  "title": "agent.draining",
+  "description": "The answer to agent.drain, written to the agent's own log once the socket's live calls have moved: it takes no new call, and each call it held went to another socket holding the agent or waits, parked, for the next one that registers.",
+  "x-pinecall": {"kind": "event", "type": "agent.draining", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/AgentDraining",
+  "$defs": {
+    "AgentDraining": {
+      "type": "object",
+      "description": "One socket let go of its calls without cutting them.",
+      "properties": {
+        "app": {"type": "string", "description": "The socket that is leaving, as agent.registered named it."},
+        "env": {"$ref": "../defs.json#/$defs/Env", "description": "The world it held the agent in."},
+        "handed": {"type": "integer", "minimum": 0, "description": "Live calls attached to another socket holding the agent."},
+        "parked": {"type": "integer", "minimum": 0, "description": "Live calls waiting for the next socket that registers the agent."}
+      },
+      "required": ["app", "env", "handed", "parked"],
+      "additionalProperties": false
+    }
+  }
+}

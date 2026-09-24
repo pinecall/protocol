@@ -23,6 +23,17 @@ One delta of the reply the agent is giving, never the reply so far: in a voice c
 | `start` | `number` | no | When these words start, in seconds from the start of the reply's audio, as the voice aligned them. Absent when the voice returned no word timings. |
 | `end` | `number` | no | When these words end, in seconds from the start of the reply's audio, as the voice aligned them. Absent when the voice returned no word timings. |
 
+### `call.attached`
+
+A live call is now served by this socket, mid-conversation: the socket that held it drained, or died, or the gateway restarted. The socket rebuilds the call from this entry and sends its whole prompt and its tools again, because nothing it sent before reached this socket; every tool.call still waiting for an answer follows it, sent again with its own seq.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `app` | `string` | yes | The socket that serves the call from now on, as agent.registered named it. |
+| `started` | `CallStarted` | yes | How the call opened: who, where, when, as call.started said it. |
+| `state` | `object` | yes | The agent's state as the last state.changed of the call left it; empty when none was written. |
+| `seq` | `integer` | yes | The last entry of this call before it changed hands. |
+
 ### `call.dialing`
 
 The platform is placing an outbound call and the far end has not answered yet. The first entry of an outbound call's log.

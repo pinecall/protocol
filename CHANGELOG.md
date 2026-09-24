@@ -10,6 +10,15 @@ packages from it, and the notes of a GitHub release are the section below it.
 ### Added
 - **`BoxEvent`**, the frame of the operator's `GET /v1/ops/events`: `{org, entry}`, an entry of
   some org's floor and the id of the org it is. The envelope itself is untouched.
+- **`agent.drain` and `agent.draining`.** A socket that is leaving says so: it takes no new call,
+  and the gateway moves the live calls it holds to the newest other socket holding the agent, or
+  parks them until one registers. `agent.draining` answers with how many were `handed` and `parked`.
+- **`call.attached`.** A live call changed hands without ending — a drain, a socket that died, a
+  gateway restart. It carries how the call `started`, the last `state` and the `seq` it changed
+  hands at; no prompt text, which the log never keeps. The socket sends the whole prompt and its
+  tools again, and every `tool.call` still waiting follows it.
+- **`Minted`, and `log_token` on `Dialled`.** `POST /v1/tokens` and a dial both answer a token that
+  reads that one call's log and recording, so a page follows it without a relay.
 
 ## 0.6.5 — Asking for a person, a call back, and a transfer the runtime shapes
 

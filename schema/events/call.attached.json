@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/call.attached.json",
+  "title": "call.attached",
+  "description": "A live call is now served by this socket, mid-conversation: the socket that held it drained, or died, or the gateway restarted. The socket rebuilds the call from this entry and sends its whole prompt and its tools again, because nothing it sent before reached this socket; every tool.call still waiting for an answer follows it, sent again with its own seq.",
+  "x-pinecall": {"kind": "event", "type": "call.attached", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/CallAttached",
+  "$defs": {
+    "CallAttached": {
+      "type": "object",
+      "description": "A call changed hands without ending.",
+      "properties": {
+        "app": {"type": "string", "description": "The socket that serves the call from now on, as agent.registered named it."},
+        "started": {"$ref": "call.started.json#/$defs/CallStarted", "description": "How the call opened: who, where, when, as call.started said it."},
+        "state": {"type": "object", "additionalProperties": true, "description": "The agent's state as the last state.changed of the call left it; empty when none was written."},
+        "seq": {"type": "integer", "minimum": 0, "description": "The last entry of this call before it changed hands."}
+      },
+      "required": ["app", "started", "state", "seq"],
+      "additionalProperties": false
+    }
+  }
+}

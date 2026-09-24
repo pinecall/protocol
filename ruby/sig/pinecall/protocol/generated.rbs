@@ -286,7 +286,9 @@ module Pinecall
       # POST /v1/calls/{call}/remember, the answer: what the call taught about the contact, counted.
       type remembered = { ops: Integer, took_ms: Float }
       # POST /v1/agents/{slug}/dial, the answer: the call a dial became, accepted before the far end has heard anything ring.
-      type dialled = { call: String, agent: String, to: String, from: String, env: env }
+      type dialled = { call: String, agent: String, to: String, from: String, env: env, log_token: String }
+      # POST /v1/tokens, the answer: where the browser joins, as whom, the call it becomes, and a token that reads that call's log.
+      type minted = { server_url: String, participant_token: String, call: String, log_token: String }
       # GET /v1/carrier/outbound, the guards: what this org may dial and how often.
       type dial_guards = { dial_anywhere: bool, per_minute: Integer, per_day: Integer, max_duration_s: Integer }
       # GET /v1/carrier/outbound, the answer: whether this org can place a call yet, and what is missing.
@@ -415,6 +417,8 @@ module Pinecall
       type verb = say_verb | whisper_verb | takeover_verb | release_verb | transfer_verb | end_verb
       # Declare or change what the agent is: voice, models, language, greeting, the full tool list.
       type agent_configure = { config: agent_config }
+      # This socket is leaving, and its calls go on without it.
+      type agent_drain = { }
       # The app's first message: this socket speaks for this agent and answers these doors.
       type agent_register = { routes: Array[route], ?sdk: String, ?host: String, ?takes_unclaimed: bool }
       # Make the model speak now, guided by an instruction it reads and the caller never hears: 'tell them a slot at 10:15 just opened'.
@@ -473,6 +477,8 @@ module Pinecall
       type agent_configured = { changed: Array[String] }
       # One socket stopped holding the agent.
       type agent_detached = { app: String, env: env, left: bool }
+      # One socket let go of its calls without cutting them.
+      type agent_draining = { app: String, env: env, handed: Integer, parked: Integer }
       # The gateway accepted an agent.register: this socket now speaks for the agent and answers its routes.
       type agent_registered = { routes: Array[route], app: String, ?sdk: String, ?env: env }
       # The agent's state changed, in the session's own words.
@@ -483,6 +489,8 @@ module Pinecall
       type attention_answered = { ok: bool, by: supervisor?, ?error: String }
       # The agent asked for a person: the caller is on hold and waits for a supervisor to take the line.
       type attention_requested = { reason: String, wait_s: Float }
+      # A call changed hands without ending.
+      type call_attached = { app: String, started: call_started, state: Hash[Symbol, untyped], seq: Integer }
       # The platform is placing an outbound call and the far end has not answered yet.
       type call_dialing = { channel: channel, from: String, to: String, ?run: String?, caller: contact?, ?external_id: String, ?asked_by: String }
       # The call is over.

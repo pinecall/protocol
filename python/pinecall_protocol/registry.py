@@ -5,6 +5,7 @@ from typing import Literal
 from pinecall_protocol._base import WireModel
 from pinecall_protocol.commands import (
     AgentConfigure,
+    AgentDrain,
     AgentRegister,
     AgentReply,
     AgentSay,
@@ -36,12 +37,14 @@ from pinecall_protocol.defs import ToolResult
 from pinecall_protocol.events import (
     AgentConfigured,
     AgentDetached,
+    AgentDraining,
     AgentRegistered,
     AgentStateChanged,
     AgentTranscript,
     AgentTurnEnded,
     AttentionAnswered,
     AttentionRequested,
+    CallAttached,
     CallbackRequested,
     CallDialing,
     CallEnded,
@@ -104,11 +107,13 @@ from pinecall_protocol.room import (
 EVENTS: dict[str, type[WireModel]] = {
     "agent.configured": AgentConfigured,
     "agent.detached": AgentDetached,
+    "agent.draining": AgentDraining,
     "agent.registered": AgentRegistered,
     "agent.state": AgentStateChanged,
     "agent.transcript": AgentTranscript,
     "attention.answered": AttentionAnswered,
     "attention.requested": AttentionRequested,
+    "call.attached": CallAttached,
     "call.dialing": CallDialing,
     "call.ended": CallEnded,
     "call.line": CallLine,
@@ -168,11 +173,13 @@ EVENTS: dict[str, type[WireModel]] = {
 type EventType = Literal[
     "agent.configured",
     "agent.detached",
+    "agent.draining",
     "agent.registered",
     "agent.state",
     "agent.transcript",
     "attention.answered",
     "attention.requested",
+    "call.attached",
     "call.dialing",
     "call.ended",
     "call.line",
@@ -254,6 +261,7 @@ TERMINAL_EVENT: str = "call.score"
 # Every command by its wire type; codec looks the model up here.
 COMMANDS: dict[str, type[WireModel]] = {
     "agent.configure": AgentConfigure,
+    "agent.drain": AgentDrain,
     "agent.register": AgentRegister,
     "agent.reply": AgentReply,
     "agent.say": AgentSay,
@@ -285,6 +293,7 @@ COMMANDS: dict[str, type[WireModel]] = {
 
 type CommandType = Literal[
     "agent.configure",
+    "agent.drain",
     "agent.register",
     "agent.reply",
     "agent.say",
@@ -318,6 +327,7 @@ type CommandType = Literal[
 # Which events a command lands in the log as, so a caller knows what to wait for.
 PRODUCES: dict[str, tuple[str, ...]] = {
     "agent.configure": ("agent.configured",),
+    "agent.drain": ("agent.draining",),
     "agent.register": ("agent.registered",),
     "agent.reply": ("turn.agent",),
     "agent.say": ("turn.agent",),

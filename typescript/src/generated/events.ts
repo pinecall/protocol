@@ -39,6 +39,15 @@ export const AgentDetachedSchema = z.strictObject({
 });
 export type AgentDetached = z.infer<typeof AgentDetachedSchema>;
 
+/** One socket let go of its calls without cutting them. */
+export const AgentDrainingSchema = z.strictObject({
+  app: z.string(),
+  env: EnvSchema,
+  handed: z.int(),
+  parked: z.int(),
+});
+export type AgentDraining = z.infer<typeof AgentDrainingSchema>;
+
 /**
  * The gateway accepted an agent.register: this socket now speaks for the agent and answers its
  * routes. Many sockets may hold one agent at once — a new call takes the newest of them, unless
@@ -93,6 +102,34 @@ export const AttentionRequestedSchema = z.strictObject({
   wait_s: z.number(),
 });
 export type AttentionRequested = z.infer<typeof AttentionRequestedSchema>;
+
+/**
+ * Media is up: the caller and the agent can hear each other, or the text session is open.
+ * Everything the agent says and hears comes after this.
+ */
+export const CallStartedSchema = z.strictObject({
+  channel: ChannelSchema,
+  direction: DirectionSchema,
+  from: z.string(),
+  to: z.string(),
+  run: z.string().nullable().nullish(),
+  persona: z.string().nullable().nullish(),
+  accepts_when: z.string().nullable().nullish(),
+  declines_when: z.string().nullable().nullish(),
+  caller: ContactSchema.nullable(),
+  started_at: z.number(),
+  env: EnvSchema.nullish(),
+});
+export type CallStarted = z.infer<typeof CallStartedSchema>;
+
+/** A call changed hands without ending. */
+export const CallAttachedSchema = z.strictObject({
+  app: z.string(),
+  started: CallStartedSchema,
+  state: z.record(z.string(), z.unknown()),
+  seq: z.int(),
+});
+export type CallAttached = z.infer<typeof CallAttachedSchema>;
 
 /**
  * The platform is placing an outbound call and the far end has not answered yet. The first entry
@@ -179,25 +216,6 @@ export const CallScoreSchema = z.strictObject({
   judge_cost_eur: z.number().nullish(),
 });
 export type CallScore = z.infer<typeof CallScoreSchema>;
-
-/**
- * Media is up: the caller and the agent can hear each other, or the text session is open.
- * Everything the agent says and hears comes after this.
- */
-export const CallStartedSchema = z.strictObject({
-  channel: ChannelSchema,
-  direction: DirectionSchema,
-  from: z.string(),
-  to: z.string(),
-  run: z.string().nullable().nullish(),
-  persona: z.string().nullable().nullish(),
-  accepts_when: z.string().nullable().nullish(),
-  declines_when: z.string().nullable().nullish(),
-  caller: ContactSchema.nullable(),
-  started_at: z.number(),
-  env: EnvSchema.nullish(),
-});
-export type CallStarted = z.infer<typeof CallStartedSchema>;
 
 /**
  * What the call was about, how it went, what it consumed and what that cost. Written after
