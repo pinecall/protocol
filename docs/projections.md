@@ -56,7 +56,8 @@ without `attributes`; `call.started` and `call.ended` without `from`, `to`, `cal
 ## `tenant` — everything, with personal data masked
 
 The tenant projection is the whole state and every entry, with one change: a field the agent
-declared `pii` in `state_fields` is masked, in `app_state` and wherever `state.changed` carries it.
+declared `pii` in `state_fields` is masked, in `app_state` and wherever `state.changed` or
+`call.attached` carries it.
 A tool argument the agent declared in `ToolSpec.pii` was masked when the entry was written and needs
 nothing here. A field never declared is `tenant`: seen whole.
 
