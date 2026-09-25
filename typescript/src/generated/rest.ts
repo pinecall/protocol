@@ -886,6 +886,7 @@ export const TuningBodySchema = z.strictObject({
   turn: TurnConfigSchema.nullish(),
   memory: MemoryConfigSchema.nullish(),
   record: z.boolean().nullish(),
+  max_duration_s: z.int().nullish(),
   knowledge: z.string().nullish(),
   bases: z.array(DocsConfigSchema).nullish(),
 });

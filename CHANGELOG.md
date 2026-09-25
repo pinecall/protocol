@@ -3,6 +3,14 @@
 The contract, version by version. A release is a `v*` tag: `release.yml` publishes the three
 packages from it, and the notes of a GitHub release are the section below it.
 
+## 0.6.10 — The longest a voice call runs
+
+### Added
+- **`TuningBody.max_duration_s`**: an agent's own ceiling on a voice call, in seconds, set per world
+  and corner like every other setting. A minute before it the agent is told to close; at it the
+  call ends as `timeout` by the `platform`. `0` is no limit, otherwise 60 to 3600; unset, 600. A
+  written conversation is never cut by it.
+
 ## 0.6.9 — A code that binds a phone call to a page
 
 ### Added

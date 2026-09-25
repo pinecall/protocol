@@ -828,6 +828,7 @@ class TuningBody(WireModel):
     turn: TurnConfig | None = None
     memory: MemoryConfig | None = None
     record: bool | None = None
+    max_duration_s: int | None = None
     knowledge: str | None = None
     bases: list[DocsConfig] | None = None
 

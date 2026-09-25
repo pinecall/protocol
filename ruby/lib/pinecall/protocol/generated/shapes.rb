@@ -842,6 +842,7 @@ module Pinecall
           turn: { kind: :ref, ref: "TurnConfig" },
           memory: { kind: :ref, ref: "MemoryConfig" },
           record: { kind: :bool },
+          max_duration_s: { kind: :int },
           knowledge: { kind: :str },
           bases: { kind: :list, items: { kind: :ref, ref: "DocsConfig" } }
         }.freeze,

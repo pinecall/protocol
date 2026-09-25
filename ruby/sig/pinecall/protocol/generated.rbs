@@ -300,7 +300,7 @@ module Pinecall
       # POST /v1/carrier/outbound, the answer: the plan, and whether it was carried out.
       type outbound_provisioned = { steps: Array[String], dry_run: bool, ready: bool, ?trunk: String, ?address: String }
       # An agent's settings: what the org set, per world and per corner.
-      type tuning_body = { ?voice: String, ?tts: String, ?tts_model: String, ?stt: String, ?llm: String, ?greeting: greeting_config, ?hangup: hangup_config, ?turn: turn_config, ?memory: memory_config, ?record: bool, ?knowledge: String, ?bases: Array[docs_config] }
+      type tuning_body = { ?voice: String, ?tts: String, ?tts_model: String, ?stt: String, ?llm: String, ?greeting: greeting_config, ?hangup: hangup_config, ?turn: turn_config, ?memory: memory_config, ?record: bool, ?max_duration_s: Integer, ?knowledge: String, ?bases: Array[docs_config] }
       # One kept version of an agent's tuning: whose corner, which version, who set it and when, and what it says.
       type tuning_row = { holder: String, version: Integer, author: String, note: String?, set_at: Float, config: tuning_body }
       # GET /v1/agents/{slug}/settings: the agent's tuning as this key sees it — its own corner's, the team's and production's, each corner's own newest row, or null when that corner set nothing.
