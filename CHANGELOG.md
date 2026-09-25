@@ -3,6 +3,14 @@
 The contract, version by version. A release is a `v*` tag: `release.yml` publishes the three
 packages from it, and the notes of a GitHub release are the section below it.
 
+## 0.6.14 — The widget's theme
+
+### Added
+- **`WidgetSettings.theme`** and **`WidgetTheme`** (`auto`, `light`, `dark`): how the widget draws
+  itself, kept per agent beside the other settings. `auto` follows the visitor's browser, and null
+  is the widget's own default, auto. Optional, so a console or a gateway that predates it still
+  reads and saves the set.
+
 ## 0.6.13 — What an org may use, and where it pays
 
 ### Added
