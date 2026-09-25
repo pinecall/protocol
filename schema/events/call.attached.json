@@ -13,7 +13,8 @@
         "app": {"type": "string", "description": "The socket that serves the call from now on, as agent.registered named it."},
         "started": {"$ref": "call.started.json#/$defs/CallStarted", "description": "How the call opened: who, where, when, as call.started said it."},
         "state": {"type": "object", "additionalProperties": true, "description": "The agent's state as the last state.changed of the call left it; empty when none was written."},
-        "seq": {"type": "integer", "minimum": 0, "description": "The last entry of this call before it changed hands."}
+        "seq": {"type": "integer", "minimum": 0, "description": "The last entry of this call before it changed hands."},
+        "claimed": {"type": ["string", "null"], "description": "The code a page showed that this call claimed (call.claimed), or null when it claimed none. Carried so a view that asks whether the caller is also on the site answers the same after the call changed hands."}
       },
       "required": ["app", "started", "state", "seq"],
       "additionalProperties": false

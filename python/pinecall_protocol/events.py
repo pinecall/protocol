@@ -127,6 +127,7 @@ class CallAttached(WireModel):
     started: CallStarted
     state: dict[str, Any]
     seq: int
+    claimed: str | None = None
 
 
 class CallClaimed(WireModel):

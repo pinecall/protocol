@@ -33,6 +33,7 @@ A live call is now served by this socket, mid-conversation: the socket that held
 | `started` | `CallStarted` | yes | How the call opened: who, where, when, as call.started said it. |
 | `state` | `object` | yes | The agent's state as the last state.changed of the call left it; empty when none was written. |
 | `seq` | `integer` | yes | The last entry of this call before it changed hands. |
+| `claimed` | `string | null` | no | The code a page showed that this call claimed (call.claimed), or null when it claimed none. Carried so a view that asks whether the caller is also on the site answers the same after the call changed hands. |
 
 ### `call.claimed`
 

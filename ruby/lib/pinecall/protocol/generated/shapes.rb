@@ -1373,7 +1373,8 @@ module Pinecall
           app: { kind: :str, required: true },
           started: { kind: :ref, ref: "CallStarted", required: true },
           state: { kind: :json, required: true },
-          seq: { kind: :int, required: true }
+          seq: { kind: :int, required: true },
+          claimed: { kind: :str, null: true }
         }.freeze,
         "CallClaimed" => {
           code: { kind: :str, required: true },

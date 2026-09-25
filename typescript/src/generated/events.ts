@@ -129,6 +129,7 @@ export const CallAttachedSchema = z.strictObject({
   started: CallStartedSchema,
   state: z.record(z.string(), z.unknown()),
   seq: z.int(),
+  claimed: z.string().nullable().nullish(),
 });
 export type CallAttached = z.infer<typeof CallAttachedSchema>;
 

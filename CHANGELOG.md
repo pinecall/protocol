@@ -3,6 +3,13 @@
 The contract, version by version. A release is a `v*` tag: `release.yml` publishes the three
 packages from it, and the notes of a GitHub release are the section below it.
 
+## 0.6.11 — A claimed call stays claimed when it changes hands
+
+### Added
+- **`CallAttached.claimed`**: the code the call claimed, or null. A call handed to another process
+  mid-conversation — a deploy, a socket that died — used to arrive there with no memory of the
+  page following it, so a view asking `claimed` read null until the call ended.
+
 ## 0.6.10 — The longest a voice call runs
 
 ### Added

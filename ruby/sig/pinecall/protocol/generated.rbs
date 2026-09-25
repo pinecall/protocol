@@ -502,7 +502,7 @@ module Pinecall
       # The agent asked for a person: the caller is on hold and waits for a supervisor to take the line.
       type attention_requested = { reason: String, wait_s: Float }
       # A call changed hands without ending.
-      type call_attached = { app: String, started: call_started, state: Hash[Symbol, untyped], seq: Integer }
+      type call_attached = { app: String, started: call_started, state: Hash[Symbol, untyped], seq: Integer, ?claimed: String? }
       # The call was bound to a page's code.
       type call_claimed = { code: String, via: "keypad" | "agent" }
       # The platform is placing an outbound call and the far end has not answered yet.
