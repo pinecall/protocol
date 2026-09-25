@@ -469,6 +469,21 @@ module Pinecall
           limit_eur: { kind: :float, null: true, required: true },
           spent_eur_month: { kind: :float, required: true }
         }.freeze,
+        "Limits" => {
+          minutes: { kind: :ref, ref: "Limit", required: true },
+          messages: { kind: :ref, ref: "Limit", required: true },
+          llm_tokens: { kind: :ref, ref: "Limit", required: true },
+          concurrent_calls: { kind: :ref, ref: "Limit", required: true },
+          agents: { kind: :ref, ref: "Limit", required: true },
+          seats: { kind: :ref, ref: "Limit", required: true },
+          numbers: { kind: :ref, ref: "Limit", required: true },
+          lends: { kind: :list, null: true, items: { kind: :str }, required: true },
+          billing_url: { kind: :str, null: true, required: true }
+        }.freeze,
+        "Limit" => {
+          limit: { kind: :int, null: true, required: true },
+          used: { kind: :float, required: true }
+        }.freeze,
         "Judging" => {
           on: { kind: :bool, required: true },
           ceiling_eur: { kind: :float, null: true, required: true }

@@ -147,6 +147,29 @@ class Insights(WireModel):
     budget: InsightsBudget
 
 
+class Limit(WireModel):
+    """One quota: the limit the org was given, and how much of it is used."""
+
+    limit: int | None
+    used: float
+
+
+# GET /v1/limits: what the key's org may use and has used on this instance, where it bought more,
+# and which of the box's vendor keys it runs on. Any key of the org.
+class Limits(WireModel):
+    """GET /v1/limits."""
+
+    minutes: Limit
+    messages: Limit
+    llm_tokens: Limit
+    concurrent_calls: Limit
+    agents: Limit
+    seats: Limit
+    numbers: Limit
+    lends: list[str] | None
+    billing_url: str | None
+
+
 # GET and PUT /v1/org/judging: whether the org's calls are judged at hang-up, and what judging one
 # may spend on a model.
 class Judging(WireModel):

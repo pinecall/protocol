@@ -149,6 +149,30 @@ export const InsightsSchema = z.strictObject({
 });
 export type Insights = z.infer<typeof InsightsSchema>;
 
+/** One quota: the limit the org was given, and how much of it is used. */
+export const LimitSchema = z.strictObject({
+  limit: z.int().nullable(),
+  used: z.number(),
+});
+export type Limit = z.infer<typeof LimitSchema>;
+
+/**
+ * GET /v1/limits: what the key's org may use and has used on this instance, where it bought more,
+ * and which of the box's vendor keys it runs on. Any key of the org.
+ */
+export const LimitsSchema = z.strictObject({
+  minutes: LimitSchema,
+  messages: LimitSchema,
+  llm_tokens: LimitSchema,
+  concurrent_calls: LimitSchema,
+  agents: LimitSchema,
+  seats: LimitSchema,
+  numbers: LimitSchema,
+  lends: z.array(z.string()).nullable(),
+  billing_url: z.string().nullable(),
+});
+export type Limits = z.infer<typeof LimitsSchema>;
+
 /**
  * GET and PUT /v1/org/judging: whether the org's calls are judged at hang-up, and what judging one
  * may spend on a model.

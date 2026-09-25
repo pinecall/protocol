@@ -3,6 +3,14 @@
 The contract, version by version. A release is a `v*` tag: `release.yml` publishes the three
 packages from it, and the notes of a GitHub release are the section below it.
 
+## 0.6.13 — What an org may use, and where it pays
+
+### Added
+- **`Limits` and `Limit`**, the answer of `GET /v1/limits`: each quota the org is held to as
+  `{limit, used}` — minutes, messages, llm_tokens, calls at once, agents, seats, numbers — with
+  `lends` and `billing_url`, where a box that bills sends its orgs to pay. A console draws a
+  trial's meter off it, and an upgrade link only where the box names one.
+
 ## 0.6.12 — Tokens are a quota
 
 ### Added

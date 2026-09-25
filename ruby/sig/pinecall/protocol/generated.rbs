@@ -167,6 +167,10 @@ module Pinecall
       type insights_agent = { slug: String, today: Integer, score: Float? }
       # What the org may spend in a month and what it has spent so far, both worlds together.
       type insights_budget = { limit_eur: Float?, spent_eur_month: Float }
+      # GET /v1/limits: what the key's org may use and has used on this instance, where it bought more, and which of the box's vendor keys it runs on.
+      type limits = { minutes: limit, messages: limit, llm_tokens: limit, concurrent_calls: limit, agents: limit, seats: limit, numbers: limit, lends: Array[String]?, billing_url: String? }
+      # One quota: the limit the org was given, and how much of it is used.
+      type limit = { limit: Integer?, used: Float }
       # GET and PUT /v1/org/judging: whether the org's calls are judged at hang-up, and what judging one may spend on a model.
       type judging = { on: bool, ceiling_eur: Float? }
       # PUT /v1/org/judging, the body.

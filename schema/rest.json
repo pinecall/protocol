@@ -148,6 +148,33 @@
         "spent_eur_month": {"type": "number", "description": "What calls started this calendar month (UTC) cost, every world and corner of the org."}
       }
     },
+    "Limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/limits: what the key's org may use and has used on this instance, where it bought more, and which of the box's vendor keys it runs on. Any key of the org.",
+      "required": ["minutes", "messages", "llm_tokens", "concurrent_calls", "agents", "seats", "numbers", "lends", "billing_url"],
+      "properties": {
+        "minutes": {"$ref": "#/$defs/Limit", "description": "Minutes of call, summed from every call.summary of the org on this instance."},
+        "messages": {"$ref": "#/$defs/Limit", "description": "Turns, both sides, the same way."},
+        "llm_tokens": {"$ref": "#/$defs/Limit", "description": "Tokens its models read and wrote, input and output together, the same way."},
+        "concurrent_calls": {"$ref": "#/$defs/Limit", "description": "Its calls open on this gateway right now."},
+        "agents": {"$ref": "#/$defs/Limit", "description": "The agents its sockets hold right now, every world and corner."},
+        "seats": {"$ref": "#/$defs/Limit", "description": "Its people, invited and active together."},
+        "numbers": {"$ref": "#/$defs/Limit", "description": "The numbers the box bought for it."},
+        "lends": {"type": ["array", "null"], "items": {"type": "string"}, "description": "Which of the box's vendor keys its calls may run on where it brought none: null every one, [] none, else vendors and vendor/model prefixes."},
+        "billing_url": {"type": ["string", "null"], "description": "Where this box's orgs pay or change their plan (PINECALL_BILLING_URL); null on a box that bills nobody."}
+      }
+    },
+    "Limit": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One quota: the limit the org was given, and how much of it is used.",
+      "required": ["limit", "used"],
+      "properties": {
+        "limit": {"type": ["integer", "null"], "description": "The quota; null is no limit, and 0 a real one."},
+        "used": {"type": "number", "description": "How much is used, in the quota's own unit."}
+      }
+    },
     "Judging": {
       "type": "object",
       "additionalProperties": false,
