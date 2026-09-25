@@ -3,7 +3,7 @@
 The contract, version by version. A release is a `v*` tag: `release.yml` publishes the three
 packages from it, and the notes of a GitHub release are the section below it.
 
-## Unreleased
+## 0.6.8 — The voices a person can hear
 
 ### Added
 - **`ListedVoice`, `VoicesListed` and `VoiceSample`**, the shapes of `GET /v1/voices` and
