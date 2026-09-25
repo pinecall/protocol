@@ -267,6 +267,11 @@ class AgentMemory(WireModel):
     next: str | None
 
 
+# auto: the visitor's own light or dark, as the browser says. light and dark: that one, whatever the
+# browser says.
+type WidgetTheme = Literal["auto", "light", "dark"]
+
+
 # GET and PUT /v1/agents/{slug}/widget: how the widget presents this agent, kept per org, world and
 # agent. PUT takes the whole set.
 class WidgetSettings(WireModel):
@@ -277,6 +282,7 @@ class WidgetSettings(WireModel):
     greeting: str | None
     accent: str | None
     autostart: bool
+    theme: WidgetTheme | None = None
 
 
 # GET and PUT /v1/org/sso: the OpenID Connect provider this org's people sign in at, and never the

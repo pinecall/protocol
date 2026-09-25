@@ -276,6 +276,13 @@ export const AgentMemorySchema = z.strictObject({
 export type AgentMemory = z.infer<typeof AgentMemorySchema>;
 
 /**
+ * auto: the visitor's own light or dark, as the browser says. light and dark: that one, whatever
+ * the browser says.
+ */
+export const WidgetThemeSchema = z.enum(["auto", "light", "dark"]);
+export type WidgetTheme = z.infer<typeof WidgetThemeSchema>;
+
+/**
  * GET and PUT /v1/agents/{slug}/widget: how the widget presents this agent, kept per org, world
  * and agent. PUT takes the whole set.
  */
@@ -285,6 +292,7 @@ export const WidgetSettingsSchema = z.strictObject({
   greeting: z.string().nullable(),
   accent: z.string().nullable(),
   autostart: z.boolean(),
+  theme: WidgetThemeSchema.nullable().nullish(),
 });
 export type WidgetSettings = z.infer<typeof WidgetSettingsSchema>;
 

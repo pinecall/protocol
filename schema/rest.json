@@ -308,9 +308,11 @@
         "tagline": {"type": ["string", "null"], "description": "The line under it."},
         "greeting": {"type": ["string", "null"], "description": "The first line the widget shows before the call starts, as plain text."},
         "accent": {"type": ["string", "null"], "description": "The accent colour, a CSS colour."},
-        "autostart": {"type": "boolean", "description": "Open with the microphone asked for and the call started, without a second click."}
+        "autostart": {"type": "boolean", "description": "Open with the microphone asked for and the call started, without a second click."},
+        "theme": {"anyOf": [{"$ref": "#/$defs/WidgetTheme"}, {"type": "null"}], "description": "The widget's colours: null is its own default, auto. Absent from a gateway that predates it."}
       }
     },
+    "WidgetTheme": {"type": "string", "enum": ["auto", "light", "dark"], "description": "auto: the visitor's own light or dark, as the browser says. light and dark: that one, whatever the browser says."},
     "OrgSso": {
       "type": "object",
       "additionalProperties": false,

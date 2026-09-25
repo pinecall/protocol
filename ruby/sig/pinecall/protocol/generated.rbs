@@ -196,7 +196,9 @@ module Pinecall
       # GET /v1/agents/{slug}/memory: the current facts the agent's calls taught, newest first.
       type agent_memory = { facts: Array[agent_fact], next: String? }
       # GET and PUT /v1/agents/{slug}/widget: how the widget presents this agent, kept per org, world and agent.
-      type widget_settings = { title: String?, tagline: String?, greeting: String?, accent: String?, autostart: bool }
+      type widget_settings = { title: String?, tagline: String?, greeting: String?, accent: String?, autostart: bool, ?theme: widget_theme? }
+      # auto: the visitor's own light or dark, as the browser says.
+      type widget_theme = "auto" | "light" | "dark"
       # GET and PUT /v1/org/sso: the OpenID Connect provider this org's people sign in at, and never the client secret it was wired with.
       type org_sso = { configured: bool, issuer: String?, client_id: String?, domains: Array[String], role: String?, required: bool, redirect_uri: String }
       # PUT /v1/org/sso, the body.

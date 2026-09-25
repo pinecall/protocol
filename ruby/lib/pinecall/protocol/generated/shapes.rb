@@ -545,7 +545,8 @@ module Pinecall
           tagline: { kind: :str, null: true, required: true },
           greeting: { kind: :str, null: true, required: true },
           accent: { kind: :str, null: true, required: true },
-          autostart: { kind: :bool, required: true }
+          autostart: { kind: :bool, required: true },
+          theme: { kind: :ref, null: true, ref: "WidgetTheme" }
         }.freeze,
         "OrgSso" => {
           configured: { kind: :bool, required: true },

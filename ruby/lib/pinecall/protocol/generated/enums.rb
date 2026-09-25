@@ -84,6 +84,9 @@ module Pinecall
       # in: the contact wrote it. out: the agent, or a person as the agent, did. call: a spoken
       # call, drawn as one pill.
       THREAD_KIND = %w[in out call].freeze
+      # auto: the visitor's own light or dark, as the browser says. light and dark: that one,
+      # whatever the browser says.
+      WIDGET_THEME = %w[auto light dark].freeze
       # Where the call is in its life. idle before any call.* entry, which is what an agent's own
       # log looks like.
       CALL_STATUS = %w[idle ringing dialing active ended].freeze
@@ -110,6 +113,7 @@ module Pinecall
         "Projection" => PROJECTION,
         "SessionFlag" => SESSION_FLAG,
         "ThreadKind" => THREAD_KIND,
+        "WidgetTheme" => WIDGET_THEME,
         "CallStatus" => CALL_STATUS
       }.freeze
     end
