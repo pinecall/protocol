@@ -98,12 +98,12 @@ A page asked for a code to show beside the agent's phone number (POST /v1/codes)
 
 ### `credits.exhausted`
 
-The gateway refused a call or a register because one of the org's quotas ran out. Written into the agent's own log, which is the org's, before the door says no.
+The gateway refused a call, a written turn or a register because one of the org's quotas ran out. Written into the agent's own log, which is the org's, before the door says no.
 
 | field | type | required | meaning |
 |---|---|---|---|
 | `org` | `string` | yes | The org whose quota ran out. |
-| `quota` | `"minutes" | "messages" | "agents" | "concurrent_calls" | "memory_facts" | "knowledge_chunks" | "numbers" | "seats"` | yes | Which quota: minutes of call, messages, agents held, calls at once, facts memory keeps, chunks the knowledge bases keep, numbers the box bought for the org, people it seats. Every quota a gateway can refuse for is a word here, whether or not that refusal is one an entry is written for: a push and an invitation name no agent, so they are answered at the door and never logged. |
+| `quota` | `"minutes" | "messages" | "agents" | "concurrent_calls" | "memory_facts" | "knowledge_chunks" | "numbers" | "seats" | "llm_tokens"` | yes | Which quota: minutes of call, messages, agents held, calls at once, facts memory keeps, chunks the knowledge bases keep, numbers the box bought for the org, people it seats, tokens its models read and wrote. Every quota a gateway can refuse for is a word here, whether or not that refusal is one an entry is written for: a push and an invitation name no agent, so they are answered at the door and never logged. |
 | `used` | `number` | yes | How much the org had consumed when the door refused. |
 | `limit` | `integer` | yes | The quota the operator set. |
 

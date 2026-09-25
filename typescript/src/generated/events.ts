@@ -320,12 +320,12 @@ export const ConfirmRequestSchema = z.strictObject({
 export type ConfirmRequest = z.infer<typeof ConfirmRequestSchema>;
 
 /**
- * The gateway refused a call or a register because one of the org's quotas ran out. Written into
- * the agent's own log, which is the org's, before the door says no.
+ * The gateway refused a call, a written turn or a register because one of the org's quotas ran
+ * out. Written into the agent's own log, which is the org's, before the door says no.
  */
 export const CreditsExhaustedSchema = z.strictObject({
   org: z.string(),
-  quota: z.enum(["minutes", "messages", "agents", "concurrent_calls", "memory_facts", "knowledge_chunks", "numbers", "seats"]),
+  quota: z.enum(["minutes", "messages", "agents", "concurrent_calls", "memory_facts", "knowledge_chunks", "numbers", "seats", "llm_tokens"]),
   used: z.number(),
   limit: z.int(),
 });

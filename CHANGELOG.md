@@ -3,6 +3,13 @@
 The contract, version by version. A release is a `v*` tag: `release.yml` publishes the three
 packages from it, and the notes of a GitHub release are the section below it.
 
+## 0.6.12 — Tokens are a quota
+
+### Added
+- **`CreditsExhausted.quota` may say `llm_tokens`**: the input and output tokens an org's models
+  read and wrote. A written conversation is held to it, and to `messages`, on every turn, so a
+  refusal may now come in the middle of a chat and not only when a call opens.
+
 ## 0.6.11 — A claimed call stays claimed when it changes hands
 
 ### Added

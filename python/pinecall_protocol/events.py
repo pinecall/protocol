@@ -302,9 +302,10 @@ class ConfirmRequest(WireModel):
     ttl_s: int
 
 
+# The gateway refused a call, a written turn or a register because one of the org's quotas ran out.
 # Written into the agent's own log, which is the org's, before the door says no.
 class CreditsExhausted(WireModel):
-    """The gateway refused a call or a register because one of the org's quotas ran out."""
+    """CreditsExhausted, as protocol/schema declares it."""
 
     org: str
     quota: Literal[
@@ -316,6 +317,7 @@ class CreditsExhausted(WireModel):
         "knowledge_chunks",
         "numbers",
         "seats",
+        "llm_tokens",
     ]
     used: float
     limit: int

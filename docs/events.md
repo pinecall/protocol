@@ -29,7 +29,7 @@ Every event the gateway writes, one line each, with the page that holds its data
 | `confirm.declined` | call | no | [events-app.md](events-app.md) | The caller did not say yes, or the request lapsed. |
 | `confirm.granted` | call | no | [events-app.md](events-app.md) | The caller said yes. |
 | `confirm.request` | call | no | [events-app.md](events-app.md) | A tool with confirm set is about to run and the platform is asking the caller. |
-| `credits.exhausted` | agent | no | [events-control.md](events-control.md) | The gateway refused a call or a register because one of the org's quotas ran out. |
+| `credits.exhausted` | agent | no | [events-control.md](events-control.md) | The gateway refused a call, a written turn or a register because one of the org's quotas ran out. |
 | `custom` | call | no | [events-app.md](events-app.md) | A line the app wrote into the log with call.log. |
 | `dev.request` | agent | yes | [events-control.md](events-control.md) | The gateway asks the app process holding the agent to do something only that process can — read a file of the agent's directory, mount its class, run its goldens — on a console's behalf. |
 | `docs.sources` | call | no | [events-app.md](events-app.md) | What retrieval put in front of the model for this turn. |
