@@ -78,6 +78,12 @@ export const CallCallbackSchema = z.strictObject({
 });
 export type CallCallback = z.infer<typeof CallCallbackSchema>;
 
+/** The code the caller said, to bind this call to the page that shows it. */
+export const CallClaimSchema = z.strictObject({
+  code: z.string().regex(/^[0-9]{4}$/),
+});
+export type CallClaim = z.infer<typeof CallClaimSchema>;
+
 /**
  * Place an outbound call as this agent. The new call's log opens with call.dialing; call.started
  * follows when the far end answers.

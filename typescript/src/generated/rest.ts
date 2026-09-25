@@ -803,6 +803,31 @@ export const DialledSchema = z.strictObject({
 export type Dialled = z.infer<typeof DialledSchema>;
 
 /**
+ * POST /v1/codes, the answer: the four digits a page shows beside the agent's number, when they
+ * stop being a code, and the token the page asks about them with.
+ */
+export const CodeSchema = z.strictObject({
+  code: z.string(),
+  number: z.string(),
+  expires_at: z.number(),
+  code_token: z.string(),
+});
+export type Code = z.infer<typeof CodeSchema>;
+
+/**
+ * GET /v1/codes/{code}: whether a call has claimed the code yet, and once one has, the call and
+ * the token that reads it.
+ */
+export const CodeStandingSchema = z.strictObject({
+  code: z.string(),
+  status: z.enum(["waiting", "claimed", "expired"]),
+  expires_at: z.number(),
+  call: z.string().nullable(),
+  log_token: z.string().nullable(),
+});
+export type CodeStanding = z.infer<typeof CodeStandingSchema>;
+
+/**
  * POST /v1/tokens, the answer: where the browser joins, as whom, the call it becomes, and a token
  * that reads that call's log.
  */

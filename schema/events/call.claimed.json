@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/call.claimed.json",
+  "title": "call.claimed",
+  "description": "This call is the one a page was waiting for: the caller keyed the code the page shows, or the agent claimed it from what they said. From here the page follows the call, and the agent knows the person is on the site.",
+  "x-pinecall": {"kind": "event", "type": "call.claimed", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/CallClaimed",
+  "$defs": {
+    "CallClaimed": {
+      "type": "object",
+      "description": "The call was bound to a page's code.",
+      "properties": {
+        "code": {"type": "string", "description": "The code that was claimed."},
+        "via": {"type": "string", "enum": ["keypad", "agent"], "description": "How: the caller keyed it, or the agent claimed it from what was said."}
+      },
+      "required": ["code", "via"],
+      "additionalProperties": false
+    }
+  }
+}

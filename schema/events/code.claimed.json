@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/code.claimed.json",
+  "title": "code.claimed",
+  "description": "A code is off the table: a call claimed it, or it expired with none. On the agent's own log, beside the code.issued it closes.",
+  "x-pinecall": {"kind": "event", "type": "code.claimed", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/CodeClaimed",
+  "$defs": {
+    "CodeClaimed": {
+      "type": "object",
+      "description": "One code, taken or expired.",
+      "properties": {
+        "code": {"type": "string", "description": "The code, as code.issued named it."},
+        "call": {"type": ["string", "null"], "description": "The call that claimed it; null when it expired unclaimed."}
+      },
+      "required": ["code", "call"],
+      "additionalProperties": false
+    }
+  }
+}

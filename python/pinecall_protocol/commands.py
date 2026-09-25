@@ -68,6 +68,12 @@ class CallCallback(WireModel):
     note: str | None = None
 
 
+class CallClaim(WireModel):
+    """The code the caller said, to bind this call to the page that shows it."""
+
+    code: str = Field(pattern="^[0-9]{4}$")
+
+
 # The new call's log opens with call.dialing; call.started follows when the far end answers.
 class CallDial(WireModel):
     """Place an outbound call as this agent."""

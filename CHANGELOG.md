@@ -3,6 +3,17 @@
 The contract, version by version. A release is a `v*` tag: `release.yml` publishes the three
 packages from it, and the notes of a GitHub release are the section below it.
 
+## 0.6.9 — A code that binds a phone call to a page
+
+### Added
+- **`dtmf.received`**: a touch tone the caller keyed, one per tone, from their own leg.
+- **`call.claim` → `call.claimed`**: a call bound to the four-digit code a page shows beside the
+  agent's number — keyed on the phone (`via: keypad`, the runtime) or said and claimed by the
+  agent (`via: agent`).
+- **`code.issued` and `code.claimed`** on the agent's own log: the table of codes a page asked
+  for, waiting, claimed by a call, or expired with none.
+- **`Code` and `CodeStanding`**: what `POST /v1/codes` and `GET /v1/codes/{code}` answer.
+
 ## 0.6.8 — The voices a person can hear
 
 ### Added

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/code.issued.json",
+  "title": "code.issued",
+  "description": "A page asked for a code to show beside the agent's phone number (POST /v1/codes): the four digits a caller keys to bind their call to that page. On the agent's own log, which is the table of codes: a gateway that starts reads back the ones still waiting.",
+  "x-pinecall": {"kind": "event", "type": "code.issued", "scope": "agent", "ephemeral": false},
+  "$ref": "#/$defs/CodeIssued",
+  "$defs": {
+    "CodeIssued": {
+      "type": "object",
+      "description": "One code, waiting for the call that keys it.",
+      "properties": {
+        "code": {"type": "string", "description": "The four digits."},
+        "env": {"$ref": "../defs.json#/$defs/Env", "description": "The world the agent answers the phone in."},
+        "expires_at": {"type": "number", "description": "When the code stops being one, unix seconds."},
+        "log": {"$ref": "../defs.json#/$defs/Projection", "description": "The projection the page reads the claimed call through."}
+      },
+      "required": ["code", "env", "expires_at", "log"],
+      "additionalProperties": false
+    }
+  }
+}

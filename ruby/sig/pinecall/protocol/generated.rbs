@@ -287,6 +287,10 @@ module Pinecall
       type remembered = { ops: Integer, took_ms: Float }
       # POST /v1/agents/{slug}/dial, the answer: the call a dial became, accepted before the far end has heard anything ring.
       type dialled = { call: String, agent: String, to: String, from: String, env: env, log_token: String }
+      # POST /v1/codes, the answer: the four digits a page shows beside the agent's number, when they stop being a code, and the token the page asks about them with.
+      type code = { code: String, number: String, expires_at: Float, code_token: String }
+      # GET /v1/codes/{code}: whether a call has claimed the code yet, and once one has, the call and the token that reads it.
+      type code_standing = { code: String, status: "waiting" | "claimed" | "expired", expires_at: Float, call: String?, log_token: String? }
       # POST /v1/tokens, the answer: where the browser joins, as whom, the call it becomes, and a token that reads that call's log.
       type minted = { server_url: String, participant_token: String, call: String, log_token: String }
       # GET /v1/carrier/outbound, the guards: what this org may dial and how often.
@@ -435,6 +439,8 @@ module Pinecall
       type call_attention = { reason: String, wait_s: Float }
       # Write down that the caller wants to be called back.
       type call_callback = { number: String, ?when: String, ?note: String }
+      # The code the caller said, to bind this call to the page that shows it.
+      type call_claim = { code: String }
       # Place an outbound call as this agent.
       type call_dial = { to: String, ?from: String, ?caller: contact, ?metadata: Hash[Symbol, untyped] }
       # Send touch tones down the line, for an IVR on the far end.
@@ -497,6 +503,8 @@ module Pinecall
       type attention_requested = { reason: String, wait_s: Float }
       # A call changed hands without ending.
       type call_attached = { app: String, started: call_started, state: Hash[Symbol, untyped], seq: Integer }
+      # The call was bound to a page's code.
+      type call_claimed = { code: String, via: "keypad" | "agent" }
       # The platform is placing an outbound call and the far end has not answered yet.
       type call_dialing = { channel: channel, from: String, to: String, ?run: String?, caller: contact?, ?external_id: String, ?asked_by: String }
       # The call is over.
@@ -519,6 +527,10 @@ module Pinecall
       type call_transferred = { to: String, ?mode: transfer_mode?, ok: bool, ?error: String }
       # Somebody asked to be called back: a phone caller the overflow agent answered, a web visitor who left a number at the widget, or a caller who asked the agent for one (call.callback).
       type callback_requested = { channel: channel, number: String, via: "overflow" | "widget" | "agent", call: String?, ?when: String, ?note: String, contact: contact? }
+      # One code, taken or expired.
+      type code_claimed = { code: String, call: String? }
+      # One code, waiting for the call that keys it.
+      type code_issued = { code: String, env: env, expires_at: Float, log: projection }
       # The caller did not say yes, or the request lapsed.
       type confirm_declined = { tool: String, call_id: String, audience: String, ?said: String, reason: "no" | "timeout" | "changed" | "cancelled" }
       # The caller said yes.
@@ -533,6 +545,8 @@ module Pinecall
       type dev_request = { id: String, verb: dev_verb, data: Hash[Symbol, untyped] }
       # What retrieval put in front of the model for this turn.
       type docs_sources = { query: String, sources: Array[doc_source], took_ms: Float, ?speech_id: String }
+      # One tone the caller keyed.
+      type dtmf_received = { digit: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#", code: Integer }
       # Something went wrong.
       type error_event = { code: String, message: String, ?command: String, ?id: String, recoverable: bool }
       # The gateway refused to open a call because every worker of the fleet was full.

@@ -12,7 +12,7 @@ END = "<!-- generated:end -->"
 # One page per group of events, so no page outgrows a reader. Every event must land on exactly
 # one page: an event with a new prefix fails generation until somebody decides where it goes.
 EVENT_PAGES: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("events-call.md", ("call.", "user.", "agent.state", "agent.transcript", "turn.", "metrics.")),
+    ("events-call.md", ("call.", "user.", "agent.state", "agent.transcript", "turn.", "metrics.", "dtmf.")),
     (
         "events-app.md",
         ("tool.", "state.", "prompt.", "tools.", "confirm.", "memory.", "docs.", "custom"),
@@ -33,6 +33,7 @@ EVENT_PAGES: tuple[tuple[str, tuple[str, ...]], ...] = (
             "fleet.",
             "callback.",
             "message.",
+            "code.",
             "dev.",
         ),
     ),

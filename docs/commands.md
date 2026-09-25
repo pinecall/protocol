@@ -12,6 +12,7 @@ What reaches the gateway: the commands an app sends over its socket, each with t
 | `agent.say` | call | `turn.agent` | Make the agent say this text now, verbatim, outside the model's turn: a greeting, a read-back, a system notice. |
 | `call.attention` | call | `attention.requested`, `call.line`, `attention.answered` | Ask for a person without sending the caller anywhere: the call waits on hold until a supervisor takes the line, or until wait_s passes with nobody taking it. |
 | `call.callback` | call | `callback.requested` | Write down that the caller wants to be called back. |
+| `call.claim` | call | `call.claimed` | The caller said the code a page shows: bind this call to it, so the page follows the call from here. |
 | `call.dial` | agent | `call.dialing` | Place an outbound call as this agent. |
 | `call.dtmf` | call | nothing | Send touch tones down the line, for an IVR on the far end. |
 | `call.event` | call | `event.received` | Hand the agent a fact from the tenant's backend: a slot freed, an order shipped, a payment confirmed. |
@@ -110,6 +111,16 @@ Lands in the log as: `callback.requested`.
 | `number` | `string` | yes | The number to call back, E.164. |
 | `when` | `string` | no | When the caller asked to be called, in their words or as a date: tomorrow morning, 2026-09-23T10:00. |
 | `note` | `string` | no | What the call back is about, for whoever places it. |
+
+### `call.claim`
+
+The caller said the code a page shows: bind this call to it, so the page follows the call from here. Refused with `no_code` when nobody issued that code for this agent, it expired, or another call already took it.
+
+Lands in the log as: `call.claimed`.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `code` | `string` | yes | The four digits, as the page shows them. Matches `^[0-9]{4}$`. |
 
 ### `call.dial`
 

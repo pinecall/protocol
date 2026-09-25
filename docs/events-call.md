@@ -34,6 +34,15 @@ A live call is now served by this socket, mid-conversation: the socket that held
 | `state` | `object` | yes | The agent's state as the last state.changed of the call left it; empty when none was written. |
 | `seq` | `integer` | yes | The last entry of this call before it changed hands. |
 
+### `call.claimed`
+
+This call is the one a page was waiting for: the caller keyed the code the page shows, or the agent claimed it from what they said. From here the page follows the call, and the agent knows the person is on the site.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `code` | `string` | yes | The code that was claimed. |
+| `via` | `"keypad" | "agent"` | yes | How: the caller keyed it, or the agent claimed it from what was said. |
+
 ### `call.dialing`
 
 The platform is placing an outbound call and the far end has not answered yet. The first entry of an outbound call's log.
@@ -137,6 +146,15 @@ A transfer asked for by the agent or a supervisor finished, one way or the other
 | `mode` | `TransferMode | null` | no | Which of the two happened, or null when nothing was attempted at all — a written conversation has no line to transfer. |
 | `ok` | `boolean` | yes | True when the far end took the call. |
 | `error` | `string` | no | Why it failed, when it did. |
+
+### `dtmf.received`
+
+A touch tone the caller keyed. Written by the worker, one per tone, from the caller's own leg only: what a person keys is a fact of the call, whether an app reads it as a menu choice or the runtime reads four of them as the code a page is waiting for (call.claimed).
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `digit` | `"0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "*" | "#"` | yes | The key, as printed on a phone. |
+| `code` | `integer` | yes | RFC 4733's number for it: the digits are themselves, * is 10, # is 11. |
 
 ### `metrics.avatar`
 

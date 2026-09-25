@@ -750,6 +750,29 @@ class Dialled(WireModel):
     log_token: str
 
 
+# POST /v1/codes, the answer: the four digits a page shows beside the agent's number, when they stop
+# being a code, and the token the page asks about them with.
+class Code(WireModel):
+    """POST /v1/codes, the answer."""
+
+    code: str
+    number: str
+    expires_at: float
+    code_token: str
+
+
+# GET /v1/codes/{code}: whether a call has claimed the code yet, and once one has, the call and the
+# token that reads it.
+class CodeStanding(WireModel):
+    """GET /v1/codes/{code}."""
+
+    code: str
+    status: Literal["waiting", "claimed", "expired"]
+    expires_at: float
+    call: str | None
+    log_token: str | None
+
+
 # POST /v1/tokens, the answer: where the browser joins, as whom, the call it becomes, and a token
 # that reads that call's log.
 class Minted(WireModel):

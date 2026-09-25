@@ -13,6 +13,7 @@ import {
   EndReasonSchema,
   EnvSchema,
   MemoryOpSchema,
+  ProjectionSchema,
   RouteSchema,
   ScoreVerdictSchema,
   SupervisorSchema,
@@ -130,6 +131,13 @@ export const CallAttachedSchema = z.strictObject({
   seq: z.int(),
 });
 export type CallAttached = z.infer<typeof CallAttachedSchema>;
+
+/** The call was bound to a page's code. */
+export const CallClaimedSchema = z.strictObject({
+  code: z.string(),
+  via: z.enum(["keypad", "agent"]),
+});
+export type CallClaimed = z.infer<typeof CallClaimedSchema>;
 
 /**
  * The platform is placing an outbound call and the far end has not answered yet. The first entry
@@ -257,6 +265,22 @@ export const CallbackRequestedSchema = z.strictObject({
 });
 export type CallbackRequested = z.infer<typeof CallbackRequestedSchema>;
 
+/** One code, taken or expired. */
+export const CodeClaimedSchema = z.strictObject({
+  code: z.string(),
+  call: z.string().nullable(),
+});
+export type CodeClaimed = z.infer<typeof CodeClaimedSchema>;
+
+/** One code, waiting for the call that keys it. */
+export const CodeIssuedSchema = z.strictObject({
+  code: z.string(),
+  env: EnvSchema,
+  expires_at: z.number(),
+  log: ProjectionSchema,
+});
+export type CodeIssued = z.infer<typeof CodeIssuedSchema>;
+
 /** The caller did not say yes, or the request lapsed. The tool does not run; the model is told. */
 export const ConfirmDeclinedSchema = z.strictObject({
   tool: z.string(),
@@ -335,6 +359,13 @@ export const DocsSourcesSchema = z.strictObject({
   speech_id: z.string().nullish(),
 });
 export type DocsSources = z.infer<typeof DocsSourcesSchema>;
+
+/** One tone the caller keyed. */
+export const DtmfReceivedSchema = z.strictObject({
+  digit: z.enum(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "#"]),
+  code: z.int(),
+});
+export type DtmfReceived = z.infer<typeof DtmfReceivedSchema>;
 
 /**
  * Something went wrong. Inside a call it says what failed; outside a call it says which command

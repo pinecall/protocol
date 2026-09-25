@@ -14,6 +14,7 @@ Every event the gateway writes, one line each, with the page that holds its data
 | `attention.answered` | call | no | [events-control.md](events-control.md) | An ask for a person settled: a supervisor took the line, or the wait ran out and the agent has the caller back. |
 | `attention.requested` | call | no | [events-control.md](events-control.md) | The agent asked for a person: the caller is on hold and waits for a supervisor to take the line. |
 | `call.attached` | call | no | [events-call.md](events-call.md) | A live call is now served by this socket, mid-conversation: the socket that held it drained, or died, or the gateway restarted. |
+| `call.claimed` | call | no | [events-call.md](events-call.md) | This call is the one a page was waiting for: the caller keyed the code the page shows, or the agent claimed it from what they said. |
 | `call.dialing` | call | no | [events-call.md](events-call.md) | The platform is placing an outbound call and the far end has not answered yet. |
 | `call.ended` | call | no | [events-call.md](events-call.md) | The call is over. |
 | `call.line` | call | no | [events-call.md](events-call.md) | The line's hold and mute flags after one of them changed. |
@@ -23,6 +24,8 @@ Every event the gateway writes, one line each, with the page that holds its data
 | `call.summary` | call | no | [events-call.md](events-call.md) | What the call was about, how it went, what it consumed and what that cost. |
 | `call.transferred` | call | no | [events-call.md](events-call.md) | A transfer asked for by the agent or a supervisor finished, one way or the other. |
 | `callback.requested` | agent | no | [events-control.md](events-control.md) | Somebody asked to be called back: a phone caller the overflow agent answered, a web visitor who left a number at the widget, or a caller who asked the agent for one (call.callback). |
+| `code.claimed` | agent | no | [events-control.md](events-control.md) | A code is off the table: a call claimed it, or it expired with none. |
+| `code.issued` | agent | no | [events-control.md](events-control.md) | A page asked for a code to show beside the agent's phone number (POST /v1/codes): the four digits a caller keys to bind their call to that page. |
 | `confirm.declined` | call | no | [events-app.md](events-app.md) | The caller did not say yes, or the request lapsed. |
 | `confirm.granted` | call | no | [events-app.md](events-app.md) | The caller said yes. |
 | `confirm.request` | call | no | [events-app.md](events-app.md) | A tool with confirm set is about to run and the platform is asking the caller. |
@@ -30,6 +33,7 @@ Every event the gateway writes, one line each, with the page that holds its data
 | `custom` | call | no | [events-app.md](events-app.md) | A line the app wrote into the log with call.log. |
 | `dev.request` | agent | yes | [events-control.md](events-control.md) | The gateway asks the app process holding the agent to do something only that process can — read a file of the agent's directory, mount its class, run its goldens — on a console's behalf. |
 | `docs.sources` | call | no | [events-app.md](events-app.md) | What retrieval put in front of the model for this turn. |
+| `dtmf.received` | call | no | [events-call.md](events-call.md) | A touch tone the caller keyed. |
 | `error` | agent | no | [events-control.md](events-control.md) | Something went wrong. |
 | `event.received` | call | no | [events-room.md](events-room.md) | A fact arrived from outside the conversation: the tenant's backend sent call.event, or a participant's browser sent pinecall.event. |
 | `fleet.full` | agent | no | [events-control.md](events-control.md) | The gateway refused to open a call because every worker of the fleet was full. |

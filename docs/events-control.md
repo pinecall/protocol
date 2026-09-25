@@ -76,6 +76,26 @@ Somebody asked to be called back: a phone caller the overflow agent answered, a 
 | `note` | `string` | no | What the call back is about, when the agent said. |
 | `contact` | `Contact | null` | yes | Who asked, when the app said. |
 
+### `code.claimed`
+
+A code is off the table: a call claimed it, or it expired with none. On the agent's own log, beside the code.issued it closes.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `code` | `string` | yes | The code, as code.issued named it. |
+| `call` | `string | null` | yes | The call that claimed it; null when it expired unclaimed. |
+
+### `code.issued`
+
+A page asked for a code to show beside the agent's phone number (POST /v1/codes): the four digits a caller keys to bind their call to that page. On the agent's own log, which is the table of codes: a gateway that starts reads back the ones still waiting.
+
+| field | type | required | meaning |
+|---|---|---|---|
+| `code` | `string` | yes | The four digits. |
+| `env` | `Env` | yes | The world the agent answers the phone in. |
+| `expires_at` | `number` | yes | When the code stops being one, unix seconds. |
+| `log` | `Projection` | yes | The projection the page reads the claimed call through. |
+
 ### `credits.exhausted`
 
 The gateway refused a call or a register because one of the org's quotas ran out. Written into the agent's own log, which is the org's, before the door says no.

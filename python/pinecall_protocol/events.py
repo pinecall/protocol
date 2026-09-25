@@ -17,6 +17,7 @@ from pinecall_protocol.defs import (
     EndReason,
     Env,
     MemoryOp,
+    Projection,
     Route,
     ScoreVerdict,
     Supervisor,
@@ -126,6 +127,13 @@ class CallAttached(WireModel):
     started: CallStarted
     state: dict[str, Any]
     seq: int
+
+
+class CallClaimed(WireModel):
+    """The call was bound to a page's code."""
+
+    code: str
+    via: Literal["keypad", "agent"]
 
 
 # The first entry of an outbound call's log.
@@ -242,6 +250,22 @@ class CallbackRequested(WireModel):
     contact: Contact | None
 
 
+class CodeClaimed(WireModel):
+    """One code, taken or expired."""
+
+    code: str
+    call: str | None
+
+
+class CodeIssued(WireModel):
+    """One code, waiting for the call that keys it."""
+
+    code: str
+    env: Env
+    expires_at: float
+    log: Projection
+
+
 # The tool does not run; the model is told.
 class ConfirmDeclined(WireModel):
     """The caller did not say yes, or the request lapsed."""
@@ -320,6 +344,13 @@ class DocsSources(WireModel):
     sources: list[DocSource]
     took_ms: float
     speech_id: str | None = None
+
+
+class DtmfReceived(WireModel):
+    """One tone the caller keyed."""
+
+    digit: Literal["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "#"]
+    code: int
 
 
 # Inside a call it says what failed; outside a call it says which command the gateway refused.

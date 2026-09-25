@@ -792,6 +792,19 @@ module Pinecall
           env: { kind: :ref, ref: "Env", required: true },
           log_token: { kind: :str, required: true }
         }.freeze,
+        "Code" => {
+          code: { kind: :str, required: true },
+          number: { kind: :str, required: true },
+          expires_at: { kind: :float, required: true },
+          code_token: { kind: :str, required: true }
+        }.freeze,
+        "CodeStanding" => {
+          code: { kind: :str, required: true },
+          status: { kind: :enum, values: %w[waiting claimed expired], required: true },
+          expires_at: { kind: :float, required: true },
+          call: { kind: :str, null: true, required: true },
+          log_token: { kind: :str, null: true, required: true }
+        }.freeze,
         "Minted" => {
           server_url: { kind: :str, required: true },
           participant_token: { kind: :str, required: true },
@@ -1241,6 +1254,9 @@ module Pinecall
           when: { kind: :str },
           note: { kind: :str }
         }.freeze,
+        "CallClaim" => {
+          code: { kind: :str, required: true, pattern: "^[0-9]{4}$" }
+        }.freeze,
         "CallDial" => {
           to: { kind: :str, required: true },
           from: { kind: :str },
@@ -1358,6 +1374,10 @@ module Pinecall
           state: { kind: :json, required: true },
           seq: { kind: :int, required: true }
         }.freeze,
+        "CallClaimed" => {
+          code: { kind: :str, required: true },
+          via: { kind: :enum, values: %w[keypad agent], required: true }
+        }.freeze,
         "CallDialing" => {
           channel: { kind: :ref, ref: "Channel", required: true },
           from: { kind: :str, required: true },
@@ -1442,6 +1462,16 @@ module Pinecall
           note: { kind: :str },
           contact: { kind: :ref, null: true, ref: "Contact", required: true }
         }.freeze,
+        "CodeClaimed" => {
+          code: { kind: :str, required: true },
+          call: { kind: :str, null: true, required: true }
+        }.freeze,
+        "CodeIssued" => {
+          code: { kind: :str, required: true },
+          env: { kind: :ref, ref: "Env", required: true },
+          expires_at: { kind: :float, required: true },
+          log: { kind: :ref, ref: "Projection", required: true }
+        }.freeze,
         "ConfirmDeclined" => {
           tool: { kind: :str, required: true },
           call_id: { kind: :str, required: true },
@@ -1484,6 +1514,10 @@ module Pinecall
           sources: { kind: :list, items: { kind: :ref, ref: "DocSource" }, required: true },
           took_ms: { kind: :float, required: true },
           speech_id: { kind: :str }
+        }.freeze,
+        "DtmfReceived" => {
+          digit: { kind: :enum, values: %w[0 1 2 3 4 5 6 7 8 9 * #], required: true },
+          code: { kind: :int, required: true }
         }.freeze,
         "ErrorEvent" => {
           code: { kind: :str, required: true },

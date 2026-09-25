@@ -19,6 +19,7 @@ module Pinecall
         "attention.answered" => "AttentionAnswered",
         "attention.requested" => "AttentionRequested",
         "call.attached" => "CallAttached",
+        "call.claimed" => "CallClaimed",
         "call.dialing" => "CallDialing",
         "call.ended" => "CallEnded",
         "call.line" => "CallLine",
@@ -28,6 +29,8 @@ module Pinecall
         "call.summary" => "CallSummary",
         "call.transferred" => "CallTransferred",
         "callback.requested" => "CallbackRequested",
+        "code.claimed" => "CodeClaimed",
+        "code.issued" => "CodeIssued",
         "confirm.declined" => "ConfirmDeclined",
         "confirm.granted" => "ConfirmGranted",
         "confirm.request" => "ConfirmRequest",
@@ -35,6 +38,7 @@ module Pinecall
         "custom" => "Custom",
         "dev.request" => "DevRequest",
         "docs.sources" => "DocsSources",
+        "dtmf.received" => "DtmfReceived",
         "error" => "ErrorEvent",
         "event.received" => "EventReceived",
         "fleet.full" => "FleetFull",
@@ -86,6 +90,7 @@ module Pinecall
         "agent.say" => "AgentSay",
         "call.attention" => "CallAttention",
         "call.callback" => "CallCallback",
+        "call.claim" => "CallClaim",
         "call.dial" => "CallDial",
         "call.dtmf" => "CallDtmf",
         "call.event" => "CallEvent",
@@ -111,10 +116,10 @@ module Pinecall
       }.freeze
 
       # Every event this protocol declares, in the schema's own order.
-      EVENT_TYPES = %w[agent.configured agent.detached agent.draining agent.registered agent.state agent.transcript attention.answered attention.requested call.attached call.dialing call.ended call.line call.ringing call.score call.started call.summary call.transferred callback.requested confirm.declined confirm.granted confirm.request credits.exhausted custom dev.request docs.sources error event.received fleet.full log.caught_up log.gap memory.ops message.taken message.waiting metrics.avatar metrics.eot metrics.eou metrics.interruption metrics.llm metrics.realtime metrics.stt metrics.tts metrics.vad participant.joined participant.left participant.speaking pong prompt.changed room.opened room.sent state.changed supervisor.ended supervisor.released supervisor.said supervisor.took_over supervisor.transferred supervisor.whispered tool.call tool.result tools.changed track.published track.unpublished turn.agent turn.user user.state user.transcript].freeze
+      EVENT_TYPES = %w[agent.configured agent.detached agent.draining agent.registered agent.state agent.transcript attention.answered attention.requested call.attached call.claimed call.dialing call.ended call.line call.ringing call.score call.started call.summary call.transferred callback.requested code.claimed code.issued confirm.declined confirm.granted confirm.request credits.exhausted custom dev.request docs.sources dtmf.received error event.received fleet.full log.caught_up log.gap memory.ops message.taken message.waiting metrics.avatar metrics.eot metrics.eou metrics.interruption metrics.llm metrics.realtime metrics.stt metrics.tts metrics.vad participant.joined participant.left participant.speaking pong prompt.changed room.opened room.sent state.changed supervisor.ended supervisor.released supervisor.said supervisor.took_over supervisor.transferred supervisor.whispered tool.call tool.result tools.changed track.published track.unpublished turn.agent turn.user user.state user.transcript].freeze
 
       # Every command an app may send.
-      COMMAND_TYPES = %w[agent.configure agent.drain agent.register agent.reply agent.say call.attention call.callback call.dial call.dtmf call.event call.hangup call.hold call.log call.mute call.transfer call.unhold call.unmute dev.answer participant.mute participant.remove ping prompt.set room.invite room.send session.configure state.set supervisor.verb tool.result tools.set].freeze
+      COMMAND_TYPES = %w[agent.configure agent.drain agent.register agent.reply agent.say call.attention call.callback call.claim call.dial call.dtmf call.event call.hangup call.hold call.log call.mute call.transfer call.unhold call.unmute dev.answer participant.mute participant.remove ping prompt.set room.invite room.send session.configure state.set supervisor.verb tool.result tools.set].freeze
 
       # Entries a store may drop and a slow reader may miss without harm: the entry's
       # own ephemeral flag defaults to this.
@@ -132,6 +137,7 @@ module Pinecall
         "agent.say" => %w[turn.agent],
         "call.attention" => %w[attention.requested call.line attention.answered],
         "call.callback" => %w[callback.requested],
+        "call.claim" => %w[call.claimed],
         "call.dial" => %w[call.dialing],
         "call.dtmf" => [],
         "call.event" => %w[event.received],

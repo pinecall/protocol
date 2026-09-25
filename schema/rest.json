@@ -824,6 +824,31 @@
         "log_token": {"type": "string", "description": "Reads this call's log and its recording and nothing else: ?token= on GET /v1/calls/{call}/events and /recording."}
       }
     },
+    "Code": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "POST /v1/codes, the answer: the four digits a page shows beside the agent's number, when they stop being a code, and the token the page asks about them with.",
+      "required": ["code", "number", "expires_at", "code_token"],
+      "properties": {
+        "code": {"type": "string", "description": "The four digits the caller keys, or says."},
+        "number": {"type": "string", "description": "The agent's phone number, E.164: what the page tells the visitor to call."},
+        "expires_at": {"type": "number", "description": "When the code stops being one, unix seconds."},
+        "code_token": {"type": "string", "description": "Reads this one code's standing (GET /v1/codes/{code}) and nothing else."}
+      }
+    },
+    "CodeStanding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "GET /v1/codes/{code}: whether a call has claimed the code yet, and once one has, the call and the token that reads it.",
+      "required": ["code", "status", "expires_at", "call", "log_token"],
+      "properties": {
+        "code": {"type": "string", "description": "The code, as POST /v1/codes answered it."},
+        "status": {"type": "string", "enum": ["waiting", "claimed", "expired"], "description": "Waiting for a call, claimed by one, or past its time with none."},
+        "expires_at": {"type": "number", "description": "When the code stops being one, unix seconds."},
+        "call": {"type": ["string", "null"], "description": "The call that claimed it, once one has."},
+        "log_token": {"type": ["string", "null"], "description": "Reads that call's log and recording, minted when the call claimed the code; null before."}
+      }
+    },
     "Minted": {
       "type": "object",
       "additionalProperties": false,

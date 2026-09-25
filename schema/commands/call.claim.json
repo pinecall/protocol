@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/commands/call.claim.json",
+  "title": "call.claim",
+  "description": "The caller said the code a page shows: bind this call to it, so the page follows the call from here. Refused with `no_code` when nobody issued that code for this agent, it expired, or another call already took it.",
+  "x-pinecall": {"kind": "command", "type": "call.claim", "scope": "call", "produces": ["call.claimed"]},
+  "$ref": "#/$defs/CallClaim",
+  "$defs": {
+    "CallClaim": {
+      "type": "object",
+      "description": "The code the caller said, to bind this call to the page that shows it.",
+      "properties": {
+        "code": {"type": "string", "pattern": "^[0-9]{4}$", "description": "The four digits, as the page shows them."}
+      },
+      "required": ["code"],
+      "additionalProperties": false
+    }
+  }
+}

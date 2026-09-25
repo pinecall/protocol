@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pinecall.io/protocol/events/dtmf.received.json",
+  "title": "dtmf.received",
+  "description": "A touch tone the caller keyed. Written by the worker, one per tone, from the caller's own leg only: what a person keys is a fact of the call, whether an app reads it as a menu choice or the runtime reads four of them as the code a page is waiting for (call.claimed).",
+  "x-pinecall": {"kind": "event", "type": "dtmf.received", "scope": "call", "ephemeral": false},
+  "$ref": "#/$defs/DtmfReceived",
+  "$defs": {
+    "DtmfReceived": {
+      "type": "object",
+      "description": "One tone the caller keyed.",
+      "properties": {
+        "digit": {"type": "string", "enum": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "#"], "description": "The key, as printed on a phone."},
+        "code": {"type": "integer", "minimum": 0, "maximum": 15, "description": "RFC 4733's number for it: the digits are themselves, * is 10, # is 11."}
+      },
+      "required": ["digit", "code"],
+      "additionalProperties": false
+    }
+  }
+}
