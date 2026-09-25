@@ -1141,3 +1141,44 @@ export const PersonaRunListSchema = z.strictObject({
   next: z.string().nullable(),
 });
 export type PersonaRunList = z.infer<typeof PersonaRunListSchema>;
+
+/**
+ * One voice a picker offers, as GET /v1/voices lists it: the id the `voice` setting takes, and
+ * what a person chooses by. `country` and `accent` are the vendor's own words (`ES` is Spain, `MX`
+ * Mexico), empty when the vendor said none.
+ */
+export const ListedVoiceSchema = z.strictObject({
+  id: z.string(),
+  name: z.string(),
+  language: z.string(),
+  description: z.string(),
+  gender: z.string(),
+  country: z.string(),
+  accent: z.string(),
+});
+export type ListedVoice = z.infer<typeof ListedVoiceSchema>;
+
+/**
+ * GET /v1/voices?tts=&language=: a voice vendor's own voices in one language, in the vendor's
+ * order.
+ */
+export const VoicesListedSchema = z.strictObject({
+  tts: z.string(),
+  language: z.string().nullable(),
+  voices: z.array(ListedVoiceSchema),
+});
+export type VoicesListed = z.infer<typeof VoicesListedSchema>;
+
+/**
+ * POST /v1/voices/sample, the body: which vendor, which voice, which model and which words to
+ * hear. The answer is the WAV itself (`audio/wav`), with `Server-Timing: first-audio;dur=…,
+ * total;dur=…` in milliseconds.
+ */
+export const VoiceSampleSchema = z.strictObject({
+  tts: z.string(),
+  voice: z.string(),
+  model: z.string().nullable().nullish(),
+  language: z.string().nullable().nullish(),
+  text: z.string().nullable().nullish(),
+});
+export type VoiceSample = z.infer<typeof VoiceSampleSchema>;

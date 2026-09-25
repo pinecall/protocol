@@ -345,6 +345,12 @@ module Pinecall
       type persona_run_list = { runs: Array[persona_run], total: Integer, next: String? }
       # One base and the agents whose settings attach it.
       type knowledge_use = { base: String, agents: Array[String] }
+      # One voice a picker offers, as GET /v1/voices lists it: the id the `voice` setting takes, and what a person chooses by.
+      type listed_voice = { id: String, name: String, language: String, description: String, gender: String, country: String, accent: String }
+      # GET /v1/voices?tts=&language=: a voice vendor's own voices in one language, in the vendor's order.
+      type voices_listed = { tts: String, language: String?, voices: Array[listed_voice] }
+      # POST /v1/voices/sample, the body: which vendor, which voice, which model and which words to hear.
+      type voice_sample = { tts: String, voice: String, ?model: String?, ?language: String?, ?text: String? }
       # The LiveKit room exists and the call lives in it.
       type room_opened = { name: String, sid: String, channel: channel }
       # Somebody joined the room: the caller over SIP or the widget, the agent, a supervisor, a listener, or a second SIP leg.

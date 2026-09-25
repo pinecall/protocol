@@ -981,6 +981,27 @@ module Pinecall
           base: { kind: :str, required: true },
           agents: { kind: :list, items: { kind: :str }, required: true }
         }.freeze,
+        "ListedVoice" => {
+          id: { kind: :str, required: true },
+          name: { kind: :str, required: true },
+          language: { kind: :str, required: true },
+          description: { kind: :str, required: true },
+          gender: { kind: :str, required: true },
+          country: { kind: :str, required: true },
+          accent: { kind: :str, required: true }
+        }.freeze,
+        "VoicesListed" => {
+          tts: { kind: :str, required: true },
+          language: { kind: :str, null: true, required: true },
+          voices: { kind: :list, items: { kind: :ref, ref: "ListedVoice" }, required: true }
+        }.freeze,
+        "VoiceSample" => {
+          tts: { kind: :str, required: true },
+          voice: { kind: :str, required: true },
+          model: { kind: :str, null: true },
+          language: { kind: :str, null: true },
+          text: { kind: :str, null: true }
+        }.freeze,
         "RoomOpened" => {
           name: { kind: :str, required: true },
           sid: { kind: :str, required: true },

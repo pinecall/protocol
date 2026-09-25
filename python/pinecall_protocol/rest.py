@@ -1060,3 +1060,40 @@ class PersonaRunList(WireModel):
     runs: list[PersonaRun]
     total: int
     next: str | None
+
+
+# One voice a picker offers, as GET /v1/voices lists it: the id the `voice` setting takes, and what
+# a person chooses by. `country` and `accent` are the vendor's own words (`ES` is Spain, `MX`
+# Mexico), empty when the vendor said none.
+class ListedVoice(WireModel):
+    """One voice a picker offers, as GET /v1/voices lists it."""
+
+    id: str
+    name: str
+    language: str
+    description: str
+    gender: str
+    country: str
+    accent: str
+
+
+# GET /v1/voices?tts=&language=: a voice vendor's own voices in one language, in the vendor's order.
+class VoicesListed(WireModel):
+    """GET /v1/voices?tts=&language=."""
+
+    tts: str
+    language: str | None
+    voices: list[ListedVoice]
+
+
+# POST /v1/voices/sample, the body: which vendor, which voice, which model and which words to hear.
+# The answer is the WAV itself (`audio/wav`), with `Server-Timing: first-audio;dur=…, total;dur=…`
+# in milliseconds.
+class VoiceSample(WireModel):
+    """POST /v1/voices/sample, the body."""
+
+    tts: str
+    voice: str
+    model: str | None = None
+    language: str | None = None
+    text: str | None = None

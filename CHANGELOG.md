@@ -5,6 +5,11 @@ packages from it, and the notes of a GitHub release are the section below it.
 
 ## Unreleased
 
+### Added
+- **`ListedVoice`, `VoicesListed` and `VoiceSample`**, the shapes of `GET /v1/voices` and
+  `POST /v1/voices/sample`: a vendor's voices as a picker offers them, and what a person asks to
+  hear. Read by the console's picker and by `pinecall voices`, so the two parse one schema.
+
 ## 0.6.7 — A message nobody could answer yet
 
 ### Added
